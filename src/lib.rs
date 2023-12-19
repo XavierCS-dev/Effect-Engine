@@ -1,5 +1,6 @@
 pub mod engine;
 use engine::engine as effect;
+pub mod util;
 use std::time::{Duration, Instant};
 use winit::{
     dpi::PhysicalSize,

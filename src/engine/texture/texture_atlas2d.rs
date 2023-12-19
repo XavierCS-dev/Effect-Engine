@@ -1,9 +1,14 @@
+use crate::util::file_to_bytes::file_to_bytes;
+
+use image::GenericImageView;
+
 use super::{
     texture2d::{Texture2D, TextureID},
     texture_pool::BindGroupID,
 };
 
 use anyhow::Result;
+use image::EncodableLayout;
 
 pub struct TextureAtlas2D {
     bind_group_id: BindGroupID,
@@ -35,12 +40,21 @@ impl TextureAtlas2D {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> Result<()> {
-        /*
-        move this reading to own function
-        let mut file_byes: Vec<u8> = Vec::new();
-        let mut file = fs::File::open(path).expect(format!("Could not find file {path}").as_str());
-        file.read_to_end(&mut file_byes).unwrap();
-        */
+        let file_bytes = file_to_bytes(texture.file_path().as_str());
+        let image_bytes = image::load_from_memory(file_bytes.as_bytes())
+            .expect(format!("Texture {} not found", texture.file_path()).as_str());
+        let image_rgba = image_bytes.to_rgba8();
+        let dimensions = image_bytes.dimensions();
+        match self.atlas {
+            None => {
+                let texture_extent = wgpu::Extent3d {
+                    width: dimensions.0,
+                    height: dimensions.1,
+                    depth_or_array_layers: 1,
+                };
+            }
+            _ => (),
+        }
         todo!()
     }
 
