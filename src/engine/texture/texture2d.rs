@@ -8,9 +8,17 @@ use std::io::prelude::*;
 
 use super::texture_pool::BindGroupID;
 
-pub struct TextureID(String);
+#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Debug)]
+pub struct TextureID(pub String);
+
+impl TextureID {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
 
 // add tex coords here, make bind group mandatory.
+#[derive(Clone)]
 pub struct Texture2D {
     id: TextureID,
     path: String,
@@ -21,8 +29,7 @@ pub struct Texture2D {
 }
 
 impl Texture2D {
-    pub fn new(id: &str, filepath: &str, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
-        let id = TextureID(String::from(id));
+    pub fn new(id: TextureID, filepath: &str, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
         let bind_group_id = None;
         let mut file_byes: Vec<u8> = Vec::new();
         let mut file = fs::File::open(filepath).expect("Could not find file {filepath}");
@@ -143,5 +150,29 @@ impl Texture2D {
         });
 
         (bind_group, bind_group_layout, texture, view, sampler)
+    }
+
+    pub fn id(&self) -> TextureID {
+        self.id
+    }
+
+    pub fn path(&self) -> &str {
+        self.path.as_str()
+    }
+
+    pub fn offset(&self) -> Option<(u32, u32)> {
+        self.offset
+    }
+
+    pub fn set_offset(&mut self, x: u32, y: u32) {
+        self.offset = Some((x, y));
+    }
+
+    pub fn bind_group_id(&self) -> Option<BindGroupID> {
+        self.bind_group_id
+    }
+
+    pub fn set_bind_group_id(&mut self, id: BindGroupID) {
+        self.bind_group_id = Some(id);
     }
 }

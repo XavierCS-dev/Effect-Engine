@@ -1,7 +1,13 @@
 use wgpu::util::DeviceExt;
 use winit::raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
-use super::{primitives::vertex::Vertex, texture::texture2d::Texture2D};
+use super::{
+    primitives::vertex::Vertex,
+    texture::{
+        texture2d::{Texture2D, TextureID},
+        texture_pool::{BindGroupID, TexturePool2D},
+    },
+};
 
 pub struct Engine {
     surface: wgpu::Surface,
@@ -14,7 +20,8 @@ pub struct Engine {
     indices: Vec<u32>,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
-    texture: Texture2D,
+    texture_pool: TexturePool2D,
+    bind_id: BindGroupID,
 }
 
 /*
@@ -72,7 +79,9 @@ impl Engine {
         ];
         let indices = vec![0, 1, 4, 1, 2, 4, 2, 3, 4];
 
-        let texture = Texture2D::new("tree", "tree.png", &device, &queue);
+        let texture = Texture2D::new(TextureID(String::from("tree")), "tree.png", &device, &queue);
+        let mut texture_pool = TexturePool2D::new();
+        let bind_id = texture_pool.add_texture(texture, &device, &queue).unwrap();
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("vertex bugger"),
@@ -106,7 +115,7 @@ impl Engine {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Pipeline layout descriptor"),
-                bind_group_layouts: &[&texture.bind_group_layout],
+                bind_group_layouts: &[texture_pool.get_atlas(bind_id).unwrap().bind_group_layout()],
                 push_constant_ranges: &[],
             });
 
@@ -156,7 +165,8 @@ impl Engine {
             vertex_buffer,
             indices,
             index_buffer,
-            texture,
+            texture_pool,
+            bind_id,
         }
     }
 
@@ -208,7 +218,14 @@ impl Engine {
             occlusion_query_set: None,
         });
         render_pass.set_pipeline(&self.render_pipeline);
-        render_pass.set_bind_group(0, &self.texture.bind_group, &[]);
+        render_pass.set_bind_group(
+            0,
+            self.texture_pool
+                .get_atlas(self.bind_id)
+                .unwrap()
+                .bind_group(),
+            &[],
+        );
         render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
         render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
         render_pass.draw_indexed(0..self.indices.len() as u32, 0, 0..1);

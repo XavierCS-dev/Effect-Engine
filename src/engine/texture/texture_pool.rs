@@ -1,7 +1,11 @@
+use rand;
+use rand::Rng;
 use std::collections::HashMap;
 use std::fs;
 use std::io;
 use std::io::prelude::*;
+use wgpu::BindGroup;
+use wgpu::Texture;
 
 use super::{
     texture2d::{Texture2D, TextureID},
@@ -11,7 +15,8 @@ use anyhow::Result;
 use image::GenericImageView;
 
 // Textures should be stitched together instead of storing multiple textures...
-pub struct BindGroupID(u32);
+#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug)]
+pub struct BindGroupID(pub u32);
 
 pub struct TexturePool2D {
     textures: HashMap<TextureID, Texture2D>,
@@ -41,11 +46,47 @@ impl TexturePool2D {
         texture: Texture2D,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-    ) -> Result<()> {
+    ) -> Result<BindGroupID> {
         // if bind group ID is none, create one that is not taken.
         // if bind group exists in self.bind_groups, add to texture atlas
         // otherwise, create new texture atlas.
-        todo!()
+        if !self.textures.contains_key(&texture.id()) {
+            panic!("{:?}", texture.id());
+            // return an Err instead later
+        }
+        let mut rng = rand::thread_rng();
+        match texture.bind_group_id() {
+            Some(id) => {
+                let local_atlas = self.bind_groups.get_mut(&id);
+                let id = texture.bind_group_id().unwrap();
+                if local_atlas.is_none() {
+                    // create new texture atlas
+                    let mut local_atlas = TextureAtlas2D::new(texture.bind_group_id().unwrap());
+                    local_atlas.add_texture(texture.clone(), device, queue);
+                    self.bind_groups
+                        .insert(texture.bind_group_id().unwrap(), local_atlas);
+                    self.textures.insert(texture.id(), texture);
+                } else {
+                    let local_atlas = local_atlas.unwrap();
+                    local_atlas.add_texture(texture.clone(), device, queue);
+                    self.textures.insert(texture.id(), texture);
+                }
+                Ok(id)
+            }
+            None => {
+                let mut id = BindGroupID(rng.gen());
+                while self.bind_groups.contains_key(&id) {
+                    id = BindGroupID(rng.gen());
+                }
+                texture.set_bind_group_id(id);
+                let mut local_atlas = TextureAtlas2D::new(texture.bind_group_id().unwrap());
+                local_atlas.add_texture(texture.clone(), device, queue);
+                self.bind_groups
+                    .insert(texture.bind_group_id().unwrap(), local_atlas);
+                self.textures.insert(texture.id(), texture);
+                Ok(id)
+            }
+        }
     }
 
     pub fn add_textures(
@@ -73,5 +114,9 @@ impl TexturePool2D {
         queue: &wgpu::Queue,
     ) -> Result<()> {
         todo!();
+    }
+
+    pub fn get_atlas(&self, id: BindGroupID) -> Option<&TextureAtlas2D> {
+        self.bind_groups.get(&id)
     }
 }
