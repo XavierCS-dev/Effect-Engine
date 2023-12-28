@@ -1,6 +1,6 @@
 use crate::util::file_to_bytes::file_to_bytes;
 
-use image::GenericImageView;
+use image::{GenericImageView, ImageBuffer};
 
 use super::{
     texture2d::{Texture2D, TextureID},
@@ -66,7 +66,9 @@ impl TextureAtlas2D {
         let dimensions = image_bytes.dimensions();
 
         /*
-        Do Stuff
+        Takes all the textures from the texture vec, and the new texture, read them into memory,
+        then stitch then all together, making sure to set their offsets, then recreate the atlas
+        bindgroup, view and sampler.
         */
 
         self.textures.push(texture);

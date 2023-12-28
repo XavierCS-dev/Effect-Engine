@@ -62,6 +62,15 @@ impl TexturePool2D {
                 id = id_in;
             }
             None => {
+                /*
+                may not always be random, there will be the concept of layers
+                this allows for drawing object on top of each other in the correct order,
+                can allow for y sorting into layers too
+                one draw call per layer, 8096x8096 pixel texture limit per layer
+                not sure how this will relate to bind group ID however, perhaps
+                the plan should be to set the layer in the texture atlas, and use that for draw order.
+                Perhaps layer should superscede BingGroupID
+                */
                 id = BindGroupID(rng.gen());
                 while self.bind_groups.contains_key(&id) {
                     id = BindGroupID(rng.gen());
