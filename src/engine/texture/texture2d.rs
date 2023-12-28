@@ -58,7 +58,7 @@ impl Texture2D {
     }
 
     pub fn file_path(&self) -> &String {
-        &self.file_path()
+        &self.path
     }
 
     pub fn init_texture(
@@ -152,8 +152,8 @@ impl Texture2D {
         (bind_group, bind_group_layout, texture, view, sampler)
     }
 
-    pub fn id(&self) -> TextureID {
-        self.id
+    pub fn id(&self) -> &TextureID {
+        &self.id
     }
 
     pub fn path(&self) -> &str {

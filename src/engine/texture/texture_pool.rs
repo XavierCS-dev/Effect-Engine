@@ -50,43 +50,45 @@ impl TexturePool2D {
         // if bind group ID is none, create one that is not taken.
         // if bind group exists in self.bind_groups, add to texture atlas
         // otherwise, create new texture atlas.
-        if !self.textures.contains_key(&texture.id()) {
-            panic!("{:?}", texture.id());
+        if self.textures.contains_key(&texture.id()) {
+            panic!("Texture already exists {:?}", texture.id());
             // return an Err instead later
         }
         let mut rng = rand::thread_rng();
+        let mut id: BindGroupID;
+        let mut texture = texture;
         match texture.bind_group_id() {
-            Some(id) => {
-                let local_atlas = self.bind_groups.get_mut(&id);
-                let id = texture.bind_group_id().unwrap();
-                if local_atlas.is_none() {
-                    // create new texture atlas
-                    let mut local_atlas = TextureAtlas2D::new(texture.bind_group_id().unwrap());
-                    local_atlas.add_texture(texture.clone(), device, queue);
-                    self.bind_groups
-                        .insert(texture.bind_group_id().unwrap(), local_atlas);
-                    self.textures.insert(texture.id(), texture);
-                } else {
-                    let local_atlas = local_atlas.unwrap();
-                    local_atlas.add_texture(texture.clone(), device, queue);
-                    self.textures.insert(texture.id(), texture);
-                }
-                Ok(id)
+            Some(id_in) => {
+                id = id_in;
             }
             None => {
-                let mut id = BindGroupID(rng.gen());
+                id = BindGroupID(rng.gen());
                 while self.bind_groups.contains_key(&id) {
                     id = BindGroupID(rng.gen());
                 }
                 texture.set_bind_group_id(id);
-                let mut local_atlas = TextureAtlas2D::new(texture.bind_group_id().unwrap());
-                local_atlas.add_texture(texture.clone(), device, queue);
-                self.bind_groups
-                    .insert(texture.bind_group_id().unwrap(), local_atlas);
-                self.textures.insert(texture.id(), texture);
-                Ok(id)
             }
+        };
+        let local_atlas = self.bind_groups.get_mut(&id);
+        if local_atlas.is_none() {
+            // create new texture atlas
+            let local_atlas = TextureAtlas2D::new(
+                texture.bind_group_id().unwrap(),
+                texture.clone(),
+                device,
+                queue,
+            );
+            self.bind_groups
+                .insert(texture.bind_group_id().unwrap(), local_atlas);
+            self.textures.insert(texture.id().clone(), texture);
+        } else {
+            let local_atlas = local_atlas.unwrap();
+            let _ = local_atlas
+                .add_texture(texture.clone(), device, queue)
+                .unwrap();
+            self.textures.insert(texture.id().clone(), texture);
         }
+        Ok(id)
     }
 
     pub fn add_textures(
