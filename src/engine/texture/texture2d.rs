@@ -63,7 +63,6 @@ impl Texture2D {
 
     pub fn init_texture(
         extent: wgpu::Extent3d,
-        dynamic_image: DynamicImage,
         rgba_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,

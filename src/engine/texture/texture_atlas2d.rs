@@ -1,6 +1,6 @@
 use crate::util::file_to_bytes::file_to_bytes;
 
-use image::{GenericImageView, ImageBuffer};
+use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
 
 use super::{
     texture2d::{Texture2D, TextureID},
@@ -40,7 +40,7 @@ impl TextureAtlas2D {
             depth_or_array_layers: 1,
         };
         let (bind_group, bind_group_layout, atlas, view, sampler) =
-            Texture2D::init_texture(texture_extent, image_bytes, image_rgba, &device, &queue);
+            Texture2D::init_texture(texture_extent, image_rgba, &device, &queue);
         texture.set_offset(0, 0);
         Self {
             bind_group_id,
@@ -64,12 +64,47 @@ impl TextureAtlas2D {
             .expect(format!("Texture {} not found", texture.file_path()).as_str());
         let image_rgba = image_bytes.to_rgba8();
         let dimensions = image_bytes.dimensions();
+        let mut image_buffers: Vec<ImageBuffer<Rgba<u8>, _>> = Vec::new();
+        let mut total_width = 0;
+        let mut total_height = 0;
 
-        /*
-        Takes all the textures from the texture vec, and the new texture, read them into memory,
-        then stitch then all together, making sure to set their offsets, then recreate the atlas
-        bindgroup, view and sampler.
-        */
+        // currently just adds textures in a line, this will need to be changed to be vertical as well.
+
+        for tex_local in &mut self.textures {
+            let file_bytes = file_to_bytes(tex_local.file_path().as_str());
+            let image_bytes = image::load_from_memory(file_bytes.as_bytes())
+                .expect(format!("Texture {} not found", tex_local.file_path()).as_str());
+            let image_rgba = image_bytes.to_rgba8();
+            let dimensions = image_bytes.dimensions();
+            image_buffers.push(image_rgba);
+            tex_local.set_offset(total_width, 0);
+            total_width += dimensions.0;
+            total_height = total_height.max(dimensions.1)
+        }
+        total_width += dimensions.0;
+        total_height = total_height.max(dimensions.1);
+        image_buffers.push(image_rgba);
+        let mut combined_image = ImageBuffer::new(total_width, total_height);
+        let mut current_width = 0;
+
+        for image_rgba in image_buffers {
+            let dimensions = image_rgba.dimensions();
+            combined_image
+                .copy_from(&image_rgba, current_width, 0)
+                .unwrap();
+            current_width += dimensions.0;
+        }
+        let extent = wgpu::Extent3d {
+            width: total_width,
+            height: total_height,
+            depth_or_array_layers: 1,
+        };
+
+        let (bind_group, bind_group_layout, atlas, _, _) =
+            Texture2D::init_texture(extent, combined_image, device, queue);
+        self.atlas = atlas;
+        self.bind_group = bind_group;
+        self.bind_group_layout = bind_group_layout;
 
         self.textures.push(texture);
         Ok(())
