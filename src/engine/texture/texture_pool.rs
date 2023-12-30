@@ -7,6 +7,9 @@ use std::io::prelude::*;
 use wgpu::BindGroup;
 use wgpu::Texture;
 
+use crate::engine::adts::layer::Layer2D;
+use crate::engine::adts::layer::LayerID;
+
 use super::{
     texture2d::{Texture2D, TextureID},
     texture_atlas2d::TextureAtlas2D,
@@ -19,18 +22,13 @@ use image::GenericImageView;
 pub struct BindGroupID(pub u32);
 
 pub struct TexturePool2D {
-    textures: HashMap<TextureID, Texture2D>,
-    bind_groups: HashMap<BindGroupID, TextureAtlas2D>,
+    layers: HashMap<LayerID, Layer2D>,
 }
 
 impl TexturePool2D {
     pub fn new() -> Self {
-        let textures = HashMap::new();
-        let bind_groups = HashMap::new();
-        Self {
-            textures,
-            bind_groups,
-        }
+        let layers = HashMap::new();
+        Self { layers }
     }
 
     // need to check if the bind group ID and texture ID already exist.
