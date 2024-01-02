@@ -25,7 +25,7 @@ pub struct Texture2D {
     bind_group_id: Option<BindGroupID>,
     width: u32,
     height: u32,
-    offset: Option<(u32, u32)>,
+    offset: Option<[u32; 2]>,
 }
 
 impl Texture2D {
@@ -159,12 +159,12 @@ impl Texture2D {
         self.path.as_str()
     }
 
-    pub fn offset(&self) -> Option<(u32, u32)> {
+    pub fn offset(&self) -> Option<[u32; 2]> {
         self.offset
     }
 
     pub fn set_offset(&mut self, x: u32, y: u32) {
-        self.offset = Some((x, y));
+        self.offset = Some([x, y]);
     }
 
     pub fn bind_group_id(&self) -> Option<BindGroupID> {
