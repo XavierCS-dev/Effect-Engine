@@ -11,7 +11,6 @@ use anyhow::Result;
 use image::EncodableLayout;
 
 pub struct TextureAtlas2D {
-    bind_group_id: BindGroupID,
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
     textures: Vec<Texture2D>,
@@ -21,12 +20,7 @@ pub struct TextureAtlas2D {
 }
 
 impl TextureAtlas2D {
-    pub fn new(
-        bind_group_id: BindGroupID,
-        mut texture: Texture2D,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) -> Self {
+    pub fn new(mut texture: Texture2D, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
         let mut textures = Vec::new();
         let file_bytes = file_to_bytes(texture.file_path().as_str());
         let image_bytes = image::load_from_memory(file_bytes.as_bytes())
@@ -43,7 +37,6 @@ impl TextureAtlas2D {
             Texture2D::init_texture(texture_extent, image_rgba, &device, &queue);
         texture.set_offset(0, 0);
         Self {
-            bind_group_id,
             textures,
             bind_group,
             bind_group_layout,
@@ -135,10 +128,6 @@ impl TextureAtlas2D {
         queue: &wgpu::Queue,
     ) -> Result<()> {
         todo!()
-    }
-
-    pub fn bind_group_id(&self) -> &BindGroupID {
-        &self.bind_group_id
     }
 
     pub fn bind_group(&self) -> &wgpu::BindGroup {

@@ -2,11 +2,13 @@ use wgpu::util::DeviceExt;
 use winit::raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
 use super::{
+    adts::layer::{self, LayerID},
     primitives::vertex::Vertex,
     texture::{
         texture2d::{Texture2D, TextureID},
         texture_pool::{BindGroupID, TexturePool2D},
     },
+    traits::layer::Layer,
 };
 
 pub struct Engine {
@@ -21,7 +23,7 @@ pub struct Engine {
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
     texture_pool: TexturePool2D,
-    bind_id: BindGroupID,
+    layer_id: LayerID,
 }
 
 /*
@@ -81,7 +83,10 @@ impl Engine {
 
         let texture = Texture2D::new(TextureID(String::from("tree")), "tree.png", &device, &queue);
         let mut texture_pool = TexturePool2D::new();
-        let bind_id = texture_pool.add_texture(texture, &device, &queue).unwrap();
+        let layer_id = LayerID(0);
+        texture_pool
+            .add_texture(layer_id, texture, &device, &queue)
+            .unwrap();
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("vertex bugger"),
@@ -115,7 +120,10 @@ impl Engine {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Pipeline layout descriptor"),
-                bind_group_layouts: &[texture_pool.get_atlas(bind_id).unwrap().bind_group_layout()],
+                bind_group_layouts: &[texture_pool
+                    .get_layer(layer_id)
+                    .unwrap()
+                    .bind_group_layout()],
                 push_constant_ranges: &[],
             });
 
@@ -166,7 +174,7 @@ impl Engine {
             indices,
             index_buffer,
             texture_pool,
-            bind_id,
+            layer_id,
         }
     }
 
@@ -221,7 +229,7 @@ impl Engine {
         render_pass.set_bind_group(
             0,
             self.texture_pool
-                .get_atlas(self.bind_id)
+                .get_layer(self.layer_id)
                 .unwrap()
                 .bind_group(),
             &[],

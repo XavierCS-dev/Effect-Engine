@@ -1,21 +1,10 @@
-use rand;
-use rand::Rng;
 use std::collections::HashMap;
-use std::fs;
-use std::io;
-use std::io::prelude::*;
-use wgpu::BindGroup;
-use wgpu::Texture;
 
 use crate::engine::adts::layer::Layer2D;
 use crate::engine::adts::layer::LayerID;
 
-use super::{
-    texture2d::{Texture2D, TextureID},
-    texture_atlas2d::TextureAtlas2D,
-};
+use super::texture2d::{Texture2D, TextureID};
 use anyhow::Result;
-use image::GenericImageView;
 
 // Textures should be stitched together instead of storing multiple textures...
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug)]
@@ -41,61 +30,17 @@ impl TexturePool2D {
     // path: &str becomes path: Vec<String>
     pub fn add_texture(
         &mut self,
+        layer_id: LayerID,
         texture: Texture2D,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-    ) -> Result<BindGroupID> {
-        // if bind group ID is none, create one that is not taken.
-        // if bind group exists in self.bind_groups, add to texture atlas
-        // otherwise, create new texture atlas.
-        if self.textures.contains_key(&texture.id()) {
-            panic!("Texture already exists {:?}", texture.id());
-            // return an Err instead later
+    ) -> Result<()> {
+        if self.layers.contains_key(&layer_id) {
+            panic!("Layer ID Already in use!");
         }
-        let mut rng = rand::thread_rng();
-        let mut id: BindGroupID;
-        let mut texture = texture;
-        match texture.bind_group_id() {
-            Some(id_in) => {
-                id = id_in;
-            }
-            None => {
-                /*
-                may not always be random, there will be the concept of layers
-                this allows for drawing object on top of each other in the correct order,
-                can allow for y sorting into layers too
-                one draw call per layer, 8096x8096 pixel texture limit per layer
-                not sure how this will relate to bind group ID however, perhaps
-                the plan should be to set the layer in the texture atlas, and use that for draw order.
-                Perhaps layer should superscede BingGroupID
-                */
-                id = BindGroupID(rng.gen());
-                while self.bind_groups.contains_key(&id) {
-                    id = BindGroupID(rng.gen());
-                }
-                texture.set_bind_group_id(id);
-            }
-        };
-        let local_atlas = self.bind_groups.get_mut(&id);
-        if local_atlas.is_none() {
-            // create new texture atlas
-            let local_atlas = TextureAtlas2D::new(
-                texture.bind_group_id().unwrap(),
-                texture.clone(),
-                device,
-                queue,
-            );
-            self.bind_groups
-                .insert(texture.bind_group_id().unwrap(), local_atlas);
-            self.textures.insert(texture.id().clone(), texture);
-        } else {
-            let local_atlas = local_atlas.unwrap();
-            let _ = local_atlas
-                .add_texture(texture.clone(), device, queue)
-                .unwrap();
-            self.textures.insert(texture.id().clone(), texture);
-        }
-        Ok(id)
+        let layer = Layer2D::new(layer_id, texture, device, queue)?;
+        self.layers.insert(layer_id, layer);
+        Ok(())
     }
 
     pub fn add_textures(
@@ -125,7 +70,7 @@ impl TexturePool2D {
         todo!();
     }
 
-    pub fn get_atlas(&self, id: BindGroupID) -> Option<&TextureAtlas2D> {
-        self.bind_groups.get(&id)
+    pub fn get_layer(&self, layer_id: LayerID) -> Option<&Layer2D> {
+        self.layers.get(&layer_id)
     }
 }
