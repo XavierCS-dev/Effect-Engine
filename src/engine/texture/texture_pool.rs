@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use crate::engine::adts::layer::Layer2D;
 use crate::engine::adts::layer::LayerID;
+use crate::engine::traits::layer::Layer;
 
 use super::texture2d::{Texture2D, TextureID};
 use anyhow::Result;
@@ -38,8 +39,17 @@ impl TexturePool2D {
         if self.layers.contains_key(&layer_id) {
             panic!("Layer ID Already in use!");
         }
-        let layer = Layer2D::new(layer_id, texture, device, queue)?;
-        self.layers.insert(layer_id, layer);
+
+        match &mut self.layers.get_mut(&layer_id) {
+            Some(layer) => {
+                layer.add_texture(texture, device, queue)?;
+            }
+            None => {
+                let layer = Layer2D::new(layer_id, texture, device, queue)?;
+                self.layers.insert(layer_id, layer);
+            }
+        };
+
         Ok(())
     }
 

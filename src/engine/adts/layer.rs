@@ -1,13 +1,16 @@
 use anyhow::Result;
 use std::collections::HashMap;
 
-use crate::engine::{
-    texture::{
-        texture2d::{Texture2D, TextureID},
-        texture_atlas2d::TextureAtlas2D,
-        texture_pool::{BindGroupID, TexturePool2D},
+use crate::{
+    engine::{
+        texture::{
+            texture2d::{Texture2D, TextureID},
+            texture_atlas2d::TextureAtlas2D,
+            texture_pool::{BindGroupID, TexturePool2D},
+        },
+        traits::layer::Layer,
     },
-    traits::layer::Layer,
+    util::effect_error::EffectError,
 };
 
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug)]
@@ -35,6 +38,17 @@ impl Layer2D {
             atlas,
         })
     }
+
+    pub fn add_texture(
+        &mut self,
+        texture: Texture2D,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+    ) -> Result<()> {
+        Err(anyhow::Error::new(EffectError {
+            msg: String::from("unimplemented"),
+        }))
+    }
 }
 
 impl Layer for Layer2D {
@@ -44,6 +58,10 @@ impl Layer for Layer2D {
 
     fn bind_group_layout(&self) -> &wgpu::BindGroupLayout {
         self.atlas.bind_group_layout()
+    }
+
+    fn texture_ids(&self) -> &HashMap<TextureID, Texture2D> {
+        &self.textures
     }
 
     fn id(&self) -> LayerID {
