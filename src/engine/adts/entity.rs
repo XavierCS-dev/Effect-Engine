@@ -6,7 +6,7 @@ use crate::engine::{
     traits::entity::EntityType,
 };
 
-use super::transform::Transform2D;
+use super::{layer::LayerID, transform::Transform2D};
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
@@ -16,13 +16,19 @@ pub struct Entity2DRaw {
 }
 
 pub struct Entity2D {
+    layer: LayerID,
     position: Vector3D,
     texture: Texture2D,
     vertices: Vec<Vertex>,
+    // the actual numbers when in the renderer will vary depending on where the vertices are put in the main vertex buffer.
+    // ie (index + num_of_vertices_in_buffer)
+    // for now, write to buffer every frame, we can fix that later
+    indices: Vec<Vertex>,
     transform: Transform2D,
 }
 
-impl EntityType for Entity2D {
+impl Entity2D {
+    // will include "model" with pos and rotation later...
     fn to_raw(&self) -> Entity2DRaw {
         let position = [self.position.x, self.position.y, self.position.z];
         let texture_offset = self.texture.offset().expect("Texture is uninitiliased");

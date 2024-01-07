@@ -1,14 +1,20 @@
+use std::collections::HashMap;
+
 use wgpu::util::DeviceExt;
 use winit::raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
 use super::{
-    adts::layer::{self, LayerID},
+    adts::{
+        entity::Entity2D,
+        entity_group::EntityGroup2D,
+        layer::{self, LayerID},
+    },
     primitives::vertex::Vertex,
     texture::{
         texture2d::{Texture2D, TextureID},
         texture_pool::{BindGroupID, TexturePool2D},
     },
-    traits::layer::Layer,
+    traits::{entity::EntityType, layer::Layer},
 };
 
 pub struct Engine {
@@ -18,12 +24,9 @@ pub struct Engine {
     surface_configuration: wgpu::SurfaceConfiguration,
     window: winit::window::Window,
     render_pipeline: wgpu::RenderPipeline,
-    vertices: Vec<Vertex>,
-    indices: Vec<u32>,
     vertex_buffer: wgpu::Buffer,
     index_buffer: wgpu::Buffer,
     texture_pool: TexturePool2D,
-    layer_id: LayerID,
 }
 
 /*
@@ -87,6 +90,7 @@ impl Engine {
         texture_pool
             .add_texture(layer_id, texture, &device, &queue)
             .unwrap();
+        // create new entitity here
 
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("vertex bugger"),
@@ -169,12 +173,9 @@ impl Engine {
             surface_configuration,
             window,
             render_pipeline,
-            vertices,
             vertex_buffer,
-            indices,
             index_buffer,
             texture_pool,
-            layer_id,
         }
     }
 
@@ -189,14 +190,22 @@ impl Engine {
 
     pub fn input(&mut self, event: &winit::event::Event<()>, delta: &std::time::Duration) {
         // do nothing
+        // not sure what to do with this yet
+        // TODO: move input to be a burden on user.
     }
 
     pub fn update(&mut self, delta: &std::time::Duration) {
+        // TODO: Move update to be a burden on user
+
         // millis returns 0 for some reason...use nano
         // if accuracy is a problem, change to floats
     }
 
-    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    // Must be rendered in order. Maybe be no existent layers inbetween, needs to happen fast.
+    // Vec can be sorted each time entities is appended to with a new entity2d and layerid.
+    // probably a lot faster and space efficient than hashmap
+    // entities managed by APP struct
+    pub fn render(&mut self, entities: &Vec<EntityGroup2D>) -> Result<(), wgpu::SurfaceError> {
         let surface_texture = self.surface.get_current_texture()?;
         let texture_view = surface_texture
             .texture

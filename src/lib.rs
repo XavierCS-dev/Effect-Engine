@@ -1,5 +1,8 @@
 pub mod engine;
-use engine::engine as effect;
+use engine::{
+    adts::{entity::Entity2D, entity_group::EntityGroup2D},
+    engine as effect,
+};
 pub mod util;
 use std::time::{Duration, Instant};
 use winit::{
@@ -9,11 +12,11 @@ use winit::{
     window::{Window, WindowBuilder},
 };
 
-struct WGPUApp {
+struct EffectSystem {
     engine: effect::Engine,
 }
 
-impl WGPUApp {
+impl EffectSystem {
     pub fn new() -> (Self, EventLoop<()>) {
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(ControlFlow::Poll);
@@ -27,35 +30,11 @@ impl WGPUApp {
         (Self { engine }, event_loop)
     }
 
-    pub fn run(&mut self, event_loop: EventLoop<()>) {
-        // calculate delta time and pass it to update and input
-        // delta time is broken..fixed it somehow
-        let mut before = Instant::now();
-        let mut after = Instant::now();
-        let _ = event_loop.run(|event, control| {
-            after = Instant::now();
-            let delta_time = after - before;
-            self.engine.input(&event, &delta_time);
-            match event {
-                Event::WindowEvent {
-                    event: WindowEvent::CloseRequested,
-                    ..
-                } => {
-                    control.exit();
-                }
-                Event::AboutToWait => {
-                    self.engine.update(&delta_time);
-                    // Should probably handle this somewhere..
-                    self.engine.render().unwrap();
-                }
-                _ => (),
-            }
-            before = after;
-        });
+    pub fn render(&mut self, entities: &Vec<EntityGroup2D>) {
+        self.engine.render(entities).unwrap();
     }
 }
 
-pub fn init_engine() {
-    let (mut app, event_loop) = WGPUApp::new();
-    app.run(event_loop);
+pub fn init_engine() -> (EffectSystem, EventLoop<()>) {
+    EffectSystem::new()
 }

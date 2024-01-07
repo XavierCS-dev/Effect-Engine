@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use crate::{
     engine::{
+        primitives::vertex::Vertex,
         texture::{
             texture2d::{Texture2D, TextureID},
             texture_atlas2d::TextureAtlas2D,
@@ -20,6 +21,11 @@ pub struct Layer2D {
     id: LayerID,
     textures: HashMap<TextureID, Texture2D>,
     atlas: TextureAtlas2D,
+    vertices: Vec<Vertex>,
+    indices: Vec<u32>,
+    vertex_buffer: wgpu::Buffer,
+    index_buffer: wgpu::Buffer,
+    entity_buffer: wgpu::Buffer,
 }
 
 impl Layer2D {
