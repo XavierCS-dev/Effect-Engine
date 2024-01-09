@@ -1,5 +1,5 @@
 ## Next Steps (Phase 1 - Renderer)
-- [ ] Remove EntityGroup2D - don't want it to take entity owernship
+- [x] Remove EntityGroup2D - don't want it to take entity owernship
 - [ ] Find different way to pass refs to entities grouped by layer to render function
 - [ ] Render function - iterate through layers to draw, call methods to get buffers
 - [ ] Layers - Create and write to buffers when needed.
