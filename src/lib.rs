@@ -5,6 +5,7 @@ use engine::{
 };
 pub mod util;
 use std::{
+    cmp::Reverse,
     collections::HashMap,
     time::{Duration, Instant},
 };
@@ -33,8 +34,10 @@ impl EffectSystem {
         (Self { engine }, event_loop)
     }
 
-    pub fn render(&mut self, mut entities: Vec<&Entity2D>) {
+    pub fn sort(mut entities: Vec<&Entity2D>) -> Vec<Vec<&Entity2D>> {
         entities.sort_unstable_by_key(|v| v.layer_id().0);
+        // nested vecs, so not only are lower layers drawn first,
+        // but y sorting cn also be used, when implemented.
         let mut layers: Vec<Vec<&Entity2D>> = Vec::new();
         layers.push(Vec::new());
         layers.get_mut(0).unwrap().push(entities.first().unwrap());
@@ -49,8 +52,29 @@ impl EffectSystem {
             }
             layers.get_mut(index).unwrap().push(entity);
         }
+        layers
+    }
 
-        self.engine.render(layers).unwrap();
+    pub fn y_sort(layer: &mut Vec<&Entity2D>) {
+        layer.sort_unstable_by(|a, b| b.position().y.partial_cmp(&a.position().y).unwrap());
+    }
+
+    /// Take an unordered Vec or Entity2Ds, then sort them into layers
+    /// and sort the layers based on y position. (Higher y drawn first.)
+    pub fn render_sorted(&mut self, mut entities: Vec<&Entity2D>, y_sorting: bool) {
+        let mut sorted_ents = EffectSystem::sort(entities);
+        if y_sorting {
+            for layer in &mut sorted_ents {
+                EffectSystem::y_sort(layer);
+            }
+        }
+        self.engine.render(sorted_ents).unwrap();
+    }
+
+    /// Take a pre-sorted nested Vecs and render it as is.
+    // The inner Vec is a singular layer.  May result in unexpexted behaviour if incorrectly sorted.
+    pub unsafe fn render(&mut self, mut entities: Vec<Vec<&Entity2D>>) {
+        self.engine.render(entities);
     }
 }
 

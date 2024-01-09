@@ -41,4 +41,8 @@ impl Entity2D {
     pub fn layer_id(&self) -> &LayerID {
         &self.layer
     }
+
+    pub fn position(&self) -> &Vector3D {
+        &self.position
+    }
 }
