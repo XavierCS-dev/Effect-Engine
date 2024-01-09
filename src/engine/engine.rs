@@ -205,7 +205,7 @@ impl Engine {
     // Vec can be sorted each time entities is appended to with a new entity2d and layerid.
     // probably a lot faster and space efficient than hashmap
     // entities managed by APP struct
-    pub fn render(&mut self, entities: &Vec<EntityGroup2D>) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self, entities: Vec<Vec<&Entity2D>>) -> Result<(), wgpu::SurfaceError> {
         let surface_texture = self.surface.get_current_texture()?;
         let texture_view = surface_texture
             .texture
@@ -234,6 +234,7 @@ impl Engine {
             timestamp_writes: None,
             occlusion_query_set: None,
         });
+
         render_pass.set_pipeline(&self.render_pipeline);
         render_pass.set_bind_group(
             0,

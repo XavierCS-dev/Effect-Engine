@@ -37,4 +37,8 @@ impl Entity2D {
             texture_offset,
         }
     }
+
+    pub fn layer_id(&self) -> &LayerID {
+        &self.layer
+    }
 }
