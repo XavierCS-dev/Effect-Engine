@@ -5,7 +5,7 @@ use winit::raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
 use super::{
     adts::{
-        entity::Entity2D,
+        entity::{Entity2D, Entity2DRaw},
         entity_group::EntityGroup2D,
         layer::{self, LayerID},
     },
@@ -137,7 +137,7 @@ impl Engine {
             vertex: wgpu::VertexState {
                 module: &shader_module,
                 entry_point: "vrt_main",
-                buffers: &[Vertex::layout()],
+                buffers: &[Vertex::layout(), Entity2DRaw::layout()],
             },
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,

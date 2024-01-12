@@ -1,0 +1,9 @@
+- Provide a function for parallel updating of entities, to the user.
+- Create data structs for these parallel entity updates.
+- Introduce entity culling to the render function and the engine.
+  - include option to pause updates on those entities if out of frame.
+- GUI on seperate thread, render on top of everything else.
+- Create methods for user to adopt task based architecture.
+- Add logging
+- 2D Shadows / lighting
+- seperate thread / task
