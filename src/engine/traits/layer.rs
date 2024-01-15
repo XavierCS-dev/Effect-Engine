@@ -12,5 +12,11 @@ pub trait Layer {
 
     fn texture_ids(&self) -> &HashMap<TextureID, Texture2D>;
 
+    fn vertex_buffer(&self) -> Option<&wgpu::Buffer>;
+
+    fn index_buffer(&self) -> Option<&wgpu::Buffer>;
+
+    fn entity_buffer(&self) -> Option<&wgpu::Buffer>;
+
     fn id(&self) -> LayerID;
 }

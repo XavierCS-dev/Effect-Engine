@@ -21,11 +21,9 @@ pub struct Layer2D {
     id: LayerID,
     textures: HashMap<TextureID, Texture2D>,
     atlas: TextureAtlas2D,
-    vertices: Vec<Vertex>,
-    indices: Vec<u32>,
-    vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
-    entity_buffer: wgpu::Buffer,
+    vertex_buffer: Option<wgpu::Buffer>,
+    index_buffer: Option<wgpu::Buffer>,
+    entity_buffer: Option<wgpu::Buffer>,
 }
 
 impl Layer2D {
@@ -42,6 +40,9 @@ impl Layer2D {
             id,
             textures,
             atlas,
+            vertex_buffer: None,
+            index_buffer: None,
+            entity_buffer: None,
         })
     }
 
@@ -51,9 +52,7 @@ impl Layer2D {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> Result<()> {
-        Err(anyhow::Error::new(EffectError {
-            msg: String::from("unimplemented"),
-        }))
+        Err(anyhow::Error::new(EffectError::new("unimplemented")))
     }
 }
 
@@ -68,6 +67,18 @@ impl Layer for Layer2D {
 
     fn texture_ids(&self) -> &HashMap<TextureID, Texture2D> {
         &self.textures
+    }
+
+    fn vertex_buffer(&self) -> Option<&wgpu::Buffer> {
+        self.vertex_buffer.as_ref()
+    }
+
+    fn index_buffer(&self) -> Option<&wgpu::Buffer> {
+        self.index_buffer.as_ref()
+    }
+
+    fn entity_buffer(&self) -> Option<&wgpu::Buffer> {
+        self.entity_buffer.as_ref()
     }
 
     fn id(&self) -> LayerID {
