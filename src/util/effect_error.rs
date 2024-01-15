@@ -14,3 +14,11 @@ impl fmt::Display for EffectError {
 }
 
 impl std::error::Error for EffectError {}
+
+impl EffectError {
+    pub fn new(msg: &str) -> Self {
+        Self {
+            msg: String::from(msg),
+        }
+    }
+}

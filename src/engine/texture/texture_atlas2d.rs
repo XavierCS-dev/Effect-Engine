@@ -1,4 +1,4 @@
-use crate::util::file_to_bytes::file_to_bytes;
+use crate::util::{effect_error::EffectError, file_to_bytes::file_to_bytes};
 
 use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
 
@@ -9,6 +9,9 @@ use super::{
 
 use anyhow::Result;
 use image::EncodableLayout;
+
+const MAX_WIDTH: u32 = 8096;
+const MAX_HEIGHT: u32 = 8096;
 
 pub struct TextureAtlas2D {
     bind_group: wgpu::BindGroup,
@@ -52,40 +55,71 @@ impl TextureAtlas2D {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> Result<()> {
-        let file_bytes = file_to_bytes(texture.file_path().as_str());
-        let image_bytes = image::load_from_memory(file_bytes.as_bytes())
-            .expect(format!("Texture {} not found", texture.file_path()).as_str());
-        let image_rgba = image_bytes.to_rgba8();
-        let dimensions = image_bytes.dimensions();
         let mut image_buffers: Vec<ImageBuffer<Rgba<u8>, _>> = Vec::new();
         let mut total_width = 0;
         let mut total_height = 0;
+        let mut current_width = 0;
+        let mut current_height = 0;
 
-        // currently just adds textures in a line, this will need to be changed to be vertical as well.
+        self.textures.push(texture.clone());
 
         for tex_local in &mut self.textures {
             let file_bytes = file_to_bytes(tex_local.file_path().as_str());
-            let image_bytes = image::load_from_memory(file_bytes.as_bytes())
-                .expect(format!("Texture {} not found", tex_local.file_path()).as_str());
+            let image_bytes = match image::load_from_memory(file_bytes.as_bytes()) {
+                Ok(b) => b,
+                Err(_) => {
+                    self.textures.pop();
+                    return Err(anyhow::Error::new(EffectError::new(
+                        format!("Texture {} not found", tex_local.file_path()).as_str(),
+                    )));
+                }
+            };
             let image_rgba = image_bytes.to_rgba8();
             let dimensions = image_bytes.dimensions();
-            image_buffers.push(image_rgba);
-            tex_local.set_offset(total_width, 0);
-            total_width += dimensions.0;
-            total_height = total_height.max(dimensions.1)
-        }
-        total_width += dimensions.0;
-        total_height = total_height.max(dimensions.1);
-        image_buffers.push(image_rgba);
-        let mut combined_image = ImageBuffer::new(total_width, total_height);
-        let mut current_width = 0;
 
-        for image_rgba in image_buffers {
-            let dimensions = image_rgba.dimensions();
-            combined_image
-                .copy_from(&image_rgba, current_width, 0)
-                .unwrap();
-            current_width += dimensions.0;
+            if (current_width + dimensions.0) > MAX_WIDTH {
+                // to not overwrite textures, the next texture will need to be placed at the highest point.
+                // this is why we check total_height not current_height + dimensions.1
+                if (total_height + dimensions.1) > MAX_HEIGHT {
+                    self.textures.pop();
+                    return Err(anyhow::Error::new(EffectError::new(
+                        "Texture atlas would exceed max size, try a different layer",
+                    )));
+                }
+                current_height = total_height;
+                total_height += dimensions.1;
+                current_width = 0;
+            }
+
+            // Make sure texture isn't too long to where it extends past the max
+            if (current_height + dimensions.1) > MAX_HEIGHT {
+                self.textures.pop();
+                return Err(anyhow::Error::new(EffectError::new(
+                    "Texture atlas would exceed max size, try a different layer",
+                )));
+            }
+
+            tex_local.set_offset(current_width, current_height);
+            if (current_width + dimensions.0) > total_width {
+                total_width = current_width + dimensions.0;
+            }
+            if (current_height + dimensions.1) > total_height {
+                total_height = current_height + dimensions.1;
+            }
+
+            image_buffers.push(image_rgba);
+        }
+        let mut combined_image = ImageBuffer::new(total_width, total_height);
+
+        for (index, image_rgba) in image_buffers.iter().enumerate() {
+            // if this fails, there is a mismatch between the image bytes and the textures in self.textures.
+            // it is most likely related to the code which calculates the offsets.
+            let dimensions = unsafe { self.textures.get_unchecked(index).offset().unwrap() };
+            unsafe {
+                combined_image
+                    .copy_from(image_rgba, dimensions[0], dimensions[1])
+                    .unwrap();
+            }
         }
         let extent = wgpu::Extent3d {
             width: total_width,
