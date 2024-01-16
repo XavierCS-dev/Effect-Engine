@@ -9,3 +9,4 @@
 - [ ] Create buffers in shader
 - [x] Add buffer layouts to pipeline
 - [ ] Add bind group layouts to pipeline (Mainly for entity)
+- [ ] Implement Entity2D::new()

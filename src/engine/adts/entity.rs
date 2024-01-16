@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::Path;
 
 use crate::engine::{
     primitives::{vector::Vector3D, vertex::Vertex},
@@ -41,6 +42,10 @@ pub struct Entity2D {
 }
 
 impl Entity2D {
+    pub fn new(layer: LayerID, texture: &str) -> Self {
+        todo!();
+    }
+
     // will include "model" with pos and rotation later...
     fn to_raw(&self) -> Entity2DRaw {
         let position = [self.position.x, self.position.y, self.position.z];
