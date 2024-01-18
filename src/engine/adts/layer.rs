@@ -70,6 +70,40 @@ impl Layer2D {
         );
     }
 
+    fn create_index_buffer(&self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
+        self.index_buffer = Some(
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(
+                    entities
+                        .iter()
+                        .flat_map(|e| e.indicies())
+                        .copied()
+                        .collect::<Vec<_>>()
+                        .as_slice(),
+                ),
+                usage: wgpu::BufferUsages::VERTEX,
+            }),
+        );
+    }
+
+    fn create_vertex_buffer(&self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
+        self.vertex_buffer = Some(
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(
+                    entities
+                        .iter()
+                        .flat_map(|e| e.vertices())
+                        .copied()
+                        .collect::<Vec<_>>()
+                        .as_slice(),
+                ),
+                usage: wgpu::BufferUsages::VERTEX,
+            }),
+        );
+    }
+
     pub fn add_texture(
         &mut self,
         texture: Texture2D,
@@ -113,18 +147,48 @@ impl Layer for Layer2D {
     ) -> Result<()> {
         match self.vertex_buffer() {
             Some(v_buf) => {
-                // do something
+                if entities.len() > self.entity_count {
+                    self.create_vertex_buffer(entities, device)
+                } else {
+                    queue.write_buffer(
+                        &self.vertex_buffer.unwrap(),
+                        0,
+                        bytemuck::cast_slice(
+                            entities
+                                .iter()
+                                .flat_map(|e| e.vertices())
+                                .copied()
+                                .collect::<Vec<_>>()
+                                .as_slice(),
+                        ),
+                    )
+                }
             }
             None => {
-                // do something
+                self.create_vertex_buffer(entities, device);
             }
         };
         match self.index_buffer() {
             Some(i_buf) => {
-                // do something
+                if entities.len() > self.entity_count {
+                    self.create_vertex_buffer(entities, device)
+                } else {
+                    queue.write_buffer(
+                        &self.index_buffer.unwrap(),
+                        0,
+                        bytemuck::cast_slice(
+                            entities
+                                .iter()
+                                .flat_map(|e| e.indicies())
+                                .copied()
+                                .collect::<Vec<_>>()
+                                .as_slice(),
+                        ),
+                    )
+                }
             }
             None => {
-                // do something
+                self.create_index_buffer(entities, device);
             }
         }
         // if the vertices have changed, the entities probably have to

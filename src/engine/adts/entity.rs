@@ -37,7 +37,7 @@ pub struct Entity2D {
     // the actual numbers when in the renderer will vary depending on where the vertices are put in the main vertex buffer.
     // ie (index + num_of_vertices_in_buffer)
     // for now, write to buffer every frame, we can fix that later
-    indices: Vec<Vertex>,
+    indices: Vec<u16>,
     transform: Transform2D,
 }
 
@@ -62,5 +62,13 @@ impl Entity2D {
 
     pub fn position(&self) -> &Vector3D {
         &self.position
+    }
+
+    pub fn vertices(&self) -> &Vec<Vertex> {
+        &self.vertices
+    }
+
+    pub fn indicies(&self) -> &Vec<u16> {
+        &self.indices
     }
 }
