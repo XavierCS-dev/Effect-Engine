@@ -1,8 +1,11 @@
 use anyhow::Result;
 use std::collections::HashMap;
 
+use wgpu::util::DeviceExt;
+
 use crate::{
     engine::{
+        adts::entity::Entity2DRaw,
         primitives::vertex::Vertex,
         texture::{
             texture2d::{Texture2D, TextureID},
@@ -14,6 +17,8 @@ use crate::{
     util::effect_error::EffectError,
 };
 
+use super::entity::Entity2D;
+
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug)]
 pub struct LayerID(pub u32);
 
@@ -24,6 +29,7 @@ pub struct Layer2D {
     vertex_buffer: Option<wgpu::Buffer>,
     index_buffer: Option<wgpu::Buffer>,
     entity_buffer: Option<wgpu::Buffer>,
+    entity_count: usize,
 }
 
 impl Layer2D {
@@ -36,6 +42,7 @@ impl Layer2D {
         let mut textures = HashMap::new();
         let atlas = TextureAtlas2D::new(texture.clone(), device, queue);
         textures.insert(texture.id().clone(), texture);
+        let entity_count = 0;
         Ok(Self {
             id,
             textures,
@@ -43,7 +50,24 @@ impl Layer2D {
             vertex_buffer: None,
             index_buffer: None,
             entity_buffer: None,
+            entity_count,
         })
+    }
+
+    fn create_entity_buffer(&self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
+        self.entity_buffer = Some(
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(
+                    entities
+                        .iter()
+                        .map(|e| e.to_raw())
+                        .collect::<Vec<_>>()
+                        .as_slice(),
+                ),
+                usage: wgpu::BufferUsages::VERTEX,
+            }),
+        );
     }
 
     pub fn add_texture(
@@ -79,6 +103,68 @@ impl Layer for Layer2D {
 
     fn entity_buffer(&self) -> Option<&wgpu::Buffer> {
         self.entity_buffer.as_ref()
+    }
+
+    fn set_vertex_buffers(
+        &mut self,
+        entities: &Vec<&Entity2D>,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+    ) -> Result<()> {
+        match self.vertex_buffer() {
+            Some(v_buf) => {
+                // do something
+            }
+            None => {
+                // do something
+            }
+        };
+        match self.index_buffer() {
+            Some(i_buf) => {
+                // do something
+            }
+            None => {
+                // do something
+            }
+        }
+        // if the vertices have changed, the entities probably have to
+        // Given this is a 2D engine tho, everything should be a quad...
+        // meaning, it is pretty much guaranteed new entities were created
+        self.set_entity_buffer(entities, device, queue, entities.len() > self.entity_count)?;
+        self.entity_count = entities.len();
+        Ok(())
+    }
+
+    fn set_entity_buffer(
+        &mut self,
+        entities: &Vec<&Entity2D>,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        recreate_buffer: bool,
+    ) -> Result<()> {
+        match self.entity_buffer() {
+            Some(e_buf) => {
+                if recreate_buffer {
+                    self.create_entity_buffer(entities, device);
+                } else {
+                    queue.write_buffer(
+                        &self.entity_buffer.unwrap(),
+                        0,
+                        bytemuck::cast_slice(
+                            entities
+                                .iter()
+                                .map(|e| e.to_raw())
+                                .collect::<Vec<_>>()
+                                .as_slice(),
+                        ),
+                    )
+                }
+            }
+            None => {
+                self.create_entity_buffer(entities, device);
+            }
+        }
+        Ok(())
     }
 
     fn id(&self) -> LayerID {

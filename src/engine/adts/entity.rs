@@ -47,7 +47,7 @@ impl Entity2D {
     }
 
     // will include "model" with pos and rotation later...
-    fn to_raw(&self) -> Entity2DRaw {
+    pub fn to_raw(&self) -> Entity2DRaw {
         let position = [self.position.x, self.position.y, self.position.z];
         let texture_offset = self.texture.offset().expect("Texture is uninitiliased");
         Entity2DRaw {
