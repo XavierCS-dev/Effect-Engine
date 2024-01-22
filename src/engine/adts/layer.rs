@@ -19,7 +19,7 @@ use crate::{
 
 use super::entity::Entity2D;
 
-#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug)]
+#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
 pub struct LayerID(pub u32);
 
 pub struct Layer2D {
@@ -110,7 +110,13 @@ impl Layer2D {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> Result<()> {
-        Err(anyhow::Error::new(EffectError::new("unimplemented")))
+        match self.atlas.add_texture(texture.clone(), device, queue) {
+            Ok(_) => {
+                self.textures.insert(texture.id().to_owned(), texture);
+                Ok(())
+            }
+            Err(e) => Err(e),
+        }
     }
 }
 

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::path::Path;
 
 use crate::engine::{
-    primitives::{vector::Vector3D, vertex::Vertex},
+    primitives::{vector::Vector3, vertex::Vertex},
     texture::texture2d::Texture2D,
     traits::entity::EntityType,
 };
@@ -31,7 +31,7 @@ impl Entity2DRaw {
 
 pub struct Entity2D {
     layer: LayerID,
-    position: Vector3D,
+    position: Vector3,
     texture: Texture2D,
     vertices: Vec<Vertex>,
     // the actual numbers when in the renderer will vary depending on where the vertices are put in the main vertex buffer.

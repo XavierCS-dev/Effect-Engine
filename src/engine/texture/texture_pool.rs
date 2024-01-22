@@ -1,3 +1,5 @@
+use std::collections::btree_map::IntoIter;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 
 use crate::engine::adts::layer::Layer2D;
@@ -6,18 +8,19 @@ use crate::engine::traits::layer::Layer;
 
 use super::texture2d::{Texture2D, TextureID};
 use anyhow::Result;
+use rayon::array::IntoIter;
 
 // Textures should be stitched together instead of storing multiple textures...
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug)]
 pub struct BindGroupID(pub u32);
 
 pub struct TexturePool2D {
-    layers: HashMap<LayerID, Layer2D>,
+    layers: BTreeMap<LayerID, Layer2D>,
 }
 
 impl TexturePool2D {
     pub fn new() -> Self {
-        let layers = HashMap::new();
+        let layers = BTreeMap::new();
         Self { layers }
     }
 
@@ -64,6 +67,7 @@ impl TexturePool2D {
 
     pub fn remove_texture(
         &mut self,
+        layer_id: LayerID,
         texture_id: TextureID,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
@@ -82,5 +86,9 @@ impl TexturePool2D {
 
     pub fn get_layer(&self, layer_id: LayerID) -> Option<&Layer2D> {
         self.layers.get(&layer_id)
+    }
+
+    pub fn get_layers(&self) -> &BTreeMap<LayerID, Layer2D> {
+        &self.layers
     }
 }

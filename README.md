@@ -10,4 +10,4 @@
 - [x] Add buffer layouts to pipeline
 - [ ] Add bind group layouts to pipeline (Mainly for entity)
 - [ ] Implement Entity2D::new()
-- [ ] Switch HashMap to BTreeMao where it makes sense to do so
+- [x] Switch HashMap to BTreeMap where it makes sense to do so
