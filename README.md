@@ -14,3 +14,6 @@
 - [ ] Add unit tests
 - [ ] Fix buffer locations
 - [ ] Refactor
+  - [ ] Reduce black box state
+  - [ ] Increase unit test friendliness
+  - [ ] Hide main loop from user, or at least, make it easier to use
