@@ -11,3 +11,6 @@
 - [ ] Add bind group layouts to pipeline (Mainly for entity)
 - [ ] Implement Entity2D::new()
 - [x] Switch HashMap to BTreeMap where it makes sense to do so
+- [ ] Add unit tests
+- [ ] Fix buffer locations
+- [ ] Refactor
