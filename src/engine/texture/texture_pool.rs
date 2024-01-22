@@ -1,14 +1,10 @@
-use std::collections::btree_map::IntoIter;
 use std::collections::BTreeMap;
-use std::collections::HashMap;
 
 use crate::engine::adts::layer::Layer2D;
 use crate::engine::adts::layer::LayerID;
-use crate::engine::traits::layer::Layer;
 
 use super::texture2d::{Texture2D, TextureID};
 use anyhow::Result;
-use rayon::array::IntoIter;
 
 // Textures should be stitched together instead of storing multiple textures...
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug)]
@@ -84,8 +80,8 @@ impl TexturePool2D {
         todo!();
     }
 
-    pub fn get_layer(&self, layer_id: LayerID) -> Option<&Layer2D> {
-        self.layers.get(&layer_id)
+    pub fn get_layer(&self, layer_id: &LayerID) -> Option<&Layer2D> {
+        self.layers.get(layer_id)
     }
 
     pub fn get_layers(&self) -> &BTreeMap<LayerID, Layer2D> {

@@ -1,9 +1,7 @@
-use image::DynamicImage;
 use image::GenericImageView;
 use image::ImageBuffer;
 use image::Rgba;
 use std::fs;
-use std::io;
 use std::io::prelude::*;
 
 use super::texture_pool::BindGroupID;

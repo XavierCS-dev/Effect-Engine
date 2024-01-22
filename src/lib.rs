@@ -1,23 +1,14 @@
 pub mod engine;
-use engine::{
-    adts::{entity::Entity2D, entity_group::EntityGroup2D, layer::LayerID},
-    engine as effect,
-};
+use engine::{adts::entity::Entity2D, engine as effect};
 pub mod util;
-use std::{
-    cmp::Reverse,
-    collections::HashMap,
-    time::{Duration, Instant},
-};
 use winit::{
     dpi::PhysicalSize,
-    event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
+    window::WindowBuilder,
 };
 
-struct EffectSystem {
-    engine: effect::Engine,
+pub struct EffectSystem {
+    pub engine: effect::Engine,
 }
 
 impl EffectSystem {
@@ -61,7 +52,7 @@ impl EffectSystem {
 
     /// Take an unordered Vec or Entity2Ds, then sort them into layers
     /// and sort the layers based on y position. (Higher y drawn first.)
-    pub fn render_sorted(&mut self, mut entities: Vec<&Entity2D>, y_sorting: bool) {
+    pub fn render_sorted(&mut self, entities: Vec<&Entity2D>, y_sorting: bool) {
         let mut sorted_ents = EffectSystem::sort(entities);
         if y_sorting {
             for layer in &mut sorted_ents {
@@ -73,7 +64,7 @@ impl EffectSystem {
 
     /// Take a pre-sorted nested Vecs and render it as is.
     // The inner Vec is a singular layer.  May result in unexpexted behaviour if incorrectly sorted.
-    pub unsafe fn render(&mut self, mut entities: Vec<Vec<&Entity2D>>) {
+    pub unsafe fn render(&mut self, entities: Vec<Vec<&Entity2D>>) {
         self.engine.render(entities);
     }
 }

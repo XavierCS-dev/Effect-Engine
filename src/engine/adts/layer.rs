@@ -3,18 +3,12 @@ use std::collections::HashMap;
 
 use wgpu::util::DeviceExt;
 
-use crate::{
-    engine::{
-        adts::entity::Entity2DRaw,
-        primitives::vertex::Vertex,
-        texture::{
-            texture2d::{Texture2D, TextureID},
-            texture_atlas2d::TextureAtlas2D,
-            texture_pool::{BindGroupID, TexturePool2D},
-        },
-        traits::layer::Layer,
+use crate::engine::{
+    texture::{
+        texture2d::{Texture2D, TextureID},
+        texture_atlas2d::TextureAtlas2D,
     },
-    util::effect_error::EffectError,
+    traits::layer::Layer,
 };
 
 use super::entity::Entity2D;
@@ -30,6 +24,7 @@ pub struct Layer2D {
     index_buffer: Option<wgpu::Buffer>,
     entity_buffer: Option<wgpu::Buffer>,
     entity_count: usize,
+    indices: usize,
 }
 
 impl Layer2D {
@@ -51,10 +46,11 @@ impl Layer2D {
             index_buffer: None,
             entity_buffer: None,
             entity_count,
+            indices: 0,
         })
     }
 
-    fn create_entity_buffer(&self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
+    fn create_entity_buffer(&mut self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
         self.entity_buffer = Some(
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
@@ -70,7 +66,7 @@ impl Layer2D {
         );
     }
 
-    fn create_index_buffer(&self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
+    fn create_index_buffer(&mut self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
         self.index_buffer = Some(
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
@@ -87,7 +83,7 @@ impl Layer2D {
         );
     }
 
-    fn create_vertex_buffer(&self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
+    fn create_vertex_buffer(&mut self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
         self.vertex_buffer = Some(
             device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
@@ -145,6 +141,10 @@ impl Layer for Layer2D {
         self.entity_buffer.as_ref()
     }
 
+    fn index_count(&self) -> usize {
+        self.indices
+    }
+
     fn set_vertex_buffers(
         &mut self,
         entities: &Vec<&Entity2D>,
@@ -157,7 +157,7 @@ impl Layer for Layer2D {
                     self.create_vertex_buffer(entities, device)
                 } else {
                     queue.write_buffer(
-                        &self.vertex_buffer.unwrap(),
+                        self.vertex_buffer.as_ref().unwrap(),
                         0,
                         bytemuck::cast_slice(
                             entities
@@ -180,7 +180,7 @@ impl Layer for Layer2D {
                     self.create_vertex_buffer(entities, device)
                 } else {
                     queue.write_buffer(
-                        &self.index_buffer.unwrap(),
+                        self.index_buffer.as_ref().unwrap(),
                         0,
                         bytemuck::cast_slice(
                             entities
@@ -202,6 +202,7 @@ impl Layer for Layer2D {
         // meaning, it is pretty much guaranteed new entities were created
         self.set_entity_buffer(entities, device, queue, entities.len() > self.entity_count)?;
         self.entity_count = entities.len();
+        self.indices = entities.iter().fold(0, |acc, e| acc + e.indicies().len());
         Ok(())
     }
 
@@ -218,7 +219,7 @@ impl Layer for Layer2D {
                     self.create_entity_buffer(entities, device);
                 } else {
                     queue.write_buffer(
-                        &self.entity_buffer.unwrap(),
+                        self.entity_buffer.as_ref().unwrap(),
                         0,
                         bytemuck::cast_slice(
                             entities

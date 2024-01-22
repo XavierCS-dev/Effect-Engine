@@ -1,20 +1,16 @@
-use std::collections::HashMap;
-
 use wgpu::util::DeviceExt;
-use winit::raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
 use super::{
     adts::{
         entity::{Entity2D, Entity2DRaw},
-        entity_group::EntityGroup2D,
-        layer::{self, LayerID},
+        layer::LayerID,
     },
     primitives::vertex::Vertex,
     texture::{
         texture2d::{Texture2D, TextureID},
-        texture_pool::{BindGroupID, TexturePool2D},
+        texture_pool::TexturePool2D,
     },
-    traits::{entity::EntityType, layer::Layer},
+    traits::layer::Layer,
 };
 
 pub struct Engine {
@@ -125,7 +121,7 @@ impl Engine {
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Pipeline layout descriptor"),
                 bind_group_layouts: &[texture_pool
-                    .get_layer(layer_id)
+                    .get_layer(&layer_id)
                     .unwrap()
                     .bind_group_layout()],
                 push_constant_ranges: &[],
@@ -235,18 +231,21 @@ impl Engine {
             occlusion_query_set: None,
         });
 
-        render_pass.set_pipeline(&self.render_pipeline);
-        render_pass.set_bind_group(
-            0,
-            self.texture_pool
-                .get_layer(self.layer_id)
-                .unwrap()
-                .bind_group(),
-            &[],
-        );
-        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
-        render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint32);
-        render_pass.draw_indexed(0..self.indices.len() as u32, 0, 0..1);
+        for layer in self.texture_pool.get_layers() {
+            render_pass.set_pipeline(&self.render_pipeline);
+            render_pass.set_bind_group(
+                0,
+                self.texture_pool.get_layer(layer.0).unwrap().bind_group(),
+                &[],
+            );
+            render_pass.set_vertex_buffer(0, layer.1.vertex_buffer().unwrap().slice(..));
+            render_pass.set_index_buffer(
+                layer.1.index_buffer().unwrap().slice(..),
+                wgpu::IndexFormat::Uint32,
+            );
+            render_pass.draw_indexed(0..layer.1.index_count() as u32, 0, 0..1);
+        }
+
         drop(render_pass);
         self.queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();

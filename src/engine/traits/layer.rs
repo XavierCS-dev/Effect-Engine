@@ -20,6 +20,8 @@ pub trait Layer {
 
     fn entity_buffer(&self) -> Option<&wgpu::Buffer>;
 
+    fn index_count(&self) -> usize;
+
     fn set_vertex_buffers(
         &mut self,
         entities: &Vec<&Entity2D>,

@@ -2,10 +2,7 @@ use crate::util::{effect_error::EffectError, file_to_bytes::file_to_bytes};
 
 use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
 
-use super::{
-    texture2d::{Texture2D, TextureID},
-    texture_pool::BindGroupID,
-};
+use super::texture2d::{Texture2D, TextureID};
 
 use anyhow::Result;
 use image::EncodableLayout;
@@ -68,7 +65,8 @@ impl TextureAtlas2D {
             let image_bytes = match image::load_from_memory(file_bytes.as_bytes()) {
                 Ok(b) => b,
                 Err(_) => {
-                    self.textures.pop();
+                    // shadow var above, don't override..
+                    let tex_local = self.textures.pop().unwrap();
                     return Err(anyhow::Error::new(EffectError::new(
                         format!("Texture {} not found", tex_local.file_path()).as_str(),
                     )));

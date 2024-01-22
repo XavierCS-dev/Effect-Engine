@@ -1,10 +1,6 @@
-use std::collections::HashMap;
-use std::path::Path;
-
 use crate::engine::{
     primitives::{vector::Vector3, vertex::Vertex},
     texture::texture2d::Texture2D,
-    traits::entity::EntityType,
 };
 
 use super::{layer::LayerID, transform::Transform2D};
@@ -60,7 +56,7 @@ impl Entity2D {
         &self.layer
     }
 
-    pub fn position(&self) -> &Vector3D {
+    pub fn position(&self) -> &Vector3 {
         &self.position
     }
 
