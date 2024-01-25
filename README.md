@@ -12,7 +12,7 @@
 - [ ] Implement Entity2D::new()
 - [x] Switch HashMap to BTreeMap where it makes sense to do so
 - [ ] Add unit tests
-- [ ] Fix buffer locations
+- [x] Fix buffer locations
 - [ ] Refactor
   - [ ] Reduce black box state
   - [ ] Increase unit test friendliness
