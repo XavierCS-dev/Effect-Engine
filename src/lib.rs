@@ -1,4 +1,5 @@
 pub mod engine;
+use anyhow::Result;
 use engine::{engine as effect, entity::entity::Entity2D};
 use winit::{
     dpi::PhysicalSize,
@@ -63,8 +64,11 @@ impl EffectSystem {
 
     /// Take a pre-sorted nested Vecs and render it as is.
     // The inner Vec is a singular layer.  May result in unexpexted behaviour if incorrectly sorted.
-    pub unsafe fn render(&mut self, entities: Vec<Vec<&Entity2D>>) {
-        self.engine.render(entities);
+    pub unsafe fn render(
+        &mut self,
+        entities: Vec<Vec<&Entity2D>>,
+    ) -> Result<(), wgpu::SurfaceError> {
+        self.engine.render(entities)
     }
 }
 

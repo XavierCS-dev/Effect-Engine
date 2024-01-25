@@ -4,6 +4,8 @@ use crate::engine::{
     texture::{texture2d::Texture2D, texture_pool::TexturePool2D},
 };
 
+use super::vertex_group::VertexGroup2D;
+
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
 pub struct Entity2DRaw {
@@ -28,22 +30,18 @@ pub struct Entity2D {
     layer: LayerID,
     position: Vector3,
     texture: Texture2D,
-    vertices: Vec<Vertex>,
-    // the actual numbers when in the renderer will vary depending on where the vertices are put in the main vertex buffer.
-    // ie (index + num_of_vertices_in_buffer)
-    // for now, write to buffer every frame, we can fix that later
-    indices: Vec<u16>,
-    // transform: Transform2D,
+    vertex_group: VertexGroup2D,
 }
 
 impl Entity2D {
-    pub fn new(
-        position: Vector3,
-        layer: LayerID,
-        texture: Texture2D,
-        texture_pool: &TexturePool2D,
-    ) -> Self {
-        todo!();
+    pub fn new(position: Vector3, layer: LayerID, texture: Texture2D) -> Self {
+        let vertex_group = VertexGroup2D::new(&texture);
+        Self {
+            layer,
+            position,
+            texture,
+            vertex_group,
+        }
     }
 
     // will include "model" with pos and rotation later...
@@ -64,11 +62,11 @@ impl Entity2D {
         &self.position
     }
 
-    pub fn vertices(&self) -> &Vec<Vertex> {
-        &self.vertices
+    pub fn vertices(&self) -> &[f32; 4] {
+        self.vertex_group.vertices()
     }
 
-    pub fn indicies(&self) -> &Vec<u16> {
-        &self.indices
+    pub fn indicies(&self) -> &[f32; 6] {
+        self.vertex_group.indices()
     }
 }
