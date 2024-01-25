@@ -1,6 +1,5 @@
 use std::time::Instant;
 
-use effect_engine;
 use winit::event::{Event, WindowEvent};
 
 fn main() {

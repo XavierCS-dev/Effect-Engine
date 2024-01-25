@@ -1,6 +1,5 @@
 pub mod engine;
-use engine::{adts::entity::Entity2D, engine as effect};
-pub mod util;
+use engine::{engine as effect, entity::entity::Entity2D};
 use winit::{
     dpi::PhysicalSize,
     event_loop::{ControlFlow, EventLoop},

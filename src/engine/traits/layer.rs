@@ -3,14 +3,13 @@ use std::collections::HashMap;
 use anyhow::Result;
 
 use crate::engine::{
-    adts::{entity::Entity2D, layer::LayerID},
+    entity::entity::Entity2D,
+    layer::layer::LayerID,
     texture::texture2d::{Texture2D, TextureID},
 };
 
 pub trait Layer {
     fn bind_group(&self) -> &wgpu::BindGroup;
-
-    fn bind_group_layout(&self) -> &wgpu::BindGroupLayout;
 
     fn texture_ids(&self) -> &HashMap<TextureID, Texture2D>;
 

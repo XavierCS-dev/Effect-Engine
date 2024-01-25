@@ -1,10 +1,9 @@
+use crate::engine::entity::entity::Entity2D;
+use crate::engine::entity::entity::Entity2DRaw;
+use crate::engine::layer::layer::*;
 use wgpu::util::DeviceExt;
 
 use super::{
-    adts::{
-        entity::{Entity2D, Entity2DRaw},
-        layer::LayerID,
-    },
     primitives::vertex::Vertex,
     texture::{
         texture2d::{Texture2D, TextureID},
@@ -20,8 +19,6 @@ pub struct Engine {
     surface_configuration: wgpu::SurfaceConfiguration,
     window: winit::window::Window,
     render_pipeline: wgpu::RenderPipeline,
-    vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
     texture_pool: TexturePool2D,
 }
 
@@ -56,50 +53,7 @@ impl Engine {
             .await
             .unwrap();
 
-        let vertices = vec![
-            Vertex {
-                position: [-0.0868241, 0.49240386, 0.0],
-                texture_coordinates: [0.4131759, 0.99240386],
-            }, // A
-            Vertex {
-                position: [-0.49513406, 0.06958647, 0.0],
-                texture_coordinates: [0.0048659444, 0.56958647],
-            }, // B
-            Vertex {
-                position: [-0.21918549, -0.44939706, 0.0],
-                texture_coordinates: [0.28081453, 0.05060294],
-            }, // C
-            Vertex {
-                position: [0.35966998, -0.3473291, 0.0],
-                texture_coordinates: [0.85967, 0.1526709],
-            }, // D
-            Vertex {
-                position: [0.44147372, 0.2347359, 0.0],
-                texture_coordinates: [0.9414737, 0.7347359],
-            }, // E
-        ];
-        let indices = vec![0, 1, 4, 1, 2, 4, 2, 3, 4];
-
-        let texture = Texture2D::new(TextureID(String::from("tree")), "tree.png", &device, &queue);
-        let mut texture_pool = TexturePool2D::new();
-        let layer_id = LayerID(0);
-        texture_pool
-            .add_texture(layer_id, texture, &device, &queue)
-            .unwrap();
-        // create new entitity here
-
-        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("vertex bugger"),
-            contents: bytemuck::cast_slice(vertices.as_slice()),
-            usage: wgpu::BufferUsages::VERTEX,
-        });
-
-        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Index bugger"),
-            contents: bytemuck::cast_slice(indices.as_slice()),
-            usage: wgpu::BufferUsages::INDEX,
-        });
-
+        let texture_pool = TexturePool2D::new(&device);
         let surface_capabilities = surface.get_capabilities(&adapter);
         // Check this...may need to specifically set it to some sRGB value
         let surface_format = surface_capabilities.formats[0];
@@ -120,10 +74,7 @@ impl Engine {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Pipeline layout descriptor"),
-                bind_group_layouts: &[texture_pool
-                    .get_layer(&layer_id)
-                    .unwrap()
-                    .bind_group_layout()],
+                bind_group_layouts: &[texture_pool.bind_group_layout()],
                 push_constant_ranges: &[],
             });
 
@@ -169,8 +120,6 @@ impl Engine {
             surface_configuration,
             window,
             render_pipeline,
-            vertex_buffer,
-            index_buffer,
             texture_pool,
         }
     }
@@ -231,19 +180,19 @@ impl Engine {
             occlusion_query_set: None,
         });
 
-        for layer in self.texture_pool.get_layers() {
+        for (layer_id, layer) in self.texture_pool.get_layers() {
             render_pass.set_pipeline(&self.render_pipeline);
             render_pass.set_bind_group(
                 0,
-                self.texture_pool.get_layer(layer.0).unwrap().bind_group(),
+                self.texture_pool.get_layer(layer_id).unwrap().bind_group(),
                 &[],
             );
-            render_pass.set_vertex_buffer(0, layer.1.vertex_buffer().unwrap().slice(..));
+            render_pass.set_vertex_buffer(0, layer.vertex_buffer().unwrap().slice(..));
             render_pass.set_index_buffer(
-                layer.1.index_buffer().unwrap().slice(..),
+                layer.index_buffer().unwrap().slice(..),
                 wgpu::IndexFormat::Uint32,
             );
-            render_pass.draw_indexed(0..layer.1.index_count() as u32, 0, 0..1);
+            render_pass.draw_indexed(0..layer.index_count() as u32, 0, 0..1);
         }
 
         drop(render_pass);

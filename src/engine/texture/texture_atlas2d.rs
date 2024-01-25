@@ -1,4 +1,4 @@
-use crate::util::{effect_error::EffectError, file_to_bytes::file_to_bytes};
+use crate::engine::util::{effect_error::EffectError, file_to_bytes::file_to_bytes};
 
 use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
 
@@ -7,12 +7,11 @@ use super::texture2d::{Texture2D, TextureID};
 use anyhow::Result;
 use image::EncodableLayout;
 
-const MAX_WIDTH: u32 = 8096;
-const MAX_HEIGHT: u32 = 8096;
+const MAX_WIDTH: u32 = 8196;
+const MAX_HEIGHT: u32 = 8196;
 
 pub struct TextureAtlas2D {
     bind_group: wgpu::BindGroup,
-    bind_group_layout: wgpu::BindGroupLayout,
     textures: Vec<Texture2D>,
     atlas: wgpu::Texture,
     view: wgpu::TextureView,
@@ -20,7 +19,12 @@ pub struct TextureAtlas2D {
 }
 
 impl TextureAtlas2D {
-    pub fn new(mut texture: Texture2D, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
+    pub fn new(
+        mut texture: Texture2D,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        bind_group_layout: &wgpu::BindGroupLayout,
+    ) -> Self {
         let mut textures = Vec::new();
         let file_bytes = file_to_bytes(texture.file_path().as_str());
         let image_bytes = image::load_from_memory(file_bytes.as_bytes())
@@ -33,13 +37,17 @@ impl TextureAtlas2D {
             height: dimensions.1,
             depth_or_array_layers: 1,
         };
-        let (bind_group, bind_group_layout, atlas, view, sampler) =
-            Texture2D::init_texture(texture_extent, image_rgba, &device, &queue);
+        let (bind_group, atlas, view, sampler) = Texture2D::init_texture(
+            texture_extent,
+            image_rgba,
+            bind_group_layout,
+            &device,
+            &queue,
+        );
         texture.set_offset(0, 0);
         Self {
             textures,
             bind_group,
-            bind_group_layout,
             atlas,
             view,
             sampler,
@@ -51,6 +59,7 @@ impl TextureAtlas2D {
         texture: Texture2D,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
+        bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<()> {
         let mut image_buffers: Vec<ImageBuffer<Rgba<u8>, _>> = Vec::new();
         let mut total_width = 0;
@@ -125,12 +134,10 @@ impl TextureAtlas2D {
             depth_or_array_layers: 1,
         };
 
-        let (bind_group, bind_group_layout, atlas, _, _) =
-            Texture2D::init_texture(extent, combined_image, device, queue);
+        let (bind_group, atlas, _, _) =
+            Texture2D::init_texture(extent, combined_image, bind_group_layout, device, queue);
         self.atlas = atlas;
         self.bind_group = bind_group;
-        self.bind_group_layout = bind_group_layout;
-
         self.textures.push(texture);
         Ok(())
     }
@@ -164,10 +171,6 @@ impl TextureAtlas2D {
 
     pub fn bind_group(&self) -> &wgpu::BindGroup {
         &self.bind_group
-    }
-
-    pub fn bind_group_layout(&self) -> &wgpu::BindGroupLayout {
-        &self.bind_group_layout
     }
 
     pub fn textures(&self) -> &Vec<Texture2D> {

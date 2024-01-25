@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use crate::engine::adts::layer::Layer2D;
-use crate::engine::adts::layer::LayerID;
+use crate::engine::layer::layer::Layer2D;
+use crate::engine::layer::layer::LayerID;
 
 use super::texture2d::{Texture2D, TextureID};
 use anyhow::Result;
@@ -12,12 +12,38 @@ pub struct BindGroupID(pub u32);
 
 pub struct TexturePool2D {
     layers: BTreeMap<LayerID, Layer2D>,
+    bind_group_layout: wgpu::BindGroupLayout,
 }
 
 impl TexturePool2D {
-    pub fn new() -> Self {
+    pub fn new(device: &wgpu::Device) -> Self {
         let layers = BTreeMap::new();
-        Self { layers }
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        multisampled: false,
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+            label: Some("Bind group layout"),
+        });
+
+        Self {
+            layers,
+            bind_group_layout,
+        }
     }
 
     // need to check if the bind group ID and texture ID already exist.
@@ -41,10 +67,11 @@ impl TexturePool2D {
 
         match &mut self.layers.get_mut(&layer_id) {
             Some(layer) => {
-                layer.add_texture(texture, device, queue)?;
+                layer.add_texture(texture, device, queue, &self.bind_group_layout)?;
             }
             None => {
-                let layer = Layer2D::new(layer_id, texture, device, queue)?;
+                let layer =
+                    Layer2D::new(layer_id, texture, device, queue, self.bind_group_layout())?;
                 self.layers.insert(layer_id, layer);
             }
         };
@@ -86,5 +113,9 @@ impl TexturePool2D {
 
     pub fn get_layers(&self) -> &BTreeMap<LayerID, Layer2D> {
         &self.layers
+    }
+
+    pub fn bind_group_layout(&self) -> &wgpu::BindGroupLayout {
+        &self.bind_group_layout
     }
 }

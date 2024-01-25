@@ -4,14 +4,13 @@ use std::collections::HashMap;
 use wgpu::util::DeviceExt;
 
 use crate::engine::{
+    entity::entity::Entity2D,
     texture::{
         texture2d::{Texture2D, TextureID},
         texture_atlas2d::TextureAtlas2D,
     },
     traits::layer::Layer,
 };
-
-use super::entity::Entity2D;
 
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
 pub struct LayerID(pub u32);
@@ -33,9 +32,10 @@ impl Layer2D {
         texture: Texture2D,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
+        bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<Self> {
         let mut textures = HashMap::new();
-        let atlas = TextureAtlas2D::new(texture.clone(), device, queue);
+        let atlas = TextureAtlas2D::new(texture.clone(), device, queue, bind_group_layout);
         textures.insert(texture.id().clone(), texture);
         let entity_count = 0;
         Ok(Self {
@@ -105,8 +105,12 @@ impl Layer2D {
         texture: Texture2D,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
+        bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<()> {
-        match self.atlas.add_texture(texture.clone(), device, queue) {
+        match self
+            .atlas
+            .add_texture(texture.clone(), device, queue, bind_group_layout)
+        {
             Ok(_) => {
                 self.textures.insert(texture.id().to_owned(), texture);
                 Ok(())
@@ -119,10 +123,6 @@ impl Layer2D {
 impl Layer for Layer2D {
     fn bind_group(&self) -> &wgpu::BindGroup {
         self.atlas.bind_group()
-    }
-
-    fn bind_group_layout(&self) -> &wgpu::BindGroupLayout {
-        self.atlas.bind_group_layout()
     }
 
     fn texture_ids(&self) -> &HashMap<TextureID, Texture2D> {

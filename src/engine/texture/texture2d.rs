@@ -62,11 +62,11 @@ impl Texture2D {
     pub fn init_texture(
         extent: wgpu::Extent3d,
         rgba_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
+        bind_group_layout: &wgpu::BindGroupLayout,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> (
         wgpu::BindGroup,
-        wgpu::BindGroupLayout,
         wgpu::Texture,
         wgpu::TextureView,
         wgpu::Sampler,
@@ -109,31 +109,9 @@ impl Texture2D {
             ..Default::default()
         });
 
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Texture {
-                        multisampled: false,
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                    },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT,
-                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                    count: None,
-                },
-            ],
-            label: Some("Bind group layout"),
-        });
-
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("bind group"),
-            layout: &bind_group_layout,
+            layout: bind_group_layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
@@ -146,7 +124,7 @@ impl Texture2D {
             ],
         });
 
-        (bind_group, bind_group_layout, texture, view, sampler)
+        (bind_group, texture, view, sampler)
     }
 
     pub fn id(&self) -> &TextureID {

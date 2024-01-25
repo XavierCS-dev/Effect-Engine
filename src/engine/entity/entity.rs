@@ -1,9 +1,8 @@
 use crate::engine::{
+    layer::layer::LayerID,
     primitives::{vector::Vector3, vertex::Vertex},
-    texture::texture2d::Texture2D,
+    texture::{texture2d::Texture2D, texture_pool::TexturePool2D},
 };
-
-use super::{layer::LayerID, transform::Transform2D};
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
@@ -34,11 +33,16 @@ pub struct Entity2D {
     // ie (index + num_of_vertices_in_buffer)
     // for now, write to buffer every frame, we can fix that later
     indices: Vec<u16>,
-    transform: Transform2D,
+    // transform: Transform2D,
 }
 
 impl Entity2D {
-    pub fn new(layer: LayerID, texture: &str) -> Self {
+    pub fn new(
+        position: Vector3,
+        layer: LayerID,
+        texture: Texture2D,
+        texture_pool: &TexturePool2D,
+    ) -> Self {
         todo!();
     }
 
