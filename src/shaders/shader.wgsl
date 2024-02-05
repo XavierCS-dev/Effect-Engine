@@ -1,7 +1,11 @@
 
-struct VertexInput {
+struct EntityInput {
     @location(2) position: vec3<f32>,
     @location(3) tex_coords: vec2<f32>,
+}
+
+struct VertexInput {
+    @location(0) position: vec3<f32>,
 }
 
 struct VertexOutput {
@@ -12,10 +16,11 @@ struct VertexOutput {
 @vertex
 fn vrt_main(
     model: VertexInput,
+    entity: EntityInput
 ) -> VertexOutput {
     var out: VertexOutput;
-    out.tex_coords = model.tex_coords;
-    out.clip_position = vec4<f32>(model.position, 1.0);
+    out.tex_coords = entity.tex_coords;
+    out.clip_position = vec4<f32>(model.position + entity.position, 1.0);
     return out;
 }
 

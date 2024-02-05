@@ -21,7 +21,7 @@ fn main() {
             Event::AboutToWait => {
                 app.engine.update(&delta_time);
                 // Should probably handle this somewhere..
-                // app.engine.render().unwrap();
+                app.engine.render(Vec::new()).unwrap();
             }
             _ => (),
         }

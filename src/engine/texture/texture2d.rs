@@ -150,4 +150,12 @@ impl Texture2D {
     pub fn set_bind_group_id(&mut self, id: BindGroupID) {
         self.bind_group_id = Some(id);
     }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
 }

@@ -15,7 +15,7 @@ pub struct Entity2DRaw {
 
 impl Entity2DRaw {
     const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 2] =
-        wgpu::vertex_attr_array![2 => Float32x3, 3=> Uint32x2];
+        wgpu::vertex_attr_array![2 => Float32x3, 3=> Float32x2];
 
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
@@ -34,8 +34,14 @@ pub struct Entity2D {
 }
 
 impl Entity2D {
-    pub fn new(position: Vector3, layer: LayerID, texture: Texture2D) -> Self {
-        let vertex_group = VertexGroup2D::new(&texture);
+    pub fn new(
+        position: Vector3,
+        layer: LayerID,
+        texture: Texture2D,
+        screen_width: u32,
+        screen_height: u32,
+    ) -> Self {
+        let vertex_group = VertexGroup2D::new(&texture, screen_width, screen_height);
         Self {
             layer,
             position,
@@ -62,11 +68,7 @@ impl Entity2D {
         &self.position
     }
 
-    pub fn vertices(&self) -> &[f32; 4] {
+    pub fn vertices(&self) -> &[Vertex; 4] {
         self.vertex_group.vertices()
-    }
-
-    pub fn indicies(&self) -> &[f32; 6] {
-        self.vertex_group.indices()
     }
 }

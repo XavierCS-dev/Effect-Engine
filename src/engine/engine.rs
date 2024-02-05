@@ -62,7 +62,7 @@ impl Engine {
             format: surface_format,
             width: window.inner_size().width,
             height: window.inner_size().height,
-            present_mode: wgpu::PresentMode::Fifo,
+            present_mode: wgpu::PresentMode::AutoNoVsync,
             alpha_mode: surface_capabilities.alpha_modes[0],
             view_formats: Vec::new(),
         };
@@ -167,10 +167,10 @@ impl Engine {
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Clear(wgpu::Color {
-                        r: 0.1,
-                        g: 0.4,
-                        b: 0.5,
-                        a: 0.3,
+                        r: 0.0,
+                        g: 0.0,
+                        b: 0.0,
+                        a: 0.0,
                     }),
                     store: wgpu::StoreOp::Store,
                 },
@@ -188,10 +188,7 @@ impl Engine {
                 &[],
             );
             render_pass.set_vertex_buffer(0, layer.vertex_buffer().unwrap().slice(..));
-            render_pass.set_index_buffer(
-                layer.index_buffer().unwrap().slice(..),
-                wgpu::IndexFormat::Uint32,
-            );
+            render_pass.set_index_buffer(layer.index_buffer().slice(..), wgpu::IndexFormat::Uint32);
             render_pass.draw_indexed(0..layer.index_count() as u32, 0, 0..1);
         }
 

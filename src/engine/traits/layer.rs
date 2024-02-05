@@ -15,7 +15,7 @@ pub trait Layer {
 
     fn vertex_buffer(&self) -> Option<&wgpu::Buffer>;
 
-    fn index_buffer(&self) -> Option<&wgpu::Buffer>;
+    fn index_buffer(&self) -> &wgpu::Buffer;
 
     fn entity_buffer(&self) -> Option<&wgpu::Buffer>;
 

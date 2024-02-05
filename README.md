@@ -13,6 +13,7 @@
 - [x] Switch HashMap to BTreeMap where it makes sense to do so
 - [ ] Add unit tests
 - [x] Fix buffer locations
+- [ ] Modify Texture to be added to a layer upon creation
 - [ ] Refactor
   - [ ] Reduce black box state
   - [ ] Increase unit test friendliness
