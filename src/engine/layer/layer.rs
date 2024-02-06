@@ -110,6 +110,14 @@ impl Layer2D {
             Err(e) => Err(e),
         }
     }
+
+    pub fn id(&self) -> LayerID {
+        self.id
+    }
+
+    pub fn contains_texture(&self, texture_id: &TextureID) -> bool {
+        self.textures.contains_key(texture_id)
+    }
 }
 
 impl Layer for Layer2D {

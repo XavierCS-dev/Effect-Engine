@@ -118,4 +118,15 @@ impl TexturePool2D {
     pub fn bind_group_layout(&self) -> &wgpu::BindGroupLayout {
         &self.bind_group_layout
     }
+
+    pub fn contains_texture(&self, layer_id: &LayerID, texture_id: &TextureID) -> bool {
+        match self.layers.get(layer_id) {
+            Some(layer) => layer.contains_texture(texture_id),
+            None => false,
+        }
+    }
+
+    pub fn contains_layer(&self, layer_id: &LayerID) -> bool {
+        self.layers.contains_key(layer_id)
+    }
 }

@@ -1,7 +1,11 @@
 use crate::engine::{
-    layer::layer::LayerID,
+    layer::layer::{Layer2D, LayerID},
     primitives::{vector::Vector3, vertex::Vertex},
-    texture::{texture2d::Texture2D, texture_pool::TexturePool2D},
+    texture::{
+        texture2d::Texture2D,
+        texture_atlas2d::TextureAtlas2D,
+        texture_pool::{self, TexturePool2D},
+    },
 };
 
 use super::vertex_group::VertexGroup2D;
@@ -36,12 +40,22 @@ pub struct Entity2D {
 impl Entity2D {
     pub fn new(
         position: Vector3,
+        texture_pool: &mut TexturePool2D,
         layer: LayerID,
         texture: Texture2D,
         screen_width: u32,
         screen_height: u32,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
     ) -> Self {
         let vertex_group = VertexGroup2D::new(&texture, screen_width, screen_height);
+        if !texture_pool.contains_texture(&layer, texture.id()) {
+            // user may want same texture for entities on different layers,
+            // contains texture checks for a specific texture on a specific layer
+            texture_pool
+                .add_texture(layer, texture.clone(), device, queue)
+                .unwrap();
+        }
         Self {
             layer,
             position,
