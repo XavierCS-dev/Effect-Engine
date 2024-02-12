@@ -147,11 +147,14 @@ impl Layer2DSystem {
     }
 
     /// Update transformation data (not the vertices).
-    pub unsafe fn update_entities(
+    pub fn update_entities(
         layer: &mut Layer2D<Initialised>,
         entities: Vec<&Entity2D>,
         queue: &wgpu::Queue,
     ) {
+        if entities.len() as u32 > layer.entity_count {
+            panic!("Entities would not fit buffer")
+        }
         let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
         queue.write_buffer(
             &layer.entity_buffer.unwrap(),
@@ -162,6 +165,7 @@ impl Layer2DSystem {
 
     /// Set the vertices and entity data. Use this when adding or removing entities
     pub fn set_entities(layer: &mut Layer2D, entities: Vec<&Entity2D>, device: &wgpu::Device) {
+        layer.entity_count = entities.len() as u32;
         let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
         // possibly extra copying going on here...look into it
         let vertices: Vec<Vertex> = entities.iter().flat_map(|e| *e.vertices()).collect();
@@ -181,12 +185,15 @@ impl Layer2DSystem {
         );
     }
 
-    // Same as set entities, but reuse the buffers, for when the number of entities hasn't changed
-    pub unsafe fn set_entities_fast(
-        layer: &mut Layer2D,
+    // Same as set entities, but reuse the buffers, for when the number of entities hasn't grown
+    pub fn set_entities_fast(
+        layer: &mut Layer2D<Initialised>,
         entities: Vec<&Entity2D>,
         queue: &wgpu::Queue,
     ) {
+        if entities.len() as u32 > layer.entity_count {
+            panic!("Entities would not fit buffer")
+        }
         let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
         // possibly extra copying going on here...look into it
         let vertices: Vec<Vertex> = entities.iter().flat_map(|e| *e.vertices()).collect();
