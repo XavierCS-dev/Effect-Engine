@@ -71,38 +71,32 @@ impl Layer2D {
     pub fn get_texture_mut(&mut self, texture_id: &TextureID) -> Option<&mut Texture2D> {
         self.textures.get_mut(texture_id)
     }
-}
 
-impl Layer for Layer2D {
-    fn bind_group(&self) -> Option<&wgpu::BindGroup> {
+    pub fn bind_group(&self) -> Option<&wgpu::BindGroup> {
         Some(&self.atlas?.bind_group())
     }
 
-    fn texture_ids(&self) -> &HashMap<TextureID, Texture2D> {
+    pub fn texture_ids(&self) -> &HashMap<TextureID, Texture2D> {
         &self.textures
     }
 
-    fn vertex_buffer(&self) -> Option<&wgpu::Buffer> {
+    pub fn vertex_buffer(&self) -> Option<&wgpu::Buffer> {
         self.vertex_buffer.as_ref()
     }
 
-    fn index_buffer(&self) -> &wgpu::Buffer {
+    pub fn index_buffer(&self) -> &wgpu::Buffer {
         &self.index_buffer
     }
 
-    fn entity_buffer(&self) -> Option<&wgpu::Buffer> {
+    pub fn entity_buffer(&self) -> Option<&wgpu::Buffer> {
         self.entity_buffer.as_ref()
     }
 
-    fn index_count(&self) -> usize {
+    pub fn index_count(&self) -> usize {
         (self.entity_count * 6) as usize
     }
 
-    fn id(&self) -> LayerID {
-        self.id
-    }
-
-    fn entity_count(&self) -> u32 {
+    pub fn entity_count(&self) -> u32 {
         self.entity_count
     }
 }
