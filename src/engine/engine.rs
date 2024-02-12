@@ -6,10 +6,7 @@ use wgpu::util::DeviceExt;
 use super::primitives::vector::Vector3;
 use super::{
     primitives::vertex::Vertex,
-    texture::{
-        texture2d::{Texture2D, TextureID},
-        texture_pool::TexturePool2D,
-    },
+    texture::texture2d::{Texture2D, TextureID},
     traits::layer::Layer,
 };
 
@@ -20,6 +17,7 @@ pub struct Engine {
     surface_configuration: wgpu::SurfaceConfiguration,
     window: winit::window::Window,
     render_pipeline: wgpu::RenderPipeline,
+    texture_bgl: wgpu::BindGroupLayout,
 }
 
 /*
@@ -70,10 +68,32 @@ impl Engine {
         let shader_module =
             device.create_shader_module(wgpu::include_wgsl!("../shaders/shader.wgsl"));
 
+        let texture_bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        multisampled: false,
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+            label: Some("Bind group layout"),
+        });
+
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Pipeline layout descriptor"),
-                bind_group_layouts: &[texture_pool.bind_group_layout()],
+                bind_group_layouts: &[&texture_bgl],
                 push_constant_ranges: &[],
             });
 
@@ -119,6 +139,7 @@ impl Engine {
             surface_configuration,
             window,
             render_pipeline,
+            texture_bgl,
         }
     }
 
@@ -195,14 +216,14 @@ impl Engine {
     pub fn init_entity(
         &mut self,
         position: Vector3,
-        texture: &Texture2D,
-        layer: LayerID,
+        texture: TextureID,
+        layer: &mut Layer2D,
     ) -> Entity2D {
         let dimensions = self.window().inner_size();
         Entity2D::new(
             position,
             layer,
-            texture.clone(),
+            texture,
             dimensions.width,
             dimensions.height,
             &self.device,
