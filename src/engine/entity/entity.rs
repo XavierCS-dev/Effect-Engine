@@ -52,7 +52,9 @@ impl Entity2D {
         let vertex_group =
             VertexGroup2D::new(tex.width(), tex.height(), screen_width, screen_height);
         let layer = layer.id();
-        let texture_offset = [tex.width(), tex.height()];
+        let texture_offset = tex
+            .offset()
+            .expect(format!("Texture {} not in layer {}", texture.0, layer.0).as_str());
         Self {
             layer,
             position,
