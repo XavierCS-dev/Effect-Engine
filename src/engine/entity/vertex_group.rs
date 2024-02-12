@@ -7,9 +7,14 @@ pub struct VertexGroup2D {
 }
 
 impl VertexGroup2D {
-    pub fn new(texture: &Texture2D, screen_width: u32, screen_height: u32) -> Self {
-        let width = (texture.width() / screen_width) as f32 * 2.0 - 1.0;
-        let height = (texture.height() / screen_height) as f32 * 2.0 - 1.0;
+    pub fn new(
+        texture_width: u32,
+        texture_height: u32,
+        screen_width: u32,
+        screen_height: u32,
+    ) -> Self {
+        let width = (texture_width / screen_width) as f32 * 2.0 - 1.0;
+        let height = (texture_height / screen_height) as f32 * 2.0 - 1.0;
         let vertices = [
             Vertex {
                 position: [width, 0.0, 0.0],

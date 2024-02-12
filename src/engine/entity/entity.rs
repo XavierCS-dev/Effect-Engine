@@ -2,7 +2,7 @@ use crate::engine::{
     layer::layer::{Layer2D, LayerID},
     primitives::{vector::Vector3, vertex::Vertex},
     texture::{
-        texture2d::Texture2D,
+        texture2d::{Texture2D, TextureID},
         texture_atlas2d::TextureAtlas2D,
         texture_pool::{self, TexturePool2D},
     },
@@ -33,33 +33,39 @@ impl Entity2DRaw {
 pub struct Entity2D {
     layer: LayerID,
     position: Vector3,
-    texture: Texture2D,
+    texture: TextureID,
     vertex_group: VertexGroup2D,
+    texture_offset: [u32; 2],
 }
 
 impl Entity2D {
     pub fn new(
         position: Vector3,
-        layer: LayerID,
-        texture: Texture2D,
+        layer: &Layer2D,
+        texture: TextureID,
         screen_width: u32,
         screen_height: u32,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> Self {
-        let vertex_group = VertexGroup2D::new(&texture, screen_width, screen_height);
+        let tex = layer.get_texture(&texture).unwrap();
+        let vertex_group =
+            VertexGroup2D::new(tex.width(), tex.height(), screen_width, screen_height);
+        let layer = layer.id();
+        let texture_offset = [tex.width(), tex.height()];
         Self {
             layer,
             position,
             texture,
             vertex_group,
+            texture_offset,
         }
     }
 
     // will include "model" with pos and rotation later...
     pub fn to_raw(&self) -> Entity2DRaw {
         let position = [self.position.x, self.position.y, self.position.z];
-        let texture_offset = self.texture.offset().expect("Texture is uninitiliased");
+        let texture_offset = self.texture_offset;
         Entity2DRaw {
             position,
             texture_offset,

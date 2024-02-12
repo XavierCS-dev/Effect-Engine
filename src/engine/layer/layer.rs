@@ -16,9 +16,9 @@ use crate::engine::{
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
 pub struct LayerID(pub u32);
 pub struct Initialised;
-pub struct Unitialised;
+pub struct Uninitialised;
 
-pub struct Layer2D<State = Unitialised> {
+pub struct Layer2D {
     id: LayerID,
     textures: HashMap<TextureID, Texture2D>,
     atlas: Option<TextureAtlas2D>,
@@ -26,7 +26,6 @@ pub struct Layer2D<State = Unitialised> {
     index_buffer: wgpu::Buffer,
     entity_count: u32,
     entity_buffer: Option<wgpu::Buffer>,
-    state: std::marker::PhantomData<State>,
 }
 
 impl Layer2D {
@@ -34,7 +33,6 @@ impl Layer2D {
         let mut textures = HashMap::new();
         let index_buffer = Layer2DSystem::create_index_buffer(device);
         let entity_count = 0;
-        let state = std::marker::PhantomData::default();
         Ok(Self {
             id,
             textures,
@@ -43,7 +41,6 @@ impl Layer2D {
             index_buffer,
             entity_count,
             entity_buffer: None,
-            state,
         })
     }
 
@@ -53,6 +50,26 @@ impl Layer2D {
 
     pub fn contains_texture(&self, texture_id: &TextureID) -> bool {
         self.textures.contains_key(texture_id)
+    }
+
+    /// Add a texture to a layer for entities to use
+    // set offset of all textures when added
+    pub fn add_texture(
+        &mut self,
+        texture: Texture2D,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        bind_group_layout: &wgpu::BindGroupLayout,
+    ) -> Result<()> {
+        todo!()
+    }
+
+    pub fn get_texture(&self, texture_id: &TextureID) -> Option<&Texture2D> {
+        self.textures.get(texture_id)
+    }
+
+    pub fn get_texture_mut(&mut self, texture_id: &TextureID) -> Option<&mut Texture2D> {
+        self.textures.get_mut(texture_id)
     }
 }
 
@@ -83,6 +100,10 @@ impl Layer for Layer2D {
 
     fn id(&self) -> LayerID {
         self.id
+    }
+
+    fn entity_count(&self) -> u32 {
+        self.entity_count
     }
 }
 
@@ -126,33 +147,10 @@ impl Layer2DSystem {
         })
     }
 
-    pub fn add_texture(
-        layer: &mut Layer2D,
-        texture: Texture2D,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-        bind_group_layout: &wgpu::BindGroupLayout,
-    ) -> Result<()> {
-        match layer
-            .atlas
-            .unwrap()
-            .add_texture(texture.clone(), device, queue, bind_group_layout)
-        {
-            Ok(_) => {
-                layer.textures.insert(texture.id().to_owned(), texture);
-                Ok(())
-            }
-            Err(e) => Err(e),
-        }
-    }
-
     /// Update transformation data (not the vertices).
-    pub fn update_entities(
-        layer: &mut Layer2D<Initialised>,
-        entities: Vec<&Entity2D>,
-        queue: &wgpu::Queue,
-    ) {
-        if entities.len() as u32 > layer.entity_count {
+    // Panics of uninitialised
+    pub fn update_entities(layer: &mut Layer2D, entities: Vec<&Entity2D>, queue: &wgpu::Queue) {
+        if entities.len() as u32 > layer.entity_count() {
             panic!("Entities would not fit buffer")
         }
         let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
@@ -186,12 +184,9 @@ impl Layer2DSystem {
     }
 
     // Same as set entities, but reuse the buffers, for when the number of entities hasn't grown
-    pub fn set_entities_fast(
-        layer: &mut Layer2D<Initialised>,
-        entities: Vec<&Entity2D>,
-        queue: &wgpu::Queue,
-    ) {
-        if entities.len() as u32 > layer.entity_count {
+    // Panics if unintialised
+    pub fn set_entities_fast(layer: &mut Layer2D, entities: Vec<&Entity2D>, queue: &wgpu::Queue) {
+        if entities.len() as u32 > layer.entity_count() {
             panic!("Entities would not fit buffer")
         }
         let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();

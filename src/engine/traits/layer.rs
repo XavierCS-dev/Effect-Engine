@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use anyhow::Result;
 
 use crate::engine::{
-    entity::entity::Entity2D,
     layer::layer::LayerID,
     texture::texture2d::{Texture2D, TextureID},
 };
@@ -22,4 +21,6 @@ pub trait Layer {
     fn index_count(&self) -> usize;
 
     fn id(&self) -> LayerID;
+
+    fn entity_count(&self) -> u32;
 }
