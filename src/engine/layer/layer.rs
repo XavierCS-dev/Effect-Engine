@@ -90,7 +90,7 @@ impl Layer2D {
     }
 
     pub fn index_count(&self) -> usize {
-        (self.entity_count * 6) as usize
+        self.entity_count * 6
     }
 
     pub fn entity_count(&self) -> usize {
@@ -103,7 +103,7 @@ pub struct Layer2DSystem;
 impl Layer2DSystem {
     fn create_entity_buffer(entities: &Vec<&Entity2D>, device: &wgpu::Device) -> wgpu::Buffer {
         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Vertex Buffer"),
+            label: Some("Entity Buffer"),
             contents: bytemuck::cast_slice(
                 entities
                     .iter()
@@ -122,7 +122,7 @@ impl Layer2DSystem {
         }
         indices.reserve(std::mem::size_of::<u16>() * entity_count as usize);
         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Vertex Buffer"),
+            label: Some("Index Buffer"),
             contents: bytemuck::cast_slice(indices.as_slice()),
             usage: wgpu::BufferUsages::VERTEX,
         })
