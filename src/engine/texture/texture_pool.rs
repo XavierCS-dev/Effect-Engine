@@ -15,6 +15,8 @@ pub struct TexturePool2D {
     bind_group_layout: wgpu::BindGroupLayout,
 }
 
+// Add functions to remove layer from texture pool
+// Don't add function to remove specific textures, encourage good use of layers
 impl TexturePool2D {
     pub fn new(device: &wgpu::Device) -> Self {
         let layers = BTreeMap::new();

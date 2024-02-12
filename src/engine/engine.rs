@@ -3,6 +3,7 @@ use crate::engine::entity::entity::Entity2DRaw;
 use crate::engine::layer::layer::*;
 use wgpu::util::DeviceExt;
 
+use super::primitives::vector::Vector3;
 use super::{
     primitives::vertex::Vertex,
     texture::{
@@ -196,5 +197,40 @@ impl Engine {
         self.queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();
         Ok(())
+    }
+
+    pub fn device(&self) -> &wgpu::Device {
+        &self.device
+    }
+
+    pub fn queue(&self) -> &wgpu::Queue {
+        &self.queue
+    }
+
+    pub fn window(&self) -> &winit::window::Window {
+        &self.window
+    }
+
+    pub fn texture_pool(&mut self) -> &mut TexturePool2D {
+        &mut self.texture_pool
+    }
+
+    pub fn init_entity(
+        &mut self,
+        position: Vector3,
+        texture: &Texture2D,
+        layer: LayerID,
+    ) -> Entity2D {
+        let dimensions = self.window().inner_size();
+        Entity2D::new(
+            position,
+            &mut self.texture_pool,
+            layer,
+            texture.clone(),
+            dimensions.width,
+            dimensions.height,
+            &self.device,
+            &self.queue,
+        )
     }
 }

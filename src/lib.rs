@@ -1,6 +1,15 @@
 pub mod engine;
 use anyhow::Result;
-use engine::{engine as effect, entity::entity::Entity2D};
+use engine::{
+    engine as effect,
+    entity::entity::Entity2D,
+    layer::layer::LayerID,
+    primitives::vector::Vector3,
+    texture::{
+        texture2d::{Texture2D, TextureID},
+        texture_pool::TexturePool2D,
+    },
+};
 use winit::{
     dpi::PhysicalSize,
     event_loop::{ControlFlow, EventLoop},
@@ -69,6 +78,19 @@ impl EffectSystem {
         entities: Vec<Vec<&Entity2D>>,
     ) -> Result<(), wgpu::SurfaceError> {
         self.engine.render(entities)
+    }
+
+    pub fn init_entity(
+        &mut self,
+        position: Vector3,
+        texture: &Texture2D,
+        layer: LayerID,
+    ) -> Entity2D {
+        self.engine.init_entity(position, texture, layer)
+    }
+
+    pub fn init_texture(&self, id: TextureID, path: &str) -> Texture2D {
+        Texture2D::new(id, path, self.engine.device(), self.engine.queue())
     }
 }
 
