@@ -20,7 +20,6 @@ pub struct Engine {
     surface_configuration: wgpu::SurfaceConfiguration,
     window: winit::window::Window,
     render_pipeline: wgpu::RenderPipeline,
-    texture_pool: TexturePool2D,
 }
 
 /*
@@ -54,7 +53,6 @@ impl Engine {
             .await
             .unwrap();
 
-        let texture_pool = TexturePool2D::new(&device);
         let surface_capabilities = surface.get_capabilities(&adapter);
         // Check this...may need to specifically set it to some sRGB value
         let surface_format = surface_capabilities.formats[0];
@@ -121,7 +119,6 @@ impl Engine {
             surface_configuration,
             window,
             render_pipeline,
-            texture_pool,
         }
     }
 
@@ -147,11 +144,7 @@ impl Engine {
         // if accuracy is a problem, change to floats
     }
 
-    // Must be rendered in order. Maybe be no existent layers inbetween, needs to happen fast.
-    // Vec can be sorted each time entities is appended to with a new entity2d and layerid.
-    // probably a lot faster and space efficient than hashmap
-    // entities managed by APP struct
-    pub fn render(&mut self, entities: Vec<Vec<&Entity2D>>) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self, entities: Vec<&Layer2D>) -> Result<(), wgpu::SurfaceError> {
         let surface_texture = self.surface.get_current_texture()?;
         let texture_view = surface_texture
             .texture
@@ -181,18 +174,6 @@ impl Engine {
             occlusion_query_set: None,
         });
 
-        for (layer_id, layer) in self.texture_pool.get_layers() {
-            render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.set_bind_group(
-                0,
-                self.texture_pool.get_layer(layer_id).unwrap().bind_group(),
-                &[],
-            );
-            render_pass.set_vertex_buffer(0, layer.vertex_buffer().unwrap().slice(..));
-            render_pass.set_index_buffer(layer.index_buffer().slice(..), wgpu::IndexFormat::Uint32);
-            render_pass.draw_indexed(0..layer.index_count() as u32, 0, 0..1);
-        }
-
         drop(render_pass);
         self.queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();
@@ -211,10 +192,6 @@ impl Engine {
         &self.window
     }
 
-    pub fn texture_pool(&mut self) -> &mut TexturePool2D {
-        &mut self.texture_pool
-    }
-
     pub fn init_entity(
         &mut self,
         position: Vector3,
@@ -224,7 +201,6 @@ impl Engine {
         let dimensions = self.window().inner_size();
         Entity2D::new(
             position,
-            &mut self.texture_pool,
             layer,
             texture.clone(),
             dimensions.width,

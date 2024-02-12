@@ -4,7 +4,8 @@ use std::collections::HashMap;
 use wgpu::util::DeviceExt;
 
 use crate::engine::{
-    entity::entity::Entity2D,
+    entity::entity::{Entity2D, Entity2DRaw},
+    primitives::vertex::Vertex,
     texture::{
         texture2d::{Texture2D, TextureID},
         texture_atlas2d::TextureAtlas2D,
@@ -14,101 +15,36 @@ use crate::engine::{
 
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
 pub struct LayerID(pub u32);
+pub struct Initialised;
+pub struct Unitialised;
 
-pub struct Layer2D {
+pub struct Layer2D<State = Unitialised> {
     id: LayerID,
     textures: HashMap<TextureID, Texture2D>,
-    atlas: TextureAtlas2D,
+    atlas: Option<TextureAtlas2D>,
     vertex_buffer: Option<wgpu::Buffer>,
     index_buffer: wgpu::Buffer,
+    entity_count: u32,
     entity_buffer: Option<wgpu::Buffer>,
-    entity_count: usize,
-    indices: usize,
+    state: std::marker::PhantomData<State>,
 }
 
 impl Layer2D {
-    pub fn new(
-        id: LayerID,
-        texture: Texture2D,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-        bind_group_layout: &wgpu::BindGroupLayout,
-    ) -> Result<Self> {
+    pub fn new(id: LayerID, texture: Texture2D, device: &wgpu::Device) -> Result<Self> {
         let mut textures = HashMap::new();
-        let atlas = TextureAtlas2D::new(texture.clone(), device, queue, bind_group_layout);
-        textures.insert(texture.id().clone(), texture);
+        let index_buffer = Layer2DSystem::create_index_buffer(device);
         let entity_count = 0;
-        let index_buffer = Layer2D::create_index_buffer(device);
+        let state = std::marker::PhantomData::default();
         Ok(Self {
             id,
             textures,
-            atlas,
+            atlas: None,
             vertex_buffer: None,
             index_buffer,
-            entity_buffer: None,
             entity_count,
-            indices: 0,
+            entity_buffer: None,
+            state,
         })
-    }
-
-    fn create_entity_buffer(&mut self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
-        self.entity_buffer = Some(
-            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Vertex Buffer"),
-                contents: bytemuck::cast_slice(
-                    entities
-                        .iter()
-                        .map(|e| e.to_raw())
-                        .collect::<Vec<_>>()
-                        .as_slice(),
-                ),
-                usage: wgpu::BufferUsages::VERTEX,
-            }),
-        );
-    }
-
-    fn create_index_buffer(device: &wgpu::Device) -> wgpu::Buffer {
-        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Vertex Buffer"),
-            contents: bytemuck::cast_slice(&([0, 1, 2, 0, 2, 3] as [u16; 6])),
-            usage: wgpu::BufferUsages::VERTEX,
-        })
-    }
-
-    fn create_vertex_buffer(&mut self, entities: &Vec<&Entity2D>, device: &wgpu::Device) {
-        self.vertex_buffer = Some(
-            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Vertex Buffer"),
-                contents: bytemuck::cast_slice(
-                    entities
-                        .iter()
-                        .flat_map(|e| e.vertices())
-                        .copied()
-                        .collect::<Vec<_>>()
-                        .as_slice(),
-                ),
-                usage: wgpu::BufferUsages::VERTEX,
-            }),
-        );
-    }
-
-    pub fn add_texture(
-        &mut self,
-        texture: Texture2D,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-        bind_group_layout: &wgpu::BindGroupLayout,
-    ) -> Result<()> {
-        match self
-            .atlas
-            .add_texture(texture.clone(), device, queue, bind_group_layout)
-        {
-            Ok(_) => {
-                self.textures.insert(texture.id().to_owned(), texture);
-                Ok(())
-            }
-            Err(e) => Err(e),
-        }
     }
 
     pub fn id(&self) -> LayerID {
@@ -121,8 +57,8 @@ impl Layer2D {
 }
 
 impl Layer for Layer2D {
-    fn bind_group(&self) -> &wgpu::BindGroup {
-        self.atlas.bind_group()
+    fn bind_group(&self) -> Option<&wgpu::BindGroup> {
+        Some(&self.atlas?.bind_group())
     }
 
     fn texture_ids(&self) -> &HashMap<TextureID, Texture2D> {
@@ -142,79 +78,127 @@ impl Layer for Layer2D {
     }
 
     fn index_count(&self) -> usize {
-        self.indices
-    }
-
-    fn set_vertex_buffers(
-        &mut self,
-        entities: &Vec<&Entity2D>,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) -> Result<()> {
-        match self.vertex_buffer() {
-            Some(v_buf) => {
-                if entities.len() > self.entity_count {
-                    self.create_vertex_buffer(entities, device)
-                } else {
-                    queue.write_buffer(
-                        self.vertex_buffer.as_ref().unwrap(),
-                        0,
-                        bytemuck::cast_slice(
-                            entities
-                                .iter()
-                                .flat_map(|e| e.vertices())
-                                .copied()
-                                .collect::<Vec<_>>()
-                                .as_slice(),
-                        ),
-                    )
-                }
-            }
-            None => {
-                self.create_vertex_buffer(entities, device);
-            }
-        };
-        // if the vertices have changed, the entities probably have to
-        // Given this is a 2D engine tho, everything should be a quad...
-        // meaning, it is pretty much guaranteed new entities were created
-        self.set_entity_buffer(entities, device, queue, entities.len() > self.entity_count)?;
-        self.entity_count = entities.len();
-        Ok(())
-    }
-
-    fn set_entity_buffer(
-        &mut self,
-        entities: &Vec<&Entity2D>,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-        recreate_buffer: bool,
-    ) -> Result<()> {
-        match self.entity_buffer() {
-            Some(e_buf) => {
-                if recreate_buffer {
-                    self.create_entity_buffer(entities, device);
-                } else {
-                    queue.write_buffer(
-                        self.entity_buffer.as_ref().unwrap(),
-                        0,
-                        bytemuck::cast_slice(
-                            entities
-                                .iter()
-                                .map(|e| e.to_raw())
-                                .collect::<Vec<_>>()
-                                .as_slice(),
-                        ),
-                    )
-                }
-            }
-            None => {
-                self.create_entity_buffer(entities, device);
-            }
-        }
-        Ok(())
+        (self.entity_count * 6) as usize
     }
 
     fn id(&self) -> LayerID {
         self.id
+    }
+}
+
+pub struct Layer2DSystem;
+
+impl Layer2DSystem {
+    fn create_entity_buffer(entities: &Vec<&Entity2D>, device: &wgpu::Device) -> wgpu::Buffer {
+        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Vertex Buffer"),
+            contents: bytemuck::cast_slice(
+                entities
+                    .iter()
+                    .map(|e| e.to_raw())
+                    .collect::<Vec<_>>()
+                    .as_slice(),
+            ),
+            usage: wgpu::BufferUsages::VERTEX,
+        })
+    }
+
+    fn create_index_buffer(device: &wgpu::Device) -> wgpu::Buffer {
+        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Vertex Buffer"),
+            contents: bytemuck::cast_slice(&([0, 1, 2, 0, 2, 3] as [u16; 6])),
+            usage: wgpu::BufferUsages::VERTEX,
+        })
+    }
+
+    fn create_vertex_buffer(entities: &Vec<&Entity2D>, device: &wgpu::Device) -> wgpu::Buffer {
+        device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Vertex Buffer"),
+            contents: bytemuck::cast_slice(
+                entities
+                    .iter()
+                    .flat_map(|e| e.vertices())
+                    .copied()
+                    .collect::<Vec<_>>()
+                    .as_slice(),
+            ),
+            usage: wgpu::BufferUsages::VERTEX,
+        })
+    }
+
+    pub fn add_texture(
+        layer: &mut Layer2D,
+        texture: Texture2D,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        bind_group_layout: &wgpu::BindGroupLayout,
+    ) -> Result<()> {
+        match layer
+            .atlas
+            .unwrap()
+            .add_texture(texture.clone(), device, queue, bind_group_layout)
+        {
+            Ok(_) => {
+                layer.textures.insert(texture.id().to_owned(), texture);
+                Ok(())
+            }
+            Err(e) => Err(e),
+        }
+    }
+
+    /// Update transformation data (not the vertices).
+    pub unsafe fn update_entities(
+        layer: &mut Layer2D<Initialised>,
+        entities: Vec<&Entity2D>,
+        queue: &wgpu::Queue,
+    ) {
+        let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
+        queue.write_buffer(
+            &layer.entity_buffer.unwrap(),
+            0,
+            bytemuck::cast_slice(&data),
+        );
+    }
+
+    /// Set the vertices and entity data. Use this when adding or removing entities
+    pub fn set_entities(layer: &mut Layer2D, entities: Vec<&Entity2D>, device: &wgpu::Device) {
+        let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
+        // possibly extra copying going on here...look into it
+        let vertices: Vec<Vertex> = entities.iter().flat_map(|e| *e.vertices()).collect();
+        layer.entity_buffer = Some(
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Entity Buffer"),
+                contents: bytemuck::cast_slice(&data),
+                usage: wgpu::BufferUsages::VERTEX,
+            }),
+        );
+        layer.vertex_buffer = Some(
+            device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: bytemuck::cast_slice(&vertices),
+                usage: wgpu::BufferUsages::VERTEX,
+            }),
+        );
+    }
+
+    // Same as set entities, but reuse the buffers, for when the number of entities hasn't changed
+    pub unsafe fn set_entities_fast(
+        layer: &mut Layer2D,
+        entities: Vec<&Entity2D>,
+        queue: &wgpu::Queue,
+    ) {
+        let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
+        // possibly extra copying going on here...look into it
+        let vertices: Vec<Vertex> = entities.iter().flat_map(|e| *e.vertices()).collect();
+        queue.write_buffer(
+            &layer.entity_buffer.unwrap(),
+            0,
+            bytemuck::cast_slice(&data),
+        );
+        queue.write_buffer(
+            &layer.vertex_buffer.unwrap(),
+            0,
+            bytemuck::cast_slice(&vertices),
+        );
     }
 }

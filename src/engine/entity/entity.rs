@@ -40,7 +40,6 @@ pub struct Entity2D {
 impl Entity2D {
     pub fn new(
         position: Vector3,
-        texture_pool: &mut TexturePool2D,
         layer: LayerID,
         texture: Texture2D,
         screen_width: u32,
@@ -49,13 +48,6 @@ impl Entity2D {
         queue: &wgpu::Queue,
     ) -> Self {
         let vertex_group = VertexGroup2D::new(&texture, screen_width, screen_height);
-        if !texture_pool.contains_texture(&layer, texture.id()) {
-            // user may want same texture for entities on different layers,
-            // contains texture checks for a specific texture on a specific layer
-            texture_pool
-                .add_texture(layer, texture.clone(), device, queue)
-                .unwrap();
-        }
         Self {
             layer,
             position,
