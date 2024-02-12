@@ -14,8 +14,6 @@ use crate::engine::{
 
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
 pub struct LayerID(pub u32);
-pub struct Initialised;
-pub struct Uninitialised;
 
 pub struct Layer2D {
     id: LayerID,
@@ -185,12 +183,12 @@ impl Layer2DSystem {
         queue.write_buffer(
             &layer.entity_buffer.unwrap(),
             0,
-            bytemuck::cast_slice(&data),
+            bytemuck::cast_slice(data.as_slice()),
         );
         queue.write_buffer(
             &layer.vertex_buffer.unwrap(),
             0,
-            bytemuck::cast_slice(&vertices),
+            bytemuck::cast_slice(vertices.as_slice()),
         );
     }
 }
