@@ -77,6 +77,8 @@ impl Layer2D {
         &self.textures
     }
 
+    // if using the 2x technique, its probably better to return the exact slide where the data is
+    // instead of the whole buffer, same for the other buffers
     pub fn vertex_buffer(&self) -> Option<&wgpu::Buffer> {
         self.vertex_buffer.as_ref()
     }
