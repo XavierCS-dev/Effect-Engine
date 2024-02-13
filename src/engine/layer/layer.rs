@@ -124,7 +124,7 @@ impl Layer2DSystem {
         device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
             contents: bytemuck::cast_slice(indices.as_slice()),
-            usage: wgpu::BufferUsages::VERTEX,
+            usage: wgpu::BufferUsages::INDEX,
         })
     }
 
@@ -159,9 +159,9 @@ impl Layer2DSystem {
 
     /// Set the vertices and entity data. Use this when adding or removing entities
     pub fn set_entities(layer: &mut Layer2D, entities: Vec<&Entity2D>, device: &wgpu::Device) {
+        // allocating exactly amount needed each time may increase the number of allocations needed..
+        // perhaps a strategy of allocatin 2X needed data would be better
         layer.entity_count = entities.len();
-        // possibly extra copying going on here...look into it
-        let vertices: Vec<Vertex> = entities.iter().flat_map(|e| *e.vertices()).collect();
         layer.entity_buffer = Some(Layer2DSystem::create_entity_buffer(&entities, device));
         layer.vertex_buffer = Some(Layer2DSystem::create_vertex_buffer(&entities, device));
         layer.index_buffer = Some(Layer2DSystem::create_index_buffer(
