@@ -18,8 +18,8 @@ pub struct LayerID(pub u32);
 
 pub struct Layer2D {
     id: LayerID,
-    textures: HashMap<TextureID, Texture2D>,
-    atlas: Option<TextureAtlas2D>,
+    textures: HashMap<TextureID, ()>,
+    atlas: TextureAtlas2D,
     vertex_buffer: Option<wgpu::Buffer>,
     index_buffer: Option<wgpu::Buffer>,
     entity_count: usize,
@@ -31,10 +31,11 @@ impl Layer2D {
         let mut textures = HashMap::new();
         let index_buffer = None;
         let entity_count = 0;
+        let atlas = todo!();
         Ok(Self {
             id,
             textures,
-            atlas: None,
+            atlas,
             vertex_buffer: None,
             index_buffer,
             entity_count,
@@ -50,47 +51,11 @@ impl Layer2D {
         self.textures.contains_key(texture_id)
     }
 
-    /// Add a texture to a layer for entities to use
-    // set offset of all textures when added
-    pub fn add_texture(
-        &mut self,
-        texture: Texture2D,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-        bind_group_layout: &wgpu::BindGroupLayout,
-    ) -> Result<()> {
-        if self.textures.contains_key(texture.id()) {
-            bail!(EffectError::new(
-                format!("TextureID {:?} already in layer", texture.id()).as_str()
-            ))
-        }
-        match self.atlas {
-            Some(atlas) => {
-                atlas.add_texture(texture.clone(), device, queue, bind_group_layout)?;
-            }
-            None => {
-                let mut atlas =
-                    TextureAtlas2D::new(texture.clone(), device, queue, bind_group_layout);
-                self.atlas = Some(atlas);
-            }
-        }
-        self.textures.insert(*texture.id(), texture);
-        Ok(())
+    pub fn bind_group(&self) -> &wgpu::BindGroup {
+        &self.atlas.bind_group()
     }
 
-    pub fn get_texture(&self, texture_id: &TextureID) -> Option<&Texture2D> {
-        self.textures.get(texture_id)
-    }
-
-    pub fn get_texture_mut(&mut self, texture_id: &TextureID) -> Option<&mut Texture2D> {
-        self.textures.get_mut(texture_id)
-    }
-
-    pub fn bind_group(&self) -> Option<&wgpu::BindGroup> {
-        Some(&self.atlas?.bind_group())
-    }
-
-    pub fn texture_ids(&self) -> &HashMap<TextureID, Texture2D> {
+    pub fn texture_ids(&self) -> &HashMap<TextureID, ()> {
         &self.textures
     }
 
