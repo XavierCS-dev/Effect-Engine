@@ -19,6 +19,7 @@ pub struct TextureAtlas2D {
 
 impl TextureAtlas2D {
     // SWITCH TO CREATION OF ATLAS THEN CAN'T BE MODIFIED
+    // remember 8196 limits
     pub fn new(
         textures: Vec<&mut Texture2D>,
         device: &wgpu::Device,

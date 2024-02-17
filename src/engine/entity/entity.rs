@@ -1,3 +1,5 @@
+use anyhow::Result;
+
 use crate::engine::{
     layer::layer::{Layer2D, LayerID},
     primitives::{vector::Vector3, vertex::Vertex},
@@ -33,16 +35,15 @@ impl Entity2DRaw {
 pub struct Entity2D {
     layer: LayerID,
     position: Vector3,
-    texture: TextureID,
+    texture: Texture2D,
     vertex_group: VertexGroup2D,
-    texture_offset: [u32; 2],
 }
 
 impl Entity2D {
     pub fn new(
         position: Vector3,
         layer: &Layer2D,
-        texture: TextureID,
+        texture: Texture2D,
         screen_width: u32,
         screen_height: u32,
         device: &wgpu::Device,
@@ -84,5 +85,17 @@ impl Entity2D {
 
     pub fn vertices(&self) -> &[Vertex; 4] {
         self.vertex_group.vertices()
+    }
+}
+
+struct EntitySystem2D;
+
+impl EntitySystem2D {
+    pub fn set_texture(entity: &mut Entity2D, texture: &mut Texture2D) -> Result<()> {
+        // Check if texture has an offset (should if in a layer)
+        // Check if texture layer is the same as Entity2D
+        // Set texture data in entity2d
+        std::mem::swap(&mut entity.texture, texture);
+        todo!()
     }
 }
