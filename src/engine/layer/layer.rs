@@ -18,7 +18,7 @@ pub struct LayerID(pub u32);
 
 pub struct Layer2D {
     id: LayerID,
-    textures: HashMap<TextureID, ()>,
+    textures: HashMap<TextureID, Texture2D>,
     atlas: TextureAtlas2D,
     vertex_buffer: Option<wgpu::Buffer>,
     index_buffer: Option<wgpu::Buffer>,
