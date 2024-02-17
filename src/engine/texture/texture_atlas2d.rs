@@ -19,8 +19,9 @@ pub struct TextureAtlas2D {
 }
 
 impl TextureAtlas2D {
+    // SWITCH TO CREATION OF ATLAS THEN CAN'T BE MODIFIED
     pub fn new(
-        mut texture: Texture2D,
+        textures: Vec<&mut Texture2D>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
@@ -140,33 +141,6 @@ impl TextureAtlas2D {
         self.bind_group = bind_group;
         self.textures.push(texture);
         Ok(())
-    }
-
-    pub fn add_textures(
-        &mut self,
-        textures: Vec<Texture2D>,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) -> Result<()> {
-        todo!()
-    }
-
-    pub fn remove_texture(
-        &mut self,
-        texure_id: TextureID,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) -> Result<()> {
-        todo!()
-    }
-
-    pub fn remove_textures(
-        &mut self,
-        texture_ids: Vec<TextureID>,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) -> Result<()> {
-        todo!()
     }
 
     pub fn bind_group(&self) -> &wgpu::BindGroup {

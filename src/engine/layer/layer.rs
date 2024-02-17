@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use std::collections::HashMap;
 
 use wgpu::util::DeviceExt;
@@ -10,6 +10,7 @@ use crate::engine::{
         texture2d::{Texture2D, TextureID},
         texture_atlas2d::TextureAtlas2D,
     },
+    util::effect_error::EffectError,
 };
 
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
@@ -58,7 +59,23 @@ impl Layer2D {
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<()> {
-        todo!()
+        if self.textures.contains_key(texture.id()) {
+            bail!(EffectError::new(
+                format!("TextureID {:?} already in layer", texture.id()).as_str()
+            ))
+        }
+        match self.atlas {
+            Some(atlas) => {
+                atlas.add_texture(texture.clone(), device, queue, bind_group_layout)?;
+            }
+            None => {
+                let mut atlas =
+                    TextureAtlas2D::new(texture.clone(), device, queue, bind_group_layout);
+                self.atlas = Some(atlas);
+            }
+        }
+        self.textures.insert(*texture.id(), texture);
+        Ok(())
     }
 
     pub fn get_texture(&self, texture_id: &TextureID) -> Option<&Texture2D> {
@@ -79,8 +96,12 @@ impl Layer2D {
 
     // if using the 2x technique, its probably better to return the exact slide where the data is
     // instead of the whole buffer, same for the other buffers
-    pub fn vertex_buffer(&self) -> Option<&wgpu::Buffer> {
-        self.vertex_buffer.as_ref()
+    pub fn vertex_buffer(&self) -> Option<&wgpu::BufferSlice> {
+        match self.vertex_buffer {
+            Some(v_buf) => Some(&v_buf.slice(..)),
+            None => None,
+        };
+        todo!() // create variables for storing maximum buffer size and current buffer size
     }
 
     pub fn index_buffer(&self) -> Option<&wgpu::Buffer> {
