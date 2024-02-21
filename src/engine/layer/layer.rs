@@ -16,6 +16,8 @@ use crate::engine::{
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
 pub struct LayerID(pub u32);
 
+// Takes final ownership of textures, the data etc.
+// When a entity wants to get the texture offset, it must get the data from here.
 pub struct Layer2D {
     id: LayerID,
     textures: HashMap<TextureID, Texture2D>,

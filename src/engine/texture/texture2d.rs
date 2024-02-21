@@ -19,44 +19,29 @@ impl TextureID {
 #[derive(Clone)]
 pub struct Texture2D {
     id: TextureID,
-    path: String,
-    bind_group_id: Option<BindGroupID>,
+    path: &'static str,
     width: u32,
     height: u32,
     offset: Option<[u32; 2]>,
 }
 
 impl Texture2D {
-    pub fn new(id: TextureID, filepath: &str, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
-        let bind_group_id = None;
-        let mut file_byes: Vec<u8> = Vec::new();
-        let mut file = fs::File::open(filepath).expect("Could not find file {filepath}");
-        file.read_to_end(&mut file_byes).unwrap();
-        let diffuse = image::load_from_memory(file_byes.as_slice()).unwrap();
-        let diffuse_rgb = diffuse.to_rgba8();
-        let dimensions = diffuse.dimensions();
-
-        let texure_extent = wgpu::Extent3d {
-            width: dimensions.0,
-            height: dimensions.1,
-            depth_or_array_layers: 1,
-        };
+    pub fn new(id: TextureID, path: &str, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
         // havig one bind group per texure isn't very performant.
         // It may be better to have one bind group per zone of loaded textures,
         // each bind group having all the textures it needs for a zone,
         // then swap out the bind group for new zones.
         Self {
             id,
-            path: filepath.to_string(),
-            bind_group_id,
-            width: dimensions.0,
-            height: dimensions.1,
+            path,
+            width: 0,
+            height: 0,
             offset: None,
         }
     }
 
-    pub fn file_path(&self) -> &String {
-        &self.path
+    pub fn file_path(&self) -> &str {
+        self.path
     }
 
     pub fn init_texture(
@@ -131,10 +116,6 @@ impl Texture2D {
         &self.id
     }
 
-    pub fn path(&self) -> &str {
-        self.path.as_str()
-    }
-
     pub fn offset(&self) -> Option<[u32; 2]> {
         self.offset
     }
@@ -143,12 +124,9 @@ impl Texture2D {
         self.offset = Some([x, y]);
     }
 
-    pub fn bind_group_id(&self) -> Option<BindGroupID> {
-        self.bind_group_id
-    }
-
-    pub fn set_bind_group_id(&mut self, id: BindGroupID) {
-        self.bind_group_id = Some(id);
+    pub fn set_dimensions(&mut self, width: u32, height: u32) {
+        self.width = width;
+        self.height = height;
     }
 
     pub fn width(&self) -> u32 {
