@@ -4,19 +4,12 @@ use image::Rgba;
 use std::fs;
 use std::io::prelude::*;
 
-use super::texture_pool::BindGroupID;
-
-#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Debug)]
-pub struct TextureID(pub String);
-
-impl TextureID {
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
-    }
-}
+#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Debug, Copy)]
+pub struct TextureID(pub &'static str);
 
 // add tex coords here, make bind group mandatory.
-#[derive(Clone)]
+// Don't want to copy, as we want to make it clear it is something to be modified
+#[derive(Clone, Debug)]
 pub struct Texture2D {
     id: TextureID,
     path: &'static str,
@@ -42,6 +35,34 @@ impl Texture2D {
 
     pub fn file_path(&self) -> &str {
         self.path
+    }
+
+    pub fn id(&self) -> &TextureID {
+        &self.id
+    }
+
+    pub fn offset(&self) -> Option<[u32; 2]> {
+        self.offset
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+}
+
+struct Texture2DSystem;
+impl Texture2DSystem {
+    pub fn set_offset(texture: &mut Texture2D, x: u32, y: u32) {
+        texture.offset = Some([x, y]);
+    }
+
+    pub fn set_dimensions(texture: &mut Texture2D, width: u32, height: u32) {
+        texture.width = width;
+        texture.height = height;
     }
 
     pub fn init_texture(
@@ -110,30 +131,5 @@ impl Texture2D {
         });
 
         (bind_group, texture, view, sampler)
-    }
-
-    pub fn id(&self) -> &TextureID {
-        &self.id
-    }
-
-    pub fn offset(&self) -> Option<[u32; 2]> {
-        self.offset
-    }
-
-    pub fn set_offset(&mut self, x: u32, y: u32) {
-        self.offset = Some([x, y]);
-    }
-
-    pub fn set_dimensions(&mut self, width: u32, height: u32) {
-        self.width = width;
-        self.height = height;
-    }
-
-    pub fn width(&self) -> u32 {
-        self.width
-    }
-
-    pub fn height(&self) -> u32 {
-        self.height
     }
 }
