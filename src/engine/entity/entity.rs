@@ -6,8 +6,8 @@ use crate::engine::{
     texture::{
         texture2d::{Texture2D, TextureID},
         texture_atlas2d::TextureAtlas2D,
-        texture_pool::{self, TexturePool2D},
     },
+    util::effect_error::EffectError,
 };
 
 use super::vertex_group::VertexGroup2D;
@@ -37,6 +37,7 @@ pub struct Entity2D {
     position: Vector3,
     texture: TextureID,
     vertex_group: VertexGroup2D,
+    texture_offset: [u32; 2],
 }
 
 impl Entity2D {
@@ -49,13 +50,11 @@ impl Entity2D {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> Self {
-        let tex = layer.get_texture(&texture).unwrap();
+        let tex = layer.get_texture(texture).unwrap();
         let vertex_group =
             VertexGroup2D::new(tex.width(), tex.height(), screen_width, screen_height);
         let layer = layer.id();
-        let texture_offset = tex
-            .offset()
-            .expect(format!("Texture {} not in layer {}", texture.0, layer.0).as_str());
+        let texture_offset = tex.offset().unwrap();
         Self {
             layer,
             position,
@@ -68,10 +67,9 @@ impl Entity2D {
     // will include "model" with pos and rotation later...
     pub fn to_raw(&self) -> Entity2DRaw {
         let position = [self.position.x, self.position.y, self.position.z];
-        let texture_offset = self.texture_offset;
         Entity2DRaw {
             position,
-            texture_offset,
+            texture_offset: self.texture_offset,
         }
     }
 
@@ -91,8 +89,15 @@ impl Entity2D {
 struct EntitySystem2D;
 
 impl EntitySystem2D {
-    pub fn set_texture(entity: &mut Entity2D, texture: &Texture2D) -> Result<()> {
+    pub fn set_texture(entity: &mut Entity2D, texture: TextureID, layer: &Layer2D) -> Result<()> {
         // find texture in layer, return the ID and set here, otherwise error
-        todo!()
+        let tex = layer
+            .get_texture(texture)
+            .ok_or(EffectError::new("Texture is not in given layer"))?;
+        entity.texture_offset = tex.offset().unwrap();
+        entity.vertex_group =
+            VertexGroup2D::new(tex.height(), tex.width(), layer.width(), layer.height());
+        entity.texture = texture;
+        Ok(())
     }
 }

@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use std::collections::HashMap;
+use std::collections::{hash_map::Keys, HashMap};
 
 use wgpu::util::DeviceExt;
 
@@ -57,8 +57,8 @@ impl Layer2D {
         &self.atlas.bind_group()
     }
 
-    pub fn texture_ids(&self) -> &HashMap<TextureID, ()> {
-        &self.textures
+    pub fn texture_ids<'a>(&'a self) -> Keys<'a, TextureID, Texture2D> {
+        self.textures.keys()
     }
 
     // if using the 2x technique, its probably better to return the exact slide where the data is
@@ -85,6 +85,10 @@ impl Layer2D {
 
     pub fn entity_count(&self) -> usize {
         self.entity_count
+    }
+
+    pub fn get_texture(&self, id: TextureID) -> Option<&Texture2D> {
+        self.textures.get(&id)
     }
 }
 
