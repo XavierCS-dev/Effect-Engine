@@ -136,7 +136,7 @@ impl Layer2DSystem {
 
     // alloc buffer to 2x the size and set new max entity count
     fn create_entity_buffer(
-        entities: &Vec<&Entity2D>,
+        entities: &[&Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
@@ -167,7 +167,7 @@ impl Layer2DSystem {
     }
 
     fn create_vertex_buffer(
-        entities: &Vec<&Entity2D>,
+        entities: &[&Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
@@ -185,7 +185,7 @@ impl Layer2DSystem {
 
     /// Update transformation data (not the vertices).
     // Panics if the number of entities changed
-    pub fn update_entities(layer: &mut Layer2D, entities: Vec<&Entity2D>, queue: &wgpu::Queue) {
+    pub fn update_entities(layer: &mut Layer2D, entities: &[&Entity2D], queue: &wgpu::Queue) {
         if entities.len() != layer.entity_count() {
             panic!("Entities would not fit buffer")
         }
@@ -200,14 +200,16 @@ impl Layer2DSystem {
     /// Set the vertices and entity data. Use this when adding or removing entities
     pub fn set_entities(
         layer: &mut Layer2D,
-        entities: Vec<&Entity2D>,
+        entities: &[&Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) {
         // allocating exactly amount needed each time may increase the number of allocations needed..
         // perhaps a strategy of allocatin 2X needed data would be better
         layer.entity_count = entities.len();
-        if layer.entity_count() > layer.entity_maximum() {
+
+        if layer.entity_count() > layer.entity_maximum() || layer.vertex_buffer().is_none() {
+            // Allocate new buffers
             layer.entity_buffer = Some(Layer2DSystem::create_entity_buffer(
                 &entities, device, queue,
             ));
@@ -221,6 +223,7 @@ impl Layer2DSystem {
             ));
             layer.entity_maximum = layer.entity_count * 2;
         } else {
+            // Reuse buffers
             let entity_data: &[u8] = bytemuck::cast_slice(
                 entities
                     .iter()
