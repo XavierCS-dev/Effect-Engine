@@ -30,6 +30,12 @@ impl Entity2DRaw {
             attributes: &Self::ATTRIBUTE_ARRAY,
         }
     }
+
+    // This will likely change, having a central place for this makes things way easier
+    pub fn size() -> usize {
+        use std::mem;
+        mem::size_of::<[f32; 3]>() + mem::size_of::<[u32; 2]>()
+    }
 }
 
 pub struct Entity2D {
