@@ -53,8 +53,6 @@ impl Entity2D {
         texture: TextureID,
         screen_width: u32,
         screen_height: u32,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
     ) -> Self {
         let tex = layer.get_texture(texture).unwrap();
         let vertex_group =

@@ -3,12 +3,9 @@ use anyhow::Result;
 use engine::{
     engine as effect,
     entity::entity::Entity2D,
-    layer::layer::LayerID,
+    layer::layer::{Layer2D, LayerID},
     primitives::vector::Vector3,
-    texture::{
-        texture2d::{Texture2D, TextureID},
-        texture_pool::TexturePool2D,
-    },
+    texture::texture2d::{Texture2D, TextureID},
 };
 use winit::{
     dpi::PhysicalSize,
@@ -68,28 +65,26 @@ impl EffectSystem {
                 EffectSystem::y_sort(layer);
             }
         }
-        self.engine.render(sorted_ents).unwrap();
+        // self.engine.render(sorted_ents).unwrap();
     }
 
     /// Take a pre-sorted nested Vecs and render it as is.
     // The inner Vec is a singular layer.  May result in unexpexted behaviour if incorrectly sorted.
-    pub unsafe fn render(
-        &mut self,
-        entities: Vec<Vec<&Entity2D>>,
-    ) -> Result<(), wgpu::SurfaceError> {
-        self.engine.render(entities)
+    pub unsafe fn render(&mut self, entities: Vec<Vec<&Entity2D>>) -> Result<()> {
+        // self.engine.render(entities)
+        todo!()
     }
 
     pub fn init_entity(
         &mut self,
         position: Vector3,
         texture: &Texture2D,
-        layer: LayerID,
+        layer: &mut Layer2D,
     ) -> Entity2D {
-        self.engine.init_entity(position, texture, layer)
+        self.engine.init_entity(position, *texture.id(), layer)
     }
 
-    pub fn init_texture(&self, id: TextureID, path: &str) -> Texture2D {
+    pub fn init_texture(&self, id: TextureID, path: &'static str) -> Texture2D {
         Texture2D::new(id, path, self.engine.device(), self.engine.queue())
     }
 }

@@ -30,11 +30,12 @@ pub struct Layer2D {
     entity_count: usize,
     entity_maximum: usize,
     entity_buffer: Option<wgpu::Buffer>,
+    dimensions: winit::dpi::PhysicalSize<u32>,
 }
 
 impl Layer2D {
-    pub fn new(id: LayerID) -> Result<Self> {
-        let mut textures = HashMap::new();
+    pub fn new(id: LayerID, dimensions: winit::dpi::PhysicalSize<u32>) -> Result<Self> {
+        let textures = HashMap::new();
         let index_buffer = None;
         let entity_count = 0;
         let entity_maximum = 0;
@@ -48,6 +49,7 @@ impl Layer2D {
             entity_count,
             entity_buffer: None,
             entity_maximum,
+            dimensions,
         })
     }
 
@@ -66,32 +68,32 @@ impl Layer2D {
     // if using the 2x technique, its probably better to return the exact slice where the data is
     // instead of the whole buffer, same for the other buffers
     // 4 is the number of vertices per entity
-    pub fn vertex_buffer(&self) -> Option<&wgpu::BufferSlice> {
-        match self.vertex_buffer {
+    pub fn vertex_buffer(&self) -> Option<wgpu::BufferSlice> {
+        match self.vertex_buffer.as_ref() {
             Some(v_buf) => {
                 let length = self.entity_count * std::mem::size_of::<[f32; 3]>() * 4;
-                Some(&v_buf.slice(0..length as u64))
+                Some(v_buf.slice(0..length as u64))
             }
             None => None,
         }
     }
 
     // 6 is the number of indicies per entity.
-    pub fn index_buffer(&self) -> Option<&wgpu::BufferSlice> {
-        match self.index_buffer {
+    pub fn index_buffer(&self) -> Option<wgpu::BufferSlice> {
+        match self.index_buffer.as_ref() {
             Some(i_buf) => {
                 let length = self.entity_count * std::mem::size_of::<u16>() * 6;
-                Some(&i_buf.slice(0..length as u64))
+                Some(i_buf.slice(0..length as u64))
             }
             None => None,
         }
     }
 
-    pub fn entity_buffer(&self) -> Option<&wgpu::BufferSlice> {
-        match self.entity_buffer {
+    pub fn entity_buffer(&self) -> Option<wgpu::BufferSlice> {
+        match self.entity_buffer.as_ref() {
             Some(e_buf) => {
                 let length = self.entity_count * Entity2DRaw::size();
-                Some(&e_buf.slice(0..length as u64))
+                Some(e_buf.slice(0..length as u64))
             }
             None => None,
         }
@@ -111,6 +113,14 @@ impl Layer2D {
 
     pub fn get_texture(&self, id: TextureID) -> Option<&Texture2D> {
         self.textures.get(&id)
+    }
+
+    pub fn width(&self) -> u32 {
+        self.dimensions.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.dimensions.height
     }
 }
 
@@ -140,13 +150,8 @@ impl Layer2DSystem {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
-        let data: &[u8] = bytemuck::cast_slice(
-            entities
-                .iter()
-                .map(|e| e.to_raw())
-                .collect::<Vec<_>>()
-                .as_slice(),
-        );
+        let ents = entities.iter().map(|e| e.to_raw()).collect::<Vec<_>>();
+        let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
         let size = std::mem::size_of_val(data) as u64;
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Entity Buffer")
     }
@@ -171,14 +176,12 @@ impl Layer2DSystem {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
-        let data: &[u8] = bytemuck::cast_slice(
-            entities
-                .iter()
-                .flat_map(|e| e.vertices())
-                .copied()
-                .collect::<Vec<_>>()
-                .as_slice(),
-        );
+        let ents = entities
+            .iter()
+            .flat_map(|e| e.vertices())
+            .copied()
+            .collect::<Vec<_>>();
+        let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
         let size = std::mem::size_of_val(data) as u64;
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer")
     }
@@ -191,7 +194,7 @@ impl Layer2DSystem {
         }
         let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
         queue.write_buffer(
-            &layer.entity_buffer.unwrap(),
+            &layer.entity_buffer.as_ref().unwrap(),
             0,
             bytemuck::cast_slice(&data),
         );
@@ -224,30 +227,23 @@ impl Layer2DSystem {
             layer.entity_maximum = layer.entity_count * 2;
         } else {
             // Reuse buffers
-            let entity_data: &[u8] = bytemuck::cast_slice(
-                entities
-                    .iter()
-                    .map(|e| e.to_raw())
-                    .collect::<Vec<_>>()
-                    .as_slice(),
-            );
-            let vertex_data: &[u8] = bytemuck::cast_slice(
-                entities
-                    .iter()
-                    .flat_map(|e| e.vertices())
-                    .copied()
-                    .collect::<Vec<_>>()
-                    .as_slice(),
-            );
+            let ents = entities.iter().map(|e| e.to_raw()).collect::<Vec<_>>();
+            let entity_data: &[u8] = bytemuck::cast_slice(ents.as_slice());
+            let verts = entities
+                .iter()
+                .flat_map(|e| e.vertices())
+                .copied()
+                .collect::<Vec<_>>();
+            let vertex_data: &[u8] = bytemuck::cast_slice(verts.as_slice());
             let mut indices = Vec::new();
             indices.reserve(std::mem::size_of::<u16>() * layer.entity_count());
             for _ in 0..layer.entity_count() {
                 indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);
             }
             let index_data: &[u8] = bytemuck::cast_slice(&indices);
-            queue.write_buffer(&layer.entity_buffer.unwrap(), 0, entity_data);
-            queue.write_buffer(&layer.vertex_buffer.unwrap(), 0, vertex_data);
-            queue.write_buffer(&layer.index_buffer.unwrap(), 0, index_data);
+            queue.write_buffer(&layer.entity_buffer.as_ref().unwrap(), 0, entity_data);
+            queue.write_buffer(&layer.vertex_buffer.as_ref().unwrap(), 0, vertex_data);
+            queue.write_buffer(&layer.index_buffer.as_ref().unwrap(), 0, index_data);
         }
     }
 }

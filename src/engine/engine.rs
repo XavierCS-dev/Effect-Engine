@@ -175,7 +175,7 @@ impl Engine {
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("Command encoder"),
                 });
-        let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+        let render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("Render pass"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: &texture_view,
@@ -226,8 +226,6 @@ impl Engine {
             texture,
             dimensions.width,
             dimensions.height,
-            &self.device,
-            &self.queue,
         )
     }
 }

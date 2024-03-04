@@ -19,7 +19,12 @@ pub struct Texture2D {
 }
 
 impl Texture2D {
-    pub fn new(id: TextureID, path: &str, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
+    pub fn new(
+        id: TextureID,
+        path: &'static str,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+    ) -> Self {
         // havig one bind group per texure isn't very performant.
         // It may be better to have one bind group per zone of loaded textures,
         // each bind group having all the textures it needs for a zone,
