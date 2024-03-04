@@ -31,6 +31,7 @@ impl EffectSystem {
         (Self { engine }, event_loop)
     }
 
+    /// it is up to the user to sort the layers, they have the tools to do so.
     pub fn render(&mut self, layers: Vec<&Layer2D>) -> Result<(), wgpu::SurfaceError> {
         self.engine.render(layers)
     }

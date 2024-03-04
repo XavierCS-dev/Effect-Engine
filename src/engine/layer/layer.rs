@@ -246,4 +246,8 @@ impl Layer2DSystem {
             queue.write_buffer(&layer.index_buffer.as_ref().unwrap(), 0, index_data);
         }
     }
+
+    pub fn add_texture(layer: &mut Layer2D, texture: Texture2D) -> TextureID {
+        todo!()
+    }
 }
