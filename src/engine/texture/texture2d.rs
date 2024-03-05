@@ -59,7 +59,7 @@ impl Texture2D {
     }
 }
 
-struct Texture2DSystem;
+pub struct Texture2DSystem;
 impl Texture2DSystem {
     pub fn set_offset(texture: &mut Texture2D, x: u32, y: u32) {
         texture.offset = Some([x, y]);

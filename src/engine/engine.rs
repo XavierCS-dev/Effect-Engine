@@ -183,8 +183,8 @@ impl Engine {
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Clear(wgpu::Color {
                         r: 0.0,
-                        g: 0.0,
-                        b: 0.0,
+                        g: 0.5,
+                        b: 0.5,
                         a: 0.0,
                     }),
                     store: wgpu::StoreOp::Store,

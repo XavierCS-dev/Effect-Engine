@@ -1,10 +1,13 @@
-use crate::engine::util::{effect_error::EffectError, file_to_bytes::file_to_bytes};
+use crate::engine::{
+    texture::texture2d::Texture2DSystem,
+    util::{effect_error::EffectError, file_to_bytes::file_to_bytes},
+};
 
 use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
 
 use super::texture2d::{Texture2D, TextureID};
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use image::EncodableLayout;
 
 const MAX_WIDTH: u32 = 8196;
@@ -26,7 +29,60 @@ impl TextureAtlas2D {
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
     ) -> Result<Self> {
-        todo!()
+        let mut image_buffers: Vec<ImageBuffer<Rgba<u8>, _>> = Vec::new();
+        let mut current_width = 0;
+        let mut current_height = 0;
+        let mut total_height = 0;
+        for texture in textures.iter_mut() {
+            let tex = image::open(texture.file_path())?;
+            let tex_rgba = tex.to_rgba8();
+            let tex_dimensions = tex.dimensions();
+            Texture2DSystem::set_dimensions(texture, tex_dimensions.0, tex_dimensions.1);
+            let pot_width = current_width + texture.width();
+            let pot_depth = current_height + texture.height();
+            if pot_width < MAX_WIDTH {
+                if pot_depth < MAX_HEIGHT {
+                    Texture2DSystem::set_offset(texture, current_width, current_height);
+                    current_width = pot_width;
+                    if pot_depth > total_height {
+                        total_height = pot_depth;
+                    }
+                } else {
+                    bail!(EffectError::new("Textures exceed atlas size"))
+                }
+            } else {
+                let pot_depth = total_height + texture.height();
+                let pot_width = texture.width();
+                if pot_depth < MAX_HEIGHT {
+                    Texture2DSystem::set_offset(texture, 0, total_height);
+                    current_width = pot_width;
+                    current_height = total_height;
+                    total_height = pot_depth;
+                } else {
+                    bail!(EffectError::new("Textures exceed atlas size"))
+                }
+            }
+            image_buffers.push(tex_rgba);
+        }
+
+        let mut combined_tex = ImageBuffer::new(current_width, total_height);
+
+        for (tex_rgba, texture) in image_buffers.iter().zip(textures.iter_mut()) {
+            combined_tex.copy_from(tex_rgba, texture.width(), texture.height())?;
+        }
+        let extent = wgpu::Extent3d {
+            width: combined_tex.width(),
+            height: combined_tex.height(),
+            depth_or_array_layers: 1,
+        };
+        let (bind_group, atlas, view, sampler) =
+            Texture2DSystem::init_texture(extent, combined_tex, bind_group_layout, device, queue);
+        Ok(Self {
+            atlas,
+            bind_group,
+            view,
+            sampler,
+        })
     }
 
     pub fn bind_group(&self) -> &wgpu::BindGroup {
