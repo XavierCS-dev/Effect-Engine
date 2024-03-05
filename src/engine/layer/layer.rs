@@ -24,7 +24,7 @@ pub struct LayerID(pub u32);
 pub struct Layer2D {
     id: LayerID,
     textures: HashMap<TextureID, Texture2D>,
-    atlas: Option<TextureAtlas2D>,
+    atlas: TextureAtlas2D,
     vertex_buffer: Option<wgpu::Buffer>,
     index_buffer: Option<wgpu::Buffer>,
     entity_count: usize,
@@ -34,15 +34,25 @@ pub struct Layer2D {
 }
 
 impl Layer2D {
-    pub fn new(id: LayerID, dimensions: winit::dpi::PhysicalSize<u32>) -> Result<Self> {
-        let textures = HashMap::new();
+    pub fn new(
+        id: LayerID,
+        dimensions: winit::dpi::PhysicalSize<u32>,
+        mut textures: Vec<Texture2D>,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        bind_group_layout: &wgpu::BindGroupLayout,
+    ) -> Result<Self> {
+        let atlas = TextureAtlas2D::new(&mut textures, device, queue, bind_group_layout)?;
+        let mut textures_layer = HashMap::new();
+        for texture in textures {
+            textures_layer.insert(texture.id().clone(), texture);
+        }
         let index_buffer = None;
         let entity_count = 0;
         let entity_maximum = 0;
-        let atlas = None;
         Ok(Self {
             id,
-            textures,
+            textures: textures_layer,
             atlas,
             vertex_buffer: None,
             index_buffer,
@@ -245,9 +255,5 @@ impl Layer2DSystem {
             queue.write_buffer(&layer.vertex_buffer.as_ref().unwrap(), 0, vertex_data);
             queue.write_buffer(&layer.index_buffer.as_ref().unwrap(), 0, index_data);
         }
-    }
-
-    pub fn add_texture(layer: &mut Layer2D, texture: Texture2D) -> TextureID {
-        todo!()
     }
 }

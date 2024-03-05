@@ -21,11 +21,11 @@ impl TextureAtlas2D {
     // SWITCH TO CREATION OF ATLAS THEN CAN'T BE MODIFIED
     // remember 8196 limits
     pub fn new(
-        textures: Vec<&mut Texture2D>,
+        textures: &mut Vec<Texture2D>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
-    ) -> Self {
+    ) -> Result<Self> {
         todo!()
     }
 
