@@ -40,6 +40,8 @@ impl TextureAtlas2D {
             Texture2DSystem::set_dimensions(texture, tex_dimensions.0, tex_dimensions.1);
             let pot_width = current_width + texture.width();
             let pot_depth = current_height + texture.height();
+            // start from 0,0, place each image along the width until it would exceed max width.
+            // Then start placing images along the height.
             if pot_width < MAX_WIDTH {
                 if pot_depth < MAX_HEIGHT {
                     Texture2DSystem::set_offset(texture, current_width, current_height);
