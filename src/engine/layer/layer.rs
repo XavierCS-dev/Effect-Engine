@@ -81,7 +81,7 @@ impl Layer2D {
     pub fn vertex_buffer(&self) -> Option<wgpu::BufferSlice> {
         match self.vertex_buffer.as_ref() {
             Some(v_buf) => {
-                let length = self.entity_count * std::mem::size_of::<[f32; 3]>() * 4;
+                let length = self.entity_count * std::mem::size_of::<Vertex>() * 4;
                 Some(v_buf.slice(0..length as u64))
             }
             None => None,
@@ -102,7 +102,7 @@ impl Layer2D {
     pub fn entity_buffer(&self) -> Option<wgpu::BufferSlice> {
         match self.entity_buffer.as_ref() {
             Some(e_buf) => {
-                let length = self.entity_count * Entity2DRaw::size();
+                let length = self.entity_count * std::mem::size_of::<Entity2DRaw>();
                 Some(e_buf.slice(0..length as u64))
             }
             None => None,

@@ -202,6 +202,7 @@ impl Engine {
             render_pass.set_vertex_buffer(0, layer.vertex_buffer().unwrap());
             render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
             render_pass.set_index_buffer(layer.index_buffer().unwrap(), wgpu::IndexFormat::Uint16);
+            println!("{}", layer.entity_count());
             render_pass.draw_indexed(
                 0..(layer.entity_count() * 6) as u32,
                 0,
