@@ -177,7 +177,7 @@ impl Engine {
                 .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                     label: Some("Command encoder"),
                 });
-        let render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+        let mut render_pass = command_encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: Some("Render pass"),
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: &texture_view,
@@ -196,6 +196,18 @@ impl Engine {
             timestamp_writes: None,
             occlusion_query_set: None,
         });
+        render_pass.set_pipeline(&self.render_pipeline);
+        for layer in entities {
+            render_pass.set_bind_group(0, layer.bind_group(), &[]);
+            render_pass.set_vertex_buffer(0, layer.vertex_buffer().unwrap());
+            render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
+            render_pass.set_index_buffer(layer.index_buffer().unwrap(), wgpu::IndexFormat::Uint16);
+            render_pass.draw_indexed(
+                0..(layer.entity_count() * 6) as u32,
+                0,
+                0..layer.entity_count() as u32,
+            );
+        }
 
         drop(render_pass);
         self.queue.submit(std::iter::once(command_encoder.finish()));

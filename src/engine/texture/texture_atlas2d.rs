@@ -70,17 +70,9 @@ impl TextureAtlas2D {
         let mut combined_tex = ImageBuffer::new(current_width, total_height);
 
         for (tex_rgba, texture) in image_buffers.iter().zip(textures.iter_mut()) {
-            println!(
-                "total width: {}, total_height: {}, tex_width: {}, tex_height: {}",
-                current_width,
-                total_height,
-                texture.width(),
-                texture.height()
-            );
             let x = texture.offset().unwrap()[0];
             let y = texture.offset().unwrap()[1];
             combined_tex.copy_from(tex_rgba, x, y)?;
-            println!("Got here B");
         }
         let extent = wgpu::Extent3d {
             width: combined_tex.width(),

@@ -132,6 +132,10 @@ impl Layer2D {
     pub fn height(&self) -> u32 {
         self.dimensions.height
     }
+
+    pub fn bind_group(&self) -> &wgpu::BindGroup {
+        self.atlas.bind_group()
+    }
 }
 
 pub struct Layer2DSystem;
@@ -143,11 +147,18 @@ impl Layer2DSystem {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         label: &str,
+        index: bool,
     ) -> wgpu::Buffer {
+        let mut usage;
+        if index {
+            usage = wgpu::BufferUsages::INDEX;
+        } else {
+            usage = wgpu::BufferUsages::VERTEX;
+        }
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some(label),
             size: size * 2,
-            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            usage: usage | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
         queue.write_buffer(&buffer, 0, data);
@@ -163,7 +174,7 @@ impl Layer2DSystem {
         let ents = entities.iter().map(|e| e.to_raw()).collect::<Vec<_>>();
         let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
         let size = std::mem::size_of_val(data) as u64;
-        Layer2DSystem::alloc_buffer(data, size, device, queue, "Entity Buffer")
+        Layer2DSystem::alloc_buffer(data, size, device, queue, "Entity Buffer", false)
     }
 
     fn create_index_buffer(
@@ -177,8 +188,8 @@ impl Layer2DSystem {
             indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);
         }
         let data: &[u8] = bytemuck::cast_slice(&indices);
-        let size = (entity_count * std::mem::size_of::<u16>()) as u64;
-        Layer2DSystem::alloc_buffer(data, size, device, queue, "Index Buffer")
+        let size = (entity_count * std::mem::size_of::<u16>() * 6) as u64;
+        Layer2DSystem::alloc_buffer(data, size, device, queue, "Index Buffer", true)
     }
 
     fn create_vertex_buffer(
@@ -193,7 +204,7 @@ impl Layer2DSystem {
             .collect::<Vec<_>>();
         let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
         let size = std::mem::size_of_val(data) as u64;
-        Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer")
+        Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)
     }
 
     /// Update transformation data (not the vertices).
