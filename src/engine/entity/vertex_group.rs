@@ -13,24 +13,25 @@ impl VertexGroup2D {
         screen_width: u32,
         screen_height: u32,
     ) -> Self {
-        let width = (texture_width as f32 / screen_width as f32) * 2.0 - 1.0;
-        let height = (texture_height as f32 / screen_height as f32) * 2.0 - 1.0;
+        // remove * 10.0 when done
+        let width = (texture_width as f32 / screen_width as f32) * 10.0;
+        let height = (texture_height as f32 / screen_height as f32) * 10.0;
         let vertices = [
             Vertex {
                 position: [width, height, 0.0],
-                tex_coords: [1.0, 1.0],
+                tex_coords: [1.0, 0.0],
             },
             Vertex {
                 position: [0.0, height, 0.0],
-                tex_coords: [0.0, 1.0],
-            },
-            Vertex {
-                position: [0.0, 0.0, 0.0],
                 tex_coords: [0.0, 0.0],
             },
             Vertex {
+                position: [0.0, 0.0, 0.0],
+                tex_coords: [0.0, 1.0],
+            },
+            Vertex {
                 position: [width, 0.0, 0.0],
-                tex_coords: [1.0, 0.0],
+                tex_coords: [1.0, 1.0],
             },
         ];
         println!("{:?}", vertices);

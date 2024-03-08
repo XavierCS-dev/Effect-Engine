@@ -11,4 +11,5 @@
 - [x] Fix incorrect buffer allocation / entity copying
 - [ ] Fix (shaders maybe?) to use correct texture atlas coordinates
   - store total width and height in layer atlas then use to calc exact tex position
-- [ ] Fix tex aspect ratio
+- [x] Fix tex aspect ratio
+- [ ] Remove * 10.0 in vertex group when texture atlas complete
