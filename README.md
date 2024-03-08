@@ -10,3 +10,5 @@
 - [ ] Make layers and their atlases not allow dynamic addition and removal of textures
 - [x] Fix incorrect buffer allocation / entity copying
 - [ ] Fix (shaders maybe?) to use correct texture atlas coordinates
+  - store total width and height in layer atlas then use to calc exact tex position
+- [ ] Fix tex aspect ratio

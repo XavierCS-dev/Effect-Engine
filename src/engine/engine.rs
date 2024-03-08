@@ -127,7 +127,7 @@ impl Engine {
                 entry_point: "frg_main",
                 targets: &[Some(wgpu::ColorTargetState {
                     format: surface_configuration.format,
-                    blend: Some(wgpu::BlendState::REPLACE),
+                    blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
             }),
@@ -202,7 +202,6 @@ impl Engine {
             render_pass.set_vertex_buffer(0, layer.vertex_buffer().unwrap());
             render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
             render_pass.set_index_buffer(layer.index_buffer().unwrap(), wgpu::IndexFormat::Uint16);
-            println!("{}", layer.entity_count());
             render_pass.draw_indexed(
                 0..(layer.entity_count() * 6) as u32,
                 0,

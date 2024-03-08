@@ -149,7 +149,7 @@ impl Layer2DSystem {
         label: &str,
         index: bool,
     ) -> wgpu::Buffer {
-        let mut usage;
+        let usage;
         if index {
             usage = wgpu::BufferUsages::INDEX;
         } else {
@@ -182,7 +182,7 @@ impl Layer2DSystem {
         entity_count: usize,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
-        let mut indices = Vec::new();
+        let mut indices: Vec<u16> = Vec::new();
         indices.reserve(std::mem::size_of::<u16>() * entity_count as usize);
         for _ in 0..entity_count {
             indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);

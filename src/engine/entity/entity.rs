@@ -21,7 +21,7 @@ pub struct Entity2DRaw {
 
 impl Entity2DRaw {
     const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 2] =
-        wgpu::vertex_attr_array![2 => Float32x3, 3=> Float32x2];
+        wgpu::vertex_attr_array![2 => Float32x3, 3=> Uint32x2];
 
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
