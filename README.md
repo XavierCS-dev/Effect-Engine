@@ -2,7 +2,7 @@
 - [x] Remove TexturePool entirely.
 - [ ] Implement one time texture init for layer2D and atlas2D
 - [ ] Cleanup entity2D
-- [ ] Reimplement TextureAtlas2D.
+- [x] Reimplement TextureAtlas2D.
 - [ ] Increase use of ECS paradigm.
 - [ ] Increase simplicity of Layer2D to be used directly by a user.
 - [ ] Increae overall simplicity and reduce abstraction.

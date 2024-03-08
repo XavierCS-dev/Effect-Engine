@@ -48,6 +48,10 @@ impl EffectSystem {
     pub fn init_texture(&self, id: TextureID, path: &'static str) -> Texture2D {
         Texture2D::new(id, path, self.engine.device(), self.engine.queue())
     }
+
+    pub fn init_layer(&self, id: LayerID, textures: Vec<Texture2D>) -> Result<Layer2D> {
+        self.engine.init_layer(id, textures)
+    }
 }
 
 pub fn init_engine() -> (EffectSystem, EventLoop<()>) {

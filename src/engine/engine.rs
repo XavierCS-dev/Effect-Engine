@@ -10,6 +10,8 @@ use super::{
     traits::layer::Layer,
 };
 
+use anyhow::Result;
+
 pub struct Engine {
     surface: wgpu::Surface,
     device: wgpu::Device,
@@ -226,6 +228,17 @@ impl Engine {
             texture,
             dimensions.width,
             dimensions.height,
+        )
+    }
+
+    pub fn init_layer(&self, id: LayerID, textures: Vec<Texture2D>) -> Result<Layer2D> {
+        Layer2D::new(
+            id,
+            self.window.inner_size(),
+            textures,
+            &self.device,
+            &self.queue,
+            &self.texture_bgl,
         )
     }
 }
