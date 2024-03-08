@@ -8,4 +8,5 @@
 - [ ] Increae overall simplicity and reduce abstraction.
 - [ ] Make complex high performance paths optional
 - [ ] Make layers and their atlases not allow dynamic addition and removal of textures
-- [ ] Fix incorrect buffer allocation / entity copying
+- [x] Fix incorrect buffer allocation / entity copying
+- [ ] Fix (shaders maybe?) to use correct texture atlas coordinates
