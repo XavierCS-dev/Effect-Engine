@@ -147,7 +147,7 @@ impl Layer2DSystem {
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some(label),
             size: size * 2,
-            usage: wgpu::BufferUsages::VERTEX,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
         queue.write_buffer(&buffer, 0, data);
@@ -156,7 +156,7 @@ impl Layer2DSystem {
 
     // alloc buffer to 2x the size and set new max entity count
     fn create_entity_buffer(
-        entities: &[&Entity2D],
+        entities: &[Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
@@ -182,7 +182,7 @@ impl Layer2DSystem {
     }
 
     fn create_vertex_buffer(
-        entities: &[&Entity2D],
+        entities: &[Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
@@ -213,7 +213,7 @@ impl Layer2DSystem {
     /// Set the vertices and entity data. Use this when adding or removing entities
     pub fn set_entities(
         layer: &mut Layer2D,
-        entities: &[&Entity2D],
+        entities: &[Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) {

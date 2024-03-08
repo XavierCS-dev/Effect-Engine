@@ -32,17 +32,17 @@ impl EffectSystem {
     }
 
     /// it is up to the user to sort the layers, they have the tools to do so.
-    pub fn render(&mut self, layers: Vec<&Layer2D>) -> Result<(), wgpu::SurfaceError> {
-        self.engine.render(layers)
+    pub fn render(&mut self, layers: &Vec<Layer2D>) -> Result<(), wgpu::SurfaceError> {
+        self.engine.render(&layers)
     }
 
     pub fn init_entity(
         &mut self,
         position: Vector3,
-        texture: &Texture2D,
+        texture_id: TextureID,
         layer: &mut Layer2D,
     ) -> Entity2D {
-        self.engine.init_entity(position, *texture.id(), layer)
+        self.engine.init_entity(position, texture_id, layer)
     }
 
     pub fn init_texture(&self, id: TextureID, path: &'static str) -> Texture2D {
@@ -51,6 +51,14 @@ impl EffectSystem {
 
     pub fn init_layer(&self, id: LayerID, textures: Vec<Texture2D>) -> Result<Layer2D> {
         self.engine.init_layer(id, textures)
+    }
+
+    pub fn device(&self) -> &wgpu::Device {
+        self.engine.device()
+    }
+
+    pub fn queue(&self) -> &wgpu::Queue {
+        self.engine.queue()
     }
 }
 

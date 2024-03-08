@@ -167,7 +167,7 @@ impl Engine {
         // if accuracy is a problem, change to floats
     }
 
-    pub fn render(&mut self, entities: Vec<&Layer2D>) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self, entities: &Vec<Layer2D>) -> Result<(), wgpu::SurfaceError> {
         let surface_texture = self.surface.get_current_texture()?;
         let texture_view = surface_texture
             .texture
