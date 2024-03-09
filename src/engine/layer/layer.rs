@@ -261,7 +261,7 @@ impl Layer2DSystem {
                 .copied()
                 .collect::<Vec<_>>();
             let vertex_data: &[u8] = bytemuck::cast_slice(verts.as_slice());
-            let mut indices = Vec::new();
+            let mut indices: Vec<u16> = Vec::new();
             indices.reserve(std::mem::size_of::<u16>() * layer.entity_count());
             for _ in 0..layer.entity_count() {
                 indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);

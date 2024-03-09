@@ -42,7 +42,6 @@ impl VertexGroup2D {
                 tex_coords: [tex_w2, tex_h2],
             },
         ];
-        println!("{:?}", vertices);
         Self { vertices }
     }
 

@@ -28,6 +28,7 @@ fn main() {
     let mut ents = vec![ent];
     Layer2DSystem::set_entities(&mut layer, ents.as_slice(), app.device(), app.queue());
     let mut layers = vec![layer];
+    let mut check = false;
     let _ = event_loop.run(|event, control| {
         after = Instant::now();
         let delta_time = after - before;
@@ -41,15 +42,26 @@ fn main() {
             }
             Event::AboutToWait => {
                 app.engine.update(&delta_time);
+                let new_tex;
+                if check {
+                    new_tex = evil_id;
+                    check = false;
+                    std::thread::sleep(Duration::from_millis(200));
+                } else {
+                    new_tex = tex_id;
+                    check = true;
+                    std::thread::sleep(Duration::from_millis(200));
+                }
                 EntitySystem2D::set_texture(
                     ents.first_mut().unwrap(),
-                    tex_id,
+                    new_tex,
                     layers.first().unwrap(),
                 )
                 .unwrap();
-                Layer2DSystem::update_entities(
+                Layer2DSystem::set_entities(
                     layers.first_mut().unwrap(),
                     ents.as_slice(),
+                    app.device(),
                     app.queue(),
                 );
                 app.engine.render(&layers).unwrap();
