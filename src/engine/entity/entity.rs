@@ -26,7 +26,7 @@ impl Entity2DRaw {
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<Entity2DRaw>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
+            step_mode: wgpu::VertexStepMode::Instance,
             attributes: &Self::ATTRIBUTE_ARRAY,
         }
     }
