@@ -20,8 +20,8 @@ fn main() {
     let evil = app.init_texture(evil_id, "evil.png");
     let mut layer = app.init_layer(layer_id, vec![tex, evil]).unwrap();
     let position = Vector3 {
-        x: 0.0,
-        y: 0.0,
+        x: 0.2,
+        y: 0.4,
         z: 0.0,
     };
     let ent = app.init_entity(position, evil_id, &mut layer);
