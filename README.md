@@ -16,3 +16,4 @@
 - [ ] Fix issues where entity buffers aren't updated correctly
 - [ ] Fix entity positioning being incorrect
   - [ ] Implement 2D transformations first
+- [ ] Fix broken buffers
