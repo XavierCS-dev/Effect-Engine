@@ -5,7 +5,7 @@
 - [x] Reimplement TextureAtlas2D.
 - [ ] Increase use of ECS paradigm.
 - [ ] Increase simplicity of Layer2D to be used directly by a user.
-- [ ] Increae overall simplicity and reduce abstraction.
+- [ ] Increase overall simplicity and reduce abstraction.
 - [ ] Make complex high performance paths optional
 - [ ] Make layers and their atlases not allow dynamic addition and removal of textures
 - [x] Fix incorrect buffer allocation / entity copying
@@ -14,3 +14,5 @@
 - [x] Fix tex aspect ratio
 - [ ] Remove * 10.0 in vertex group when texture atlas complete
 - [ ] Fix issues where entity buffers aren't updated correctly
+- [ ] Fix entity positioning being incorrect
+  - [ ] Implement 2D transformations first
