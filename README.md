@@ -13,3 +13,4 @@
   - store total width and height in layer atlas then use to calc exact tex position
 - [x] Fix tex aspect ratio
 - [ ] Remove * 10.0 in vertex group when texture atlas complete
+- [ ] Fix issues where entity buffers aren't updated correctly

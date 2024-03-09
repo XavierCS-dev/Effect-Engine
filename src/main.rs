@@ -1,7 +1,7 @@
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use effect_engine::engine::{
-    entity::entity::Entity2D,
+    entity::entity::{Entity2D, EntitySystem2D},
     layer::layer::{Layer2DSystem, LayerID},
     primitives::vector::Vector3,
     texture::texture2d::{Texture2D, TextureID},
@@ -25,9 +25,9 @@ fn main() {
         z: 0.0,
     };
     let ent = app.init_entity(position, evil_id, &mut layer);
-    let ents = vec![ent];
+    let mut ents = vec![ent];
     Layer2DSystem::set_entities(&mut layer, ents.as_slice(), app.device(), app.queue());
-    let layers = vec![layer];
+    let mut layers = vec![layer];
     let _ = event_loop.run(|event, control| {
         after = Instant::now();
         let delta_time = after - before;
@@ -41,6 +41,17 @@ fn main() {
             }
             Event::AboutToWait => {
                 app.engine.update(&delta_time);
+                EntitySystem2D::set_texture(
+                    ents.first_mut().unwrap(),
+                    tex_id,
+                    layers.first().unwrap(),
+                )
+                .unwrap();
+                Layer2DSystem::update_entities(
+                    layers.first_mut().unwrap(),
+                    ents.as_slice(),
+                    app.queue(),
+                );
                 app.engine.render(&layers).unwrap();
             }
             _ => (),

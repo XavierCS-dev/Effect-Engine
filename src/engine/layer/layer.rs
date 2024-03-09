@@ -214,7 +214,7 @@ impl Layer2DSystem {
 
     /// Update transformation data (not the vertices).
     // Panics if the number of entities changed
-    pub fn update_entities(layer: &mut Layer2D, entities: &[&Entity2D], queue: &wgpu::Queue) {
+    pub fn update_entities(layer: &mut Layer2D, entities: &[Entity2D], queue: &wgpu::Queue) {
         if entities.len() != layer.entity_count() {
             panic!("Entities would not fit buffer")
         }
