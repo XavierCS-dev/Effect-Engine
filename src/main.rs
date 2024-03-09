@@ -42,15 +42,16 @@ fn main() {
             }
             Event::AboutToWait => {
                 app.engine.update(&delta_time);
+                /*
                 let new_tex;
                 if check {
                     new_tex = evil_id;
                     check = false;
-                    std::thread::sleep(Duration::from_millis(200));
+                    // std::thread::sleep(Duration::from_millis(200));
                 } else {
                     new_tex = tex_id;
                     check = true;
-                    std::thread::sleep(Duration::from_millis(200));
+                    // std::thread::sleep(Duration::from_millis(200));
                 }
                 EntitySystem2D::set_texture(
                     ents.first_mut().unwrap(),
@@ -64,6 +65,7 @@ fn main() {
                     app.device(),
                     app.queue(),
                 );
+                */
                 app.engine.render(&layers).unwrap();
             }
             _ => (),
