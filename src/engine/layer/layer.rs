@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use std::collections::{hash_map::Keys, HashMap};
+use winit::dpi::PhysicalSize;
 
 use wgpu::util::DeviceExt;
 
@@ -135,6 +136,10 @@ impl Layer2D {
 
     pub fn bind_group(&self) -> &wgpu::BindGroup {
         self.atlas.bind_group()
+    }
+
+    pub fn atlas_dimensions(&self) -> PhysicalSize<u32> {
+        self.atlas.dimensions()
     }
 }
 

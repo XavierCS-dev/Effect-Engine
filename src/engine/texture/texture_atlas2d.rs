@@ -4,6 +4,7 @@ use crate::engine::{
 };
 
 use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
+use winit::dpi::PhysicalSize;
 
 use super::texture2d::{Texture2D, TextureID};
 
@@ -18,6 +19,7 @@ pub struct TextureAtlas2D {
     atlas: wgpu::Texture,
     view: wgpu::TextureView,
     sampler: wgpu::Sampler,
+    dimensions: PhysicalSize<u32>,
 }
 
 impl TextureAtlas2D {
@@ -81,11 +83,13 @@ impl TextureAtlas2D {
         };
         let (bind_group, atlas, view, sampler) =
             Texture2DSystem::init_texture(extent, combined_tex, bind_group_layout, device, queue);
+        let dimensions = PhysicalSize::new(current_width, total_height);
         Ok(Self {
             atlas,
             bind_group,
             view,
             sampler,
+            dimensions,
         })
     }
 
@@ -103,5 +107,9 @@ impl TextureAtlas2D {
 
     pub fn sampler(&self) -> &wgpu::Sampler {
         &self.sampler
+    }
+
+    pub fn dimensions(&self) -> PhysicalSize<u32> {
+        self.dimensions
     }
 }

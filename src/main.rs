@@ -24,7 +24,7 @@ fn main() {
         y: 0.0,
         z: 0.0,
     };
-    let ent = app.init_entity(position, tex_id, &mut layer);
+    let ent = app.init_entity(position, evil_id, &mut layer);
     let ents = vec![ent];
     Layer2DSystem::set_entities(&mut layer, ents.as_slice(), app.device(), app.queue());
     let layers = vec![layer];

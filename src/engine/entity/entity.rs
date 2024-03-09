@@ -55,8 +55,14 @@ impl Entity2D {
         screen_height: u32,
     ) -> Self {
         let tex = layer.get_texture(texture).unwrap();
-        let vertex_group =
-            VertexGroup2D::new(tex.width(), tex.height(), screen_width, screen_height);
+        let vertex_group = VertexGroup2D::new(
+            tex.width(),
+            tex.height(),
+            screen_width,
+            screen_height,
+            layer.atlas_dimensions(),
+            tex.offset().unwrap(),
+        );
         let layer = layer.id();
         let texture_offset = tex.offset().unwrap();
         Self {
@@ -90,7 +96,7 @@ impl Entity2D {
     }
 }
 
-struct EntitySystem2D;
+pub struct EntitySystem2D;
 
 impl EntitySystem2D {
     pub fn set_texture(entity: &mut Entity2D, texture: TextureID, layer: &Layer2D) -> Result<()> {
@@ -99,8 +105,14 @@ impl EntitySystem2D {
             .get_texture(texture)
             .ok_or(EffectError::new("Texture is not in given layer"))?;
         entity.texture_offset = tex.offset().unwrap();
-        entity.vertex_group =
-            VertexGroup2D::new(tex.height(), tex.width(), layer.width(), layer.height());
+        entity.vertex_group = VertexGroup2D::new(
+            tex.width(),
+            tex.height(),
+            layer.width(),
+            layer.height(),
+            layer.atlas_dimensions(),
+            tex.offset().unwrap(),
+        );
         entity.texture = texture;
         Ok(())
     }
