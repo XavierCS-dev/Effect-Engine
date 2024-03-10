@@ -23,6 +23,7 @@
   - [ ] Remove unecessary functions
   - [ ] Add functions so user doesn't need to access queue and device
   - [ ] Any other issues
+- [ ] Merge with main
 
 - [ ] Further goals (0.2.0 release blockers)
   - [ ] Implement Transformation2D
