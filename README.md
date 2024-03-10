@@ -14,6 +14,28 @@
 - [x] Fix tex aspect ratio
 - [ ] Remove * 10.0 in vertex group when texture atlas complete
 - [ ] Fix issues where entity buffers aren't updated correctly
-- [ ] Fix entity positioning being incorrect
-  - [ ] Implement 2D transformations first
-- [ ] Fix broken buffers
+- [x] Fix entity positioning being incorrect
+~~¬- [ ] Implement 2D transformations first~~
+- [x] Fix broken buffers
+- [ ] Finish rewrite and clean everything up
+  - [ ] Switch from f32 to f64 if a good idea
+  - [ ] Remove unnecessary params
+  - [ ] Remove unecessary functions
+  - [ ] Add functions so user doesn't need to access queue and device
+  - [ ] Any other issues
+
+- [ ] Further goals (0.2.0 release blockers)
+  - [ ] Implement Transformation2D
+  - [ ] Implement Camera2D (using 3D proj matrix)
+
+- [ ] Possible 0,3.0 release
+  - [ ] Sound system
+  - [ ] User input system
+
+- [ ] Possible 0.4.0 release
+  - [ ] Physics system including Collision2D suvat etc
+
+- [ ] Possible 0.5.0 release
+  - [ ] GUI using framework eg iced egui
+
+- [ ] 1.0 release when all basic components needed to make a game present and code is in good shape + performant
