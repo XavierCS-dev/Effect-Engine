@@ -17,6 +17,7 @@
 - [x] Fix entity positioning being incorrect
 ~~¬- [ ] Implement 2D transformations first~~
 - [x] Fix broken buffers
+- [ ] Fix bug which causes different entities to use the texture of the first one in the buffer
 - [ ] Finish rewrite and clean everything up
   - [ ] Switch from f32 to f64 if a good idea
   - [ ] Remove unnecessary params

@@ -24,8 +24,14 @@ fn main() {
         y: 0.4,
         z: 0.0,
     };
-    let ent = app.init_entity(position, evil_id, &mut layer);
-    let mut ents = vec![ent];
+    let position_g = Vector3 {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
+    let ent = app.init_entity(position, tex_id, &mut layer);
+    let ent_good = app.init_entity(position_g, evil_id, &mut layer);
+    let mut ents = vec![ent, ent_good];
     Layer2DSystem::set_entities(&mut layer, ents.as_slice(), app.device(), app.queue());
     let mut layers = vec![layer];
     let mut check = false;
