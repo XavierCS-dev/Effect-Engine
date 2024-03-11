@@ -3,15 +3,10 @@ use winit::dpi::PhysicalSize;
 
 use crate::engine::{
     layer::layer::{Layer2D, LayerID},
-    primitives::{vector::Vector3, vertex::Vertex},
-    texture::{
-        texture2d::{Texture2D, TextureID},
-        texture_atlas2d::TextureAtlas2D,
-    },
+    primitives::vector::Vector3,
+    texture::texture2d::TextureID,
     util::effect_error::EffectError,
 };
-
-use super::vertex_group::VertexGroup2D;
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
@@ -31,12 +26,6 @@ impl Entity2DRaw {
             step_mode: wgpu::VertexStepMode::Instance,
             attributes: &Self::ATTRIBUTE_ARRAY,
         }
-    }
-
-    // This will likely change, having a central place for this makes things way easier
-    pub fn size() -> usize {
-        use std::mem;
-        mem::size_of::<[f32; 3]>() + mem::size_of::<[u32; 2]>()
     }
 }
 

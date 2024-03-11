@@ -96,8 +96,14 @@ impl TextureAtlas2D {
             depth_or_array_layers: 1,
         };
 
-        let (bind_group, atlas, view, sampler) =
-            Texture2DSystem::init_texture(extent, combined_tex, bind_group_layout, device, queue);
+        let (bind_group, atlas, view, sampler) = Texture2DSystem::init_texture(
+            extent,
+            combined_tex,
+            bind_group_layout,
+            true,
+            device,
+            queue,
+        );
         let dimensions = PhysicalSize::new(total_width, total_height);
         let tex_coord_width = (texture_size.width as f64 / total_width as f64) as f32;
         let tex_coord_height = (texture_size.height as f64 / total_height as f64) as f32;

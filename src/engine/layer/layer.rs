@@ -32,7 +32,6 @@ pub struct Layer2D {
     entity_maximum: usize,
     entity_buffer: Option<wgpu::Buffer>,
     dimensions: winit::dpi::PhysicalSize<u32>,
-    texture_size: PhysicalSize<u32>,
 }
 
 impl Layer2D {
@@ -75,7 +74,6 @@ impl Layer2D {
             entity_buffer: None,
             entity_maximum,
             dimensions,
-            texture_size,
         })
     }
 
@@ -179,7 +177,7 @@ impl Layer2DSystem {
 
     // alloc buffer to 2x the size and set new max entity count
     fn create_entity_buffer(
-        entities: &[Entity2D],
+        entities: &[&Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
@@ -232,7 +230,7 @@ impl Layer2DSystem {
     /// Set the vertices and entity data. Use this when adding or removing entities
     pub fn set_entities(
         layer: &mut Layer2D,
-        entities: &[Entity2D],
+        entities: &[&Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) {

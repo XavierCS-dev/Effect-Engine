@@ -46,7 +46,7 @@ impl EffectSystem {
     }
 
     pub fn init_texture(&self, id: TextureID, path: &'static str) -> Texture2D {
-        Texture2D::new(id, path, self.engine.device(), self.engine.queue())
+        Texture2D::new(id, path)
     }
 
     /// Make sure your texture_size is set to the larger dimension that appears in your textures.
