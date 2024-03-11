@@ -18,12 +18,12 @@ pub struct EffectSystem {
 }
 
 impl EffectSystem {
-    pub fn new() -> (Self, EventLoop<()>) {
+    pub fn new(screen_dimensions: PhysicalSize<u32>) -> (Self, EventLoop<()>) {
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(ControlFlow::Poll);
         let window = WindowBuilder::new()
             .with_title("Effect Engine")
-            .with_inner_size(PhysicalSize::new(800, 800))
+            .with_inner_size(screen_dimensions)
             .with_resizable(false)
             .build(&event_loop)
             .unwrap();
@@ -67,6 +67,6 @@ impl EffectSystem {
     }
 }
 
-pub fn init_engine() -> (EffectSystem, EventLoop<()>) {
-    EffectSystem::new()
+pub fn init_engine(screen_dimensions: PhysicalSize<u32>) -> (EffectSystem, EventLoop<()>) {
+    EffectSystem::new(screen_dimensions)
 }

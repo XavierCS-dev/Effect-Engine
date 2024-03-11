@@ -13,7 +13,7 @@ use winit::{
 
 fn main() {
     println!("Hello, world!");
-    let (mut app, event_loop) = effect_engine::init_engine();
+    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600));
     let mut before = Instant::now();
     let mut after = Instant::now();
     let tex_id = TextureID("tree");
