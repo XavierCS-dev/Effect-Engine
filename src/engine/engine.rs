@@ -7,6 +7,7 @@ use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalSize;
 
 use super::camera::camera::Camera2D;
+use super::camera::camera::Camera2DSystem;
 use super::primitives::vector::Vector3;
 use super::{
     primitives::vertex::Vertex,
@@ -32,7 +33,7 @@ pub struct Engine {
 * these closures are to be stored in Engine upon initialisation
 */
 impl Engine {
-    pub async fn new(window: winit::window::Window) -> Self {
+    pub async fn new(window: winit::window::Window, camera_fov: f32) -> Self {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
             ..Default::default()
@@ -59,8 +60,11 @@ impl Engine {
             .await
             .unwrap();
         let dims = window.inner_size();
-        let camera = Camera2D::new(&device, 45.0, (dims.width as f32) / (dims.height as f32));
-
+        let camera = Camera2D::new(
+            &device,
+            camera_fov,
+            (dims.width as f32) / (dims.height as f32),
+        );
         let surface_capabilities = surface.get_capabilities(&adapter);
         // Check this...may need to specifically set it to some sRGB value
         let surface_format = surface_capabilities.formats[0];
@@ -262,5 +266,9 @@ impl Engine {
 
     pub fn set_entities(&self, layer: &mut Layer2D, entities: &[&Entity2D]) {
         Layer2DSystem::set_entities(layer, entities, &self.device, &self.queue)
+    }
+
+    pub fn update_camera(&self, camera: &mut Camera2D) {
+        Camera2DSystem::update(camera, &self.queue);
     }
 }

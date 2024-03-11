@@ -13,7 +13,7 @@ use winit::{
 
 fn main() {
     println!("Hello, world!");
-    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600));
+    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600), 90.0);
     let mut before = Instant::now();
     let mut after = Instant::now();
     let tex_id = TextureID("tree");
@@ -43,7 +43,7 @@ fn main() {
     let _ = event_loop.run(|event, control| {
         after = Instant::now();
         let delta_time = after - before;
-        app.engine.input(&event, &delta_time);
+        // app.engine.input(&event, &delta_time);
         match event {
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
@@ -52,7 +52,7 @@ fn main() {
                 control.exit();
             }
             Event::AboutToWait => {
-                app.engine.update(&delta_time);
+                // app.engine.update(&delta_time);
                 EntitySystem2D::set_rotation(&mut ents_owner.get_mut(1).unwrap(), rotation);
                 let mut ents = Vec::new();
                 for ent in ents_owner.iter() {
@@ -62,7 +62,7 @@ fn main() {
                 drop(ents);
                 rotation += 0.05;
                 rotation = rotation % 360.0;
-                app.engine.render(&layers).unwrap();
+                app.render(&layers).unwrap();
             }
             _ => (),
         }

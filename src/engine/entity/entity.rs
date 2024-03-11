@@ -57,7 +57,7 @@ impl Entity2D {
     // will include "model" with pos and rotation later...
     pub fn to_raw(&self) -> Entity2DRaw {
         Entity2DRaw {
-            transform: self.transform.to_raw(),
+            transform: self.transform.to_raw().inner,
             texture_index: [self.texture_index[0] as f32, self.texture_index[1] as f32],
             texture_size: self.texture_size.into(),
         }

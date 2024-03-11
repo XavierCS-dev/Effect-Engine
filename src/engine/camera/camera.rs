@@ -1,6 +1,9 @@
-use wgpu::util::DeviceExt;
+use wgpu::{util::DeviceExt, Queue};
 
-use crate::engine::{primitives::matrix::Matrix4, transform::transform::Transform2D};
+use crate::engine::{
+    primitives::{matrix::Matrix4, vector::Vector3},
+    transform::transform::{Transform2D, Transform2DSystem},
+};
 
 pub struct Camera2D {
     proj_mat: Matrix4,
@@ -84,3 +87,23 @@ impl Camera2D {
 }
 
 pub struct Camera2DSystem;
+
+impl Camera2DSystem {
+    pub fn transform(camera: &mut Camera2D, position: Vector3) {
+        let position = Vector3::new(-position.x, -position.y, position.z);
+        Transform2DSystem::translate(&mut camera.transform, position);
+    }
+
+    pub fn rotate(camera: &mut Camera2D, degrees: f32) {
+        Transform2DSystem::rotate(&mut camera.transform, degrees);
+    }
+
+    pub fn update(camera: &mut Camera2D, queue: &wgpu::Queue) {
+        camera.complete_matrix = camera.proj_mat * camera.transform.to_raw();
+        queue.write_buffer(
+            &camera.buffer,
+            0,
+            bytemuck::cast_slice(&camera.complete_matrix.inner),
+        );
+    }
+}
