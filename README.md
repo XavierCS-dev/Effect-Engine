@@ -19,7 +19,9 @@
 - [x] Fix broken buffers
 - [x] Fix bug which causes different entities to use the texture of the first one in the buffer
 - [ ] Finish rewrite and clean everything up
+
   ~~- [ ] Switch from f32 to f64 if a good idea~~
+  
       - [ ] Very bad idea, find alternative to limit worldspace inaccuracies.
   - [ ] Remove unnecessary params
   - [ ] Remove unecessary functions
