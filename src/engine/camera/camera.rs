@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use wgpu::{util::DeviceExt, Queue};
 
 use crate::engine::{
@@ -23,15 +25,15 @@ impl Camera2D {
         let far = 10.0;
         // Fix this whole damn thing
         let fov_rad = fov_deg.to_radians();
-        let h = 1.0 / (fov_rad / 2.0).tan();
+        let h = PI * 0.5 - 0.5 * fov_rad;
         let w = h / aspect_ratio;
-        let a = -(far + near) / (far - near);
-        let b = (-2.0 * near * far) / (far - near);
+        let a = far / (near - far);
+        let b = (near * far) / (far - near);
         let proj_mat = Matrix4::from_slice([
             [w, 0.0, 0.0, 0.0],
             [0.0, h, 0.0, 0.0],
             [0.0, 0.0, a, b],
-            [0.0, 0.0, -1.0, 0.0],
+            [0.0, 0.0, 1.0, 1.0],
         ]);
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Camera"),
@@ -104,7 +106,7 @@ impl Camera2DSystem {
     }
 
     pub fn update(camera: &mut Camera2D, queue: &wgpu::Queue) {
-        camera.complete_matrix = conversion_mat * (camera.proj_mat * camera.transform.to_raw());
+        camera.complete_matrix = camera.proj_mat * camera.transform.to_raw();
         queue.write_buffer(
             &camera.buffer,
             0,
