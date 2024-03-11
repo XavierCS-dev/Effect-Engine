@@ -27,27 +27,24 @@ fn main() {
         .init_layer(layer_id, vec![tex, evil, bob], PhysicalSize::new(64, 64))
         .unwrap();
     let position = Vector3 {
-        x: 0.0,
-        y: 0.0,
-        z: 0.0,
-    };
-    let position_g = Vector3 {
-        x: -1.0,
-        y: 0.0,
-        z: 0.0,
-    };
-    let position_b = Vector3 {
         x: -1.0,
         y: -1.0,
         z: 0.0,
     };
-    let ent = app.init_entity(position, tex_id, &mut layer);
-    let ent_good = app.init_entity(position_g, evil_id, &mut layer);
-    let bob_ent = app.init_entity(position_b, bob_id, &mut layer);
+    let ent = app.init_entity(position, evil_id, &mut layer);
+    let mut ent_good = app.init_entity(position, tex_id, &mut layer);
+    EntitySystem2D::set_position(
+        &mut ent_good,
+        Vector3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        },
+    );
+    EntitySystem2D::set_rotation(&mut ent_good, 30.0);
+    EntitySystem2D::set_scale(&mut ent_good, 0.5);
+    let bob_ent = app.init_entity(position, bob_id, &mut layer);
     let mut ents_owner = vec![ent, ent_good, bob_ent];
-    for _ in 0..1 {
-        ents_owner.push(app.init_entity(position_b, evil_id, &mut layer));
-    }
     let mut ents = Vec::new();
     for ent in ents_owner.iter() {
         ents.push(ent);
@@ -55,7 +52,8 @@ fn main() {
     app.set_entities(&mut layer, ents.as_slice());
     drop(ents);
     let mut layers = vec![layer];
-    let mut check = false;
+
+    let mut rotation = 0.0;
     let _ = event_loop.run(|event, control| {
         after = Instant::now();
         let delta_time = after - before;
@@ -69,28 +67,15 @@ fn main() {
             }
             Event::AboutToWait => {
                 app.engine.update(&delta_time);
-                let new_tex;
-                if check {
-                    new_tex = evil_id;
-                    check = false;
-                    // std::thread::sleep(Duration::from_millis(200));
-                } else {
-                    new_tex = tex_id;
-                    check = true;
-                    // std::thread::sleep(Duration::from_millis(200));
-                }
-                EntitySystem2D::set_texture(
-                    ents_owner.first_mut().unwrap(),
-                    new_tex,
-                    layers.first().unwrap(),
-                )
-                .unwrap();
+                EntitySystem2D::set_rotation(&mut ents_owner.get_mut(1).unwrap(), rotation);
                 let mut ents = Vec::new();
                 for ent in ents_owner.iter() {
                     ents.push(ent);
                 }
-
-                app.set_entities(layers.first_mut().unwrap(), ents.as_slice());
+                app.set_entities(layers.get_mut(0).unwrap(), ents.as_slice());
+                drop(ents);
+                rotation += 0.05;
+                rotation = rotation % 360.0;
                 app.engine.render(&layers).unwrap();
             }
             _ => (),

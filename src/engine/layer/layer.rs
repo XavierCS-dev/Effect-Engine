@@ -182,6 +182,9 @@ impl Layer2DSystem {
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
         let ents = entities.iter().map(|e| e.to_raw()).collect::<Vec<_>>();
+        for &ent in ents.iter() {
+            println!("{:?}", ent);
+        }
         let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
         let size = std::mem::size_of_val(data) as u64;
         Layer2DSystem::alloc_buffer(data, size * 2, device, queue, "Entity Buffer", false)

@@ -28,6 +28,18 @@ impl Transform2D {
     pub fn to_raw(&self) -> [[f32; 4]; 4] {
         self.matrix.inner
     }
+
+    pub fn position(&self) -> &Vector3 {
+        &self.position
+    }
+
+    pub fn rotation(&self) -> f32 {
+        self.rotation.to_degrees()
+    }
+
+    pub fn scale(&self) -> f32 {
+        self.scale
+    }
 }
 
 pub struct Transform2DSystem;
@@ -54,5 +66,6 @@ impl Transform2DSystem {
         transform.scale = scale;
         transform.matrix.inner[0][0] = transform.rotation.cos() * scale;
         transform.matrix.inner[1][1] = transform.rotation.cos() * scale;
+        transform.matrix.inner[2][2] = scale;
     }
 }
