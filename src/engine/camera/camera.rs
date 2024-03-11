@@ -25,7 +25,12 @@ impl Camera2D {
         let proj_mat = Matrix4::from_slice([
             [1.0 / (aspect_ratio * (fov_rad / 2.0).tan()), 0.0, 0.0, 0.0],
             [0.0, 1.0 / ((fov_rad / 2.0).tan()), 0.0, 0.0],
-            [0.0, 0.0, far / (far - near), -(far * near) / (far - near)],
+            [
+                0.0,
+                0.0,
+                0.5 * far / (far - near),
+                -(far * near) / (far - near),
+            ],
             [0.0, 0.0, 0.0, 1.0],
         ]);
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
