@@ -33,7 +33,9 @@ impl Transform2D {
 pub struct Transform2DSystem;
 
 impl Transform2DSystem {
-    pub fn rotate(transform: &mut Transform2D, radians: f32) {
+    pub fn rotate(transform: &mut Transform2D, degrees: f32) {
+        let degrees = degrees % 360.0;
+        let radians = degrees.to_radians();
         transform.rotation = radians;
         transform.matrix.inner[0][0] = radians.cos() * transform.scale;
         transform.matrix.inner[0][1] = radians.sin();
