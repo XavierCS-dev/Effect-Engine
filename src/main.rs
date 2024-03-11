@@ -1,3 +1,4 @@
+use core::slice::SlicePattern;
 use std::time::{Duration, Instant};
 
 use effect_engine::engine::{
@@ -45,14 +46,14 @@ fn main() {
     let ent_good = app.init_entity(position_g, evil_id, &mut layer);
     let bob_ent = app.init_entity(position_b, bob_id, &mut layer);
     let mut ents_owner = vec![ent, ent_good, bob_ent];
-    for _ in 0..10000 {
+    for _ in 0..1 {
         ents_owner.push(app.init_entity(position_b, evil_id, &mut layer));
     }
     let mut ents = Vec::new();
     for ent in ents_owner.iter() {
         ents.push(ent);
     }
-    Layer2DSystem::set_entities(&mut layer, ents.as_slice(), app.device(), app.queue());
+    app.set_entities(&mut layer, ents.as_slice());
     drop(ents);
     let mut layers = vec![layer];
     let mut check = false;
@@ -89,12 +90,8 @@ fn main() {
                 for ent in ents_owner.iter() {
                     ents.push(ent);
                 }
-                Layer2DSystem::set_entities(
-                    layers.first_mut().unwrap(),
-                    ents.as_slice(),
-                    app.device(),
-                    app.queue(),
-                );
+
+                app.set_entities(layers.first_mut().unwrap(), ents.as_slice());
                 app.engine.render(&layers).unwrap();
             }
             _ => (),

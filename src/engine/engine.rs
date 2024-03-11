@@ -253,4 +253,8 @@ impl Engine {
             texture_size,
         )
     }
+
+    pub fn set_entities(&self, layer: &mut Layer2D, entities: &[&Entity2D]) {
+        Layer2DSystem::set_entities(layer, entities, &self.device, &self.queue)
+    }
 }

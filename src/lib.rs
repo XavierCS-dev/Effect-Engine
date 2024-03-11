@@ -65,6 +65,10 @@ impl EffectSystem {
         self.engine.init_layer(id, textures, texture_size)
     }
 
+    pub fn set_entities(&self, layer: &mut Layer2D, entities: &[&Entity2D]) {
+        self.engine.set_entities(layer, entities);
+    }
+
     pub fn device(&self) -> &wgpu::Device {
         self.engine.device()
     }

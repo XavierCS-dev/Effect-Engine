@@ -221,7 +221,6 @@ impl Layer2DSystem {
                 tex_coords: [tex_coord_size.width, tex_coord_size.height],
             },
         ];
-        println!("{:?}", verts);
         let data: &[u8] = bytemuck::cast_slice(verts.as_slice());
         let size = (std::mem::size_of::<Vertex>() * verts.len()) as u64;
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)

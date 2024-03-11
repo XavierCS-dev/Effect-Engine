@@ -1,7 +1,6 @@
 use winit::dpi::PhysicalSize;
 
 use crate::engine::primitives::vertex::Vertex;
-use crate::engine::texture::texture2d::Texture2D;
 
 /// Calculates the vertices and indices for each image texture
 pub struct VertexGroup2D {
