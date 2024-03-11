@@ -229,20 +229,6 @@ impl Layer2DSystem {
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)
     }
 
-    /// Update transformation data (not the vertices).
-    // Panics if the number of entities changed
-    pub fn update_entities(layer: &mut Layer2D, entities: &[Entity2D], queue: &wgpu::Queue) {
-        if entities.len() != layer.entity_count() {
-            panic!("Entities would not fit buffer")
-        }
-        let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
-        queue.write_buffer(
-            &layer.entity_buffer.as_ref().unwrap(),
-            0,
-            bytemuck::cast_slice(&data),
-        );
-    }
-
     /// Set the vertices and entity data. Use this when adding or removing entities
     pub fn set_entities(
         layer: &mut Layer2D,
