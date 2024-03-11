@@ -1,30 +1,29 @@
+use anyhow::Result;
+use winit::dpi::PhysicalSize;
+
 use crate::engine::{
     layer::layer::{Layer2D, LayerID},
-    primitives::{vector::Vector3, vertex::Vertex},
-    texture::{
-        texture2d::Texture2D,
-        texture_atlas2d::TextureAtlas2D,
-        texture_pool::{self, TexturePool2D},
-    },
+    primitives::vector::Vector3,
+    texture::texture2d::TextureID,
+    util::effect_error::EffectError,
 };
-
-use super::vertex_group::VertexGroup2D;
 
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
 pub struct Entity2DRaw {
     position: [f32; 3],
-    texture_offset: [u32; 2],
+    texture_index: [f32; 2],
+    texture_size: [f32; 2],
 }
 
 impl Entity2DRaw {
-    const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 2] =
-        wgpu::vertex_attr_array![2 => Float32x3, 3=> Float32x2];
+    const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 3] =
+        wgpu::vertex_attr_array![2 => Float32x3, 3=> Float32x2, 4=>Float32x2];
 
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<Vertex>() as wgpu::BufferAddress,
-            step_mode: wgpu::VertexStepMode::Vertex,
+            array_stride: std::mem::size_of::<Entity2DRaw>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Instance,
             attributes: &Self::ATTRIBUTE_ARRAY,
         }
     }
@@ -33,44 +32,32 @@ impl Entity2DRaw {
 pub struct Entity2D {
     layer: LayerID,
     position: Vector3,
-    texture: Texture2D,
-    vertex_group: VertexGroup2D,
+    texture: TextureID,
+    texture_index: [u32; 2],
+    texture_size: PhysicalSize<f32>,
 }
 
 impl Entity2D {
-    pub fn new(
-        position: Vector3,
-        texture_pool: &mut TexturePool2D,
-        layer: LayerID,
-        texture: Texture2D,
-        screen_width: u32,
-        screen_height: u32,
-        device: &wgpu::Device,
-        queue: &wgpu::Queue,
-    ) -> Self {
-        let vertex_group = VertexGroup2D::new(&texture, screen_width, screen_height);
-        if !texture_pool.contains_texture(&layer, texture.id()) {
-            // user may want same texture for entities on different layers,
-            // contains texture checks for a specific texture on a specific layer
-            texture_pool
-                .add_texture(layer, texture.clone(), device, queue)
-                .unwrap();
-        }
+    pub fn new(position: Vector3, layer: &Layer2D, texture: TextureID) -> Self {
+        let tex = layer.get_texture(texture).unwrap();
+        let texture_index = tex.index().expect("Tex not in given layer");
+        let texture_size = layer.tex_coord_size();
         Self {
-            layer,
+            layer: layer.id(),
             position,
             texture,
-            vertex_group,
+            texture_index,
+            texture_size,
         }
     }
 
     // will include "model" with pos and rotation later...
     pub fn to_raw(&self) -> Entity2DRaw {
         let position = [self.position.x, self.position.y, self.position.z];
-        let texture_offset = self.texture.offset().expect("Texture is uninitiliased");
         Entity2DRaw {
             position,
-            texture_offset,
+            texture_index: [self.texture_index[0] as f32, self.texture_index[1] as f32],
+            texture_size: self.texture_size.into(),
         }
     }
 
@@ -81,8 +68,32 @@ impl Entity2D {
     pub fn position(&self) -> &Vector3 {
         &self.position
     }
+}
 
-    pub fn vertices(&self) -> &[Vertex; 4] {
-        self.vertex_group.vertices()
+pub struct EntitySystem2D;
+
+impl EntitySystem2D {
+    pub fn set_texture(entity: &mut Entity2D, texture: TextureID, layer: &Layer2D) -> Result<()> {
+        // find texture in layer, return the ID and set here, otherwise error
+        let tex = layer
+            .get_texture(texture)
+            .ok_or(EffectError::new("Texture is not in given layer"))?;
+        entity.texture_index = tex.index().unwrap();
+        entity.texture_size = layer.tex_coord_size();
+        entity.layer = layer.id();
+        entity.texture = texture;
+        Ok(())
+    }
+
+    pub fn set_x(entity: &mut Entity2D, x: f32) {
+        entity.position.x = x;
+    }
+
+    pub fn set_y(entity: &mut Entity2D, y: f32) {
+        entity.position.y = y;
+    }
+
+    pub fn set_position(entity: &mut Entity2D, position: Vector3) {
+        entity.position = position;
     }
 }

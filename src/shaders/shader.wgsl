@@ -1,11 +1,13 @@
 
 struct EntityInput {
     @location(2) position: vec3<f32>,
-    @location(3) tex_coords: vec2<f32>,
+    @location(3) index: vec2<f32>,
+    @location(4) size: vec2<f32>,
 }
 
 struct VertexInput {
     @location(0) position: vec3<f32>,
+    @location(1) tex_coords: vec2<f32>,
 }
 
 struct VertexOutput {
@@ -19,7 +21,8 @@ fn vrt_main(
     entity: EntityInput
 ) -> VertexOutput {
     var out: VertexOutput;
-    out.tex_coords = entity.tex_coords;
+    out.tex_coords = vec2<f32>(model.tex_coords.x + (entity.index.x * entity.size.x), 
+    model.tex_coords.y + (entity.index.y * entity.size.y));
     out.clip_position = vec4<f32>(model.position + entity.position, 1.0);
     return out;
 }

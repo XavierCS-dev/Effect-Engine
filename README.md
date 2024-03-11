@@ -1,21 +1,43 @@
-## Next Steps (Phase 1 - Renderer)
-- [x] Remove EntityGroup2D - don't want it to take entity owernship
-- [x] Find different way to pass refs to entities grouped by layer to render function
-- [x] Render function - iterate through layers to draw, call methods to get buffers
-- [x] Layers - Create and write to buffers when needed.
-- [x] TextureAtlas2D - Complete atlas, to expand across width and height, and limit self to 8096x8096
-- [x] Create descriptors for entity
-- [ ] Create Transform 2D maths stuff for entity (later)
-- [ ] Create buffers in shader
-- [x] Add buffer layouts to pipeline
-- [ ] Add bind group layouts to pipeline (Mainly for entity)
-- [ ] Implement Entity2D::new()
-- [x] Switch HashMap to BTreeMap where it makes sense to do so
-- [ ] Add unit tests
-- [x] Fix buffer locations
-- [ ] Modify Texture to be added to a layer upon creation
-- [ ] Refactor
-  - [ ] Reduce black box state
-  - [ ] Increase unit test friendliness
-  - [ ] Hide main loop from user, or at least, make it easier to use
-  - [ ] Event System
+## Next Steps (Rewrite)
+- [x] Remove TexturePool entirely.
+- [x] Implement one time texture init for layer2D and atlas2D
+- [x] Cleanup entity2D
+- [x] Reimplement TextureAtlas2D.
+- [x] Increase use of ECS paradigm.
+- [x] Increase simplicity of Layer2D to be used directly by a user.
+- [x] Increase overall simplicity and reduce abstraction.
+- [x] Make complex high performance paths optional
+- [x] Make layers and their atlases not allow dynamic addition and removal of textures
+- [x] Fix incorrect buffer allocation / entity copying
+- [x] Fix (shaders maybe?) to use correct texture atlas coordinates
+  - store total width and height in layer atlas then use to calc exact tex position
+- [x] Fix tex aspect ratio
+- [x] Remove * 10.0 in vertex group when texture atlas complete
+- [x] Fix issues where entity buffers aren't updated correctly
+- [x] Fix entity positioning being incorrect
+~~¬- [ ] Implement 2D transformations first~~
+- [x] Fix broken buffers
+- [x] Fix bug which causes different entities to use the texture of the first one in the buffer
+- [x] Finish rewrite and clean everything up
+  - [ ] Find alternative to limit worldspace inaccuracies.
+  - [x] Remove unnecessary params
+  - [x] Remove unecessary functions
+  - [x] Add functions so user doesn't need to access queue and device
+  - [x] Any other issues
+- [ ] Merge with main
+
+- [ ] Further goals (0.2.0 release blockers)
+  - [ ] Implement Transformation2D
+  - [ ] Implement Camera2D (using 3D proj matrix)
+
+- [ ] Possible 0.3.0 release
+  - [ ] Sound system
+  - [ ] User input system
+
+- [ ] Possible 0.4.0 release
+  - [ ] Physics system including Collision2D suvat etc
+
+- [ ] Possible 0.5.0 release
+  - [ ] GUI using framework eg iced egui
+
+- [ ] 1.0 release when all basic components needed to make a game present and code is in good shape + performant

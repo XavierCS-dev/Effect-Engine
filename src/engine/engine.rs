@@ -1,26 +1,28 @@
+use std::sync::Arc;
+
 use crate::engine::entity::entity::Entity2D;
 use crate::engine::entity::entity::Entity2DRaw;
 use crate::engine::layer::layer::*;
 use wgpu::util::DeviceExt;
+use winit::dpi::PhysicalSize;
 
 use super::primitives::vector::Vector3;
 use super::{
     primitives::vertex::Vertex,
-    texture::{
-        texture2d::{Texture2D, TextureID},
-        texture_pool::TexturePool2D,
-    },
+    texture::texture2d::{Texture2D, TextureID},
     traits::layer::Layer,
 };
 
+use anyhow::Result;
+
 pub struct Engine {
-    surface: wgpu::Surface,
+    surface: wgpu::Surface<'static>,
     device: wgpu::Device,
     queue: wgpu::Queue,
     surface_configuration: wgpu::SurfaceConfiguration,
-    window: winit::window::Window,
+    window: Arc<winit::window::Window>,
     render_pipeline: wgpu::RenderPipeline,
-    texture_pool: TexturePool2D,
+    texture_bgl: wgpu::BindGroupLayout,
 }
 
 /*
@@ -33,7 +35,8 @@ impl Engine {
             backends: wgpu::Backends::all(),
             ..Default::default()
         });
-        let surface = unsafe { instance.create_surface(&window).unwrap() };
+        let window = Arc::new(window);
+        let surface = instance.create_surface(window.clone()).unwrap();
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
@@ -46,15 +49,14 @@ impl Engine {
             .request_device(
                 &wgpu::DeviceDescriptor {
                     label: Some("Adapter"),
-                    features: adapter.features(),
-                    limits: wgpu::Limits::default(),
+                    required_features: adapter.features(),
+                    required_limits: wgpu::Limits::default(),
                 },
                 None,
             )
             .await
             .unwrap();
 
-        let texture_pool = TexturePool2D::new(&device);
         let surface_capabilities = surface.get_capabilities(&adapter);
         // Check this...may need to specifically set it to some sRGB value
         let surface_format = surface_capabilities.formats[0];
@@ -66,16 +68,39 @@ impl Engine {
             present_mode: wgpu::PresentMode::AutoNoVsync,
             alpha_mode: surface_capabilities.alpha_modes[0],
             view_formats: Vec::new(),
+            desired_maximum_frame_latency: Default::default(),
         };
         surface.configure(&device, &surface_configuration);
 
         let shader_module =
             device.create_shader_module(wgpu::include_wgsl!("../shaders/shader.wgsl"));
 
+        let texture_bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        multisampled: false,
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+            label: Some("Bind group layout"),
+        });
+
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Pipeline layout descriptor"),
-                bind_group_layouts: &[texture_pool.bind_group_layout()],
+                bind_group_layouts: &[&texture_bgl],
                 push_constant_ranges: &[],
             });
 
@@ -107,7 +132,7 @@ impl Engine {
                 entry_point: "frg_main",
                 targets: &[Some(wgpu::ColorTargetState {
                     format: surface_configuration.format,
-                    blend: Some(wgpu::BlendState::REPLACE),
+                    blend: Some(wgpu::BlendState::PREMULTIPLIED_ALPHA_BLENDING),
                     write_mask: wgpu::ColorWrites::ALL,
                 })],
             }),
@@ -121,7 +146,7 @@ impl Engine {
             surface_configuration,
             window,
             render_pipeline,
-            texture_pool,
+            texture_bgl,
         }
     }
 
@@ -147,11 +172,7 @@ impl Engine {
         // if accuracy is a problem, change to floats
     }
 
-    // Must be rendered in order. Maybe be no existent layers inbetween, needs to happen fast.
-    // Vec can be sorted each time entities is appended to with a new entity2d and layerid.
-    // probably a lot faster and space efficient than hashmap
-    // entities managed by APP struct
-    pub fn render(&mut self, entities: Vec<Vec<&Entity2D>>) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self, entities: &Vec<Layer2D>) -> Result<(), wgpu::SurfaceError> {
         let surface_texture = self.surface.get_current_texture()?;
         let texture_view = surface_texture
             .texture
@@ -169,8 +190,8 @@ impl Engine {
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Clear(wgpu::Color {
                         r: 0.0,
-                        g: 0.0,
-                        b: 0.0,
+                        g: 0.5,
+                        b: 0.5,
                         a: 0.0,
                     }),
                     store: wgpu::StoreOp::Store,
@@ -180,17 +201,13 @@ impl Engine {
             timestamp_writes: None,
             occlusion_query_set: None,
         });
-
-        for (layer_id, layer) in self.texture_pool.get_layers() {
-            render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.set_bind_group(
-                0,
-                self.texture_pool.get_layer(layer_id).unwrap().bind_group(),
-                &[],
-            );
-            render_pass.set_vertex_buffer(0, layer.vertex_buffer().unwrap().slice(..));
-            render_pass.set_index_buffer(layer.index_buffer().slice(..), wgpu::IndexFormat::Uint32);
-            render_pass.draw_indexed(0..layer.index_count() as u32, 0, 0..1);
+        render_pass.set_pipeline(&self.render_pipeline);
+        for layer in entities {
+            render_pass.set_bind_group(0, layer.bind_group(), &[]);
+            render_pass.set_vertex_buffer(0, layer.vertex_buffer());
+            render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
+            render_pass.set_index_buffer(layer.index_buffer(), wgpu::IndexFormat::Uint16);
+            render_pass.draw_indexed(0..6 as u32, 0, 0..layer.entity_count() as u32);
         }
 
         drop(render_pass);
@@ -211,26 +228,33 @@ impl Engine {
         &self.window
     }
 
-    pub fn texture_pool(&mut self) -> &mut TexturePool2D {
-        &mut self.texture_pool
-    }
-
     pub fn init_entity(
         &mut self,
         position: Vector3,
-        texture: &Texture2D,
-        layer: LayerID,
+        texture: TextureID,
+        layer: &mut Layer2D,
     ) -> Entity2D {
-        let dimensions = self.window().inner_size();
-        Entity2D::new(
-            position,
-            &mut self.texture_pool,
-            layer,
-            texture.clone(),
-            dimensions.width,
-            dimensions.height,
+        Entity2D::new(position, layer, texture)
+    }
+
+    pub fn init_layer(
+        &self,
+        id: LayerID,
+        textures: Vec<Texture2D>,
+        texture_size: PhysicalSize<u32>,
+    ) -> Result<Layer2D> {
+        Layer2D::new(
+            id,
+            self.window.inner_size(),
+            textures,
             &self.device,
             &self.queue,
+            &self.texture_bgl,
+            texture_size,
         )
+    }
+
+    pub fn set_entities(&self, layer: &mut Layer2D, entities: &[&Entity2D]) {
+        Layer2DSystem::set_entities(layer, entities, &self.device, &self.queue)
     }
 }

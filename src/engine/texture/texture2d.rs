@@ -4,65 +4,72 @@ use image::Rgba;
 use std::fs;
 use std::io::prelude::*;
 
-use super::texture_pool::BindGroupID;
-
-#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Debug)]
-pub struct TextureID(pub String);
-
-impl TextureID {
-    pub fn as_str(&self) -> &str {
-        self.0.as_str()
-    }
-}
+#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Debug, Copy)]
+pub struct TextureID(pub &'static str);
 
 // add tex coords here, make bind group mandatory.
-#[derive(Clone)]
+// Don't want to copy, as we want to make it clear it is something to be modified
+#[derive(Clone, Debug)]
 pub struct Texture2D {
     id: TextureID,
-    path: String,
-    bind_group_id: Option<BindGroupID>,
+    path: &'static str,
     width: u32,
     height: u32,
-    offset: Option<[u32; 2]>,
+    index: Option<[u32; 2]>,
 }
 
 impl Texture2D {
-    pub fn new(id: TextureID, filepath: &str, device: &wgpu::Device, queue: &wgpu::Queue) -> Self {
-        let bind_group_id = None;
-        let mut file_byes: Vec<u8> = Vec::new();
-        let mut file = fs::File::open(filepath).expect("Could not find file {filepath}");
-        file.read_to_end(&mut file_byes).unwrap();
-        let diffuse = image::load_from_memory(file_byes.as_slice()).unwrap();
-        let diffuse_rgb = diffuse.to_rgba8();
-        let dimensions = diffuse.dimensions();
-
-        let texure_extent = wgpu::Extent3d {
-            width: dimensions.0,
-            height: dimensions.1,
-            depth_or_array_layers: 1,
-        };
+    pub fn new(id: TextureID, path: &'static str) -> Self {
         // havig one bind group per texure isn't very performant.
         // It may be better to have one bind group per zone of loaded textures,
         // each bind group having all the textures it needs for a zone,
         // then swap out the bind group for new zones.
         Self {
             id,
-            path: filepath.to_string(),
-            bind_group_id,
-            width: dimensions.0,
-            height: dimensions.1,
-            offset: None,
+            path,
+            width: 0,
+            height: 0,
+            index: None,
         }
     }
 
-    pub fn file_path(&self) -> &String {
-        &self.path
+    pub fn file_path(&self) -> &str {
+        self.path
+    }
+
+    pub fn id(&self) -> &TextureID {
+        &self.id
+    }
+
+    pub fn index(&self) -> Option<[u32; 2]> {
+        self.index
+    }
+
+    pub fn width(&self) -> u32 {
+        self.width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.height
+    }
+}
+
+pub struct Texture2DSystem;
+impl Texture2DSystem {
+    pub fn set_index(texture: &mut Texture2D, index: [u32; 2]) {
+        texture.index = Some(index);
+    }
+
+    pub fn set_dimensions(texture: &mut Texture2D, width: u32, height: u32) {
+        texture.width = width;
+        texture.height = height;
     }
 
     pub fn init_texture(
         extent: wgpu::Extent3d,
         rgba_image: ImageBuffer<Rgba<u8>, Vec<u8>>,
         bind_group_layout: &wgpu::BindGroupLayout,
+        pixel_art: bool,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> (
@@ -99,11 +106,17 @@ impl Texture2D {
         );
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+        let mag_filter;
+        if pixel_art {
+            mag_filter = wgpu::FilterMode::Nearest;
+        } else {
+            mag_filter = wgpu::FilterMode::Linear
+        }
         let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
             address_mode_u: wgpu::AddressMode::ClampToEdge,
             address_mode_v: wgpu::AddressMode::ClampToEdge,
             address_mode_w: wgpu::AddressMode::ClampToEdge,
-            mag_filter: wgpu::FilterMode::Linear,
+            mag_filter,
             min_filter: wgpu::FilterMode::Nearest,
             mipmap_filter: wgpu::FilterMode::Nearest,
             ..Default::default()
@@ -125,37 +138,5 @@ impl Texture2D {
         });
 
         (bind_group, texture, view, sampler)
-    }
-
-    pub fn id(&self) -> &TextureID {
-        &self.id
-    }
-
-    pub fn path(&self) -> &str {
-        self.path.as_str()
-    }
-
-    pub fn offset(&self) -> Option<[u32; 2]> {
-        self.offset
-    }
-
-    pub fn set_offset(&mut self, x: u32, y: u32) {
-        self.offset = Some([x, y]);
-    }
-
-    pub fn bind_group_id(&self) -> Option<BindGroupID> {
-        self.bind_group_id
-    }
-
-    pub fn set_bind_group_id(&mut self, id: BindGroupID) {
-        self.bind_group_id = Some(id);
-    }
-
-    pub fn width(&self) -> u32 {
-        self.width
-    }
-
-    pub fn height(&self) -> u32 {
-        self.height
     }
 }

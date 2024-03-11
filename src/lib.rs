@@ -3,12 +3,9 @@ use anyhow::Result;
 use engine::{
     engine as effect,
     entity::entity::Entity2D,
-    layer::layer::LayerID,
+    layer::layer::{Layer2D, LayerID},
     primitives::vector::Vector3,
-    texture::{
-        texture2d::{Texture2D, TextureID},
-        texture_pool::TexturePool2D,
-    },
+    texture::texture2d::{Texture2D, TextureID},
 };
 use winit::{
     dpi::PhysicalSize,
@@ -21,12 +18,12 @@ pub struct EffectSystem {
 }
 
 impl EffectSystem {
-    pub fn new() -> (Self, EventLoop<()>) {
+    pub fn new(screen_dimensions: PhysicalSize<u32>) -> (Self, EventLoop<()>) {
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(ControlFlow::Poll);
         let window = WindowBuilder::new()
             .with_title("Effect Engine")
-            .with_inner_size(PhysicalSize::new(800, 600))
+            .with_inner_size(screen_dimensions)
             .with_resizable(false)
             .build(&event_loop)
             .unwrap();
@@ -34,66 +31,53 @@ impl EffectSystem {
         (Self { engine }, event_loop)
     }
 
-    pub fn sort(mut entities: Vec<&Entity2D>) -> Vec<Vec<&Entity2D>> {
-        entities.sort_unstable_by_key(|v| v.layer_id().0);
-        // nested vecs, so not only are lower layers drawn first,
-        // but y sorting cn also be used, when implemented.
-        let mut layers: Vec<Vec<&Entity2D>> = Vec::new();
-        layers.push(Vec::new());
-        layers.get_mut(0).unwrap().push(entities.first().unwrap());
-        let mut last = entities.first().unwrap().layer_id().0;
-        entities.remove(0);
-        let mut index = 0;
-        for entity in entities {
-            if entity.layer_id().0 != last {
-                layers.push(Vec::new());
-                index += 1;
-                last = entity.layer_id().0;
-            }
-            layers.get_mut(index).unwrap().push(entity);
-        }
-        layers
-    }
-
-    pub fn y_sort(layer: &mut Vec<&Entity2D>) {
-        layer.sort_unstable_by(|a, b| b.position().y.partial_cmp(&a.position().y).unwrap());
-    }
-
-    /// Take an unordered Vec or Entity2Ds, then sort them into layers
-    /// and sort the layers based on y position. (Higher y drawn first.)
-    pub fn render_sorted(&mut self, entities: Vec<&Entity2D>, y_sorting: bool) {
-        let mut sorted_ents = EffectSystem::sort(entities);
-        if y_sorting {
-            for layer in &mut sorted_ents {
-                EffectSystem::y_sort(layer);
-            }
-        }
-        self.engine.render(sorted_ents).unwrap();
-    }
-
-    /// Take a pre-sorted nested Vecs and render it as is.
-    // The inner Vec is a singular layer.  May result in unexpexted behaviour if incorrectly sorted.
-    pub unsafe fn render(
-        &mut self,
-        entities: Vec<Vec<&Entity2D>>,
-    ) -> Result<(), wgpu::SurfaceError> {
-        self.engine.render(entities)
+    /// it is up to the user to sort the layers, they have the tools to do so.
+    pub fn render(&mut self, layers: &Vec<Layer2D>) -> Result<(), wgpu::SurfaceError> {
+        self.engine.render(&layers)
     }
 
     pub fn init_entity(
         &mut self,
         position: Vector3,
-        texture: &Texture2D,
-        layer: LayerID,
+        texture_id: TextureID,
+        layer: &mut Layer2D,
     ) -> Entity2D {
-        self.engine.init_entity(position, texture, layer)
+        self.engine.init_entity(position, texture_id, layer)
     }
 
-    pub fn init_texture(&self, id: TextureID, path: &str) -> Texture2D {
-        Texture2D::new(id, path, self.engine.device(), self.engine.queue())
+    pub fn init_texture(&self, id: TextureID, path: &'static str) -> Texture2D {
+        Texture2D::new(id, path)
+    }
+
+    /// Make sure your texture_size is set to the larger dimension that appears in your textures.
+    /// It would be easier to use textures which all have the same dimensions
+    /// and set that to the texture size, otherwise 2D transformations may not
+    /// behave as you would expect them to.
+    /// The maximum texture size for a layer is 8192px * 8192px
+    /// The optimal stratergy is to keep similar textures on the same layer
+    /// (provided you want the rendered in that order)
+    pub fn init_layer(
+        &self,
+        id: LayerID,
+        textures: Vec<Texture2D>,
+        texture_size: PhysicalSize<u32>,
+    ) -> Result<Layer2D> {
+        self.engine.init_layer(id, textures, texture_size)
+    }
+
+    pub fn set_entities(&self, layer: &mut Layer2D, entities: &[&Entity2D]) {
+        self.engine.set_entities(layer, entities);
+    }
+
+    pub fn device(&self) -> &wgpu::Device {
+        self.engine.device()
+    }
+
+    pub fn queue(&self) -> &wgpu::Queue {
+        self.engine.queue()
     }
 }
 
-pub fn init_engine() -> (EffectSystem, EventLoop<()>) {
-    EffectSystem::new()
+pub fn init_engine(screen_dimensions: PhysicalSize<u32>) -> (EffectSystem, EventLoop<()>) {
+    EffectSystem::new(screen_dimensions)
 }
