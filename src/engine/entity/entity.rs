@@ -84,4 +84,16 @@ impl EntitySystem2D {
         entity.texture = texture;
         Ok(())
     }
+
+    pub fn set_x(entity: &mut Entity2D, x: f32) {
+        entity.position.x = x;
+    }
+
+    pub fn set_y(entity: &mut Entity2D, y: f32) {
+        entity.position.y = y;
+    }
+
+    pub fn set_position(entity: &mut Entity2D, position: Vector3) {
+        entity.position = position;
+    }
 }
