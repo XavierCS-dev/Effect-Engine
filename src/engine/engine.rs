@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::engine::entity::entity::Entity2D;
 use crate::engine::entity::entity::Entity2DRaw;
 use crate::engine::layer::layer::*;
@@ -14,11 +16,11 @@ use super::{
 use anyhow::Result;
 
 pub struct Engine {
-    surface: wgpu::Surface,
+    surface: wgpu::Surface<'static>,
     device: wgpu::Device,
     queue: wgpu::Queue,
     surface_configuration: wgpu::SurfaceConfiguration,
-    window: winit::window::Window,
+    window: Arc<winit::window::Window>,
     render_pipeline: wgpu::RenderPipeline,
     texture_bgl: wgpu::BindGroupLayout,
 }
@@ -33,7 +35,8 @@ impl Engine {
             backends: wgpu::Backends::all(),
             ..Default::default()
         });
-        let surface = unsafe { instance.create_surface(&window).unwrap() };
+        let window = Arc::new(window);
+        let surface = instance.create_surface(window.clone()).unwrap();
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
@@ -46,8 +49,8 @@ impl Engine {
             .request_device(
                 &wgpu::DeviceDescriptor {
                     label: Some("Adapter"),
-                    features: adapter.features(),
-                    limits: wgpu::Limits::default(),
+                    required_features: adapter.features(),
+                    required_limits: wgpu::Limits::default(),
                 },
                 None,
             )
@@ -65,6 +68,7 @@ impl Engine {
             present_mode: wgpu::PresentMode::AutoNoVsync,
             alpha_mode: surface_capabilities.alpha_modes[0],
             view_formats: Vec::new(),
+            desired_maximum_frame_latency: Default::default(),
         };
         surface.configure(&device, &surface_configuration);
 
