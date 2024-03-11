@@ -37,6 +37,13 @@ impl TextureAtlas2D {
         let mut total_height = 0;
         for texture in textures.iter_mut() {
             let tex = image::open(texture.file_path())?;
+            let size;
+            if tex.height() > tex.width() {
+                size = tex.height();
+            } else {
+                size = tex.width();
+            }
+            tex.resize_to_fill(size, size, image::imageops::FilterType::Lanczos3);
             let tex_rgba = tex.to_rgba8();
             let tex_dimensions = tex.dimensions();
             Texture2DSystem::set_dimensions(texture, tex_dimensions.0, tex_dimensions.1);

@@ -16,7 +16,7 @@ fn main() {
     let tex_id = TextureID("tree");
     let evil_id = TextureID("evil");
     let layer_id = LayerID(1);
-    let tex = app.init_texture(tex_id, "tree.png");
+    let tex = app.init_texture(tex_id, "bob.png");
     let evil = app.init_texture(evil_id, "evil.png");
     let mut layer = app.init_layer(layer_id, vec![tex, evil]).unwrap();
     let position = Vector3 {
