@@ -44,7 +44,10 @@ fn main() {
     let ent = app.init_entity(position, tex_id, &mut layer);
     let ent_good = app.init_entity(position_g, evil_id, &mut layer);
     let bob_ent = app.init_entity(position_b, bob_id, &mut layer);
-    let ents = vec![ent, ent_good, bob_ent];
+    let mut ents = vec![ent, ent_good, bob_ent];
+    for i in 0..10000 {
+        ents.push(app.init_entity(position_b, evil_id, &mut layer));
+    }
     Layer2DSystem::set_entities(&mut layer, ents.as_slice(), app.device(), app.queue());
     let layers = vec![layer];
     let _check = false;

@@ -49,6 +49,13 @@ impl EffectSystem {
         Texture2D::new(id, path, self.engine.device(), self.engine.queue())
     }
 
+    /// Make sure your texture_size is set to the larger dimension that appears in your textures.
+    /// It would be easier to use textures which all have the same dimensions
+    /// and set that to the texture size, otherwise 2D transformations may not
+    /// behave as you would expect them to.
+    /// The maximum texture size for a layer is 8192px * 8192px
+    /// The optimal stratergy is to keep similar textures on the same layer
+    /// (provided you want the rendered in that order)
     pub fn init_layer(
         &self,
         id: LayerID,
