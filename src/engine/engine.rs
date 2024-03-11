@@ -6,6 +6,7 @@ use crate::engine::layer::layer::*;
 use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalSize;
 
+use super::camera::camera::Camera2D;
 use super::primitives::vector::Vector3;
 use super::{
     primitives::vertex::Vertex,
@@ -23,6 +24,7 @@ pub struct Engine {
     window: Arc<winit::window::Window>,
     render_pipeline: wgpu::RenderPipeline,
     texture_bgl: wgpu::BindGroupLayout,
+    camera: Camera2D,
 }
 
 /*
@@ -56,6 +58,8 @@ impl Engine {
             )
             .await
             .unwrap();
+        let dims = window.inner_size();
+        let camera = Camera2D::new(&device, 45.0, (dims.width as f32) / (dims.height as f32));
 
         let surface_capabilities = surface.get_capabilities(&adapter);
         // Check this...may need to specifically set it to some sRGB value
@@ -100,7 +104,7 @@ impl Engine {
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Pipeline layout descriptor"),
-                bind_group_layouts: &[&texture_bgl],
+                bind_group_layouts: &[&texture_bgl, camera.bind_group_layout()],
                 push_constant_ranges: &[],
             });
 
@@ -147,6 +151,7 @@ impl Engine {
             window,
             render_pipeline,
             texture_bgl,
+            camera,
         }
     }
 
@@ -204,6 +209,7 @@ impl Engine {
         render_pass.set_pipeline(&self.render_pipeline);
         for layer in entities {
             render_pass.set_bind_group(0, layer.bind_group(), &[]);
+            render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
             render_pass.set_vertex_buffer(0, layer.vertex_buffer());
             render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
             render_pass.set_index_buffer(layer.index_buffer(), wgpu::IndexFormat::Uint16);

@@ -27,9 +27,9 @@ fn main() {
     let position = Vector3::new(-0.5, -0.5, 0.0);
     let ent = app.init_entity(position, evil_id, &mut layer);
     let mut ent_good = app.init_entity(position, tex_id, &mut layer);
-    EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.5, 0.0, 0.0));
+    EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.0, 0.0, 0.0));
     EntitySystem2D::set_rotation(&mut ent_good, 30.0);
-    EntitySystem2D::set_scale(&mut ent_good, 0.5);
+    EntitySystem2D::set_scale(&mut ent_good, 0.25);
     let mut ents_owner = vec![ent, ent_good];
     let mut ents = Vec::new();
     for ent in ents_owner.iter() {
