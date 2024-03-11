@@ -5,20 +5,21 @@ use crate::engine::{
     layer::layer::{Layer2D, LayerID},
     primitives::vector::Vector3,
     texture::texture2d::TextureID,
+    transform::transform::{Transform2D, Transform2DSystem},
     util::effect_error::EffectError,
 };
 
 #[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
+#[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy, Debug)]
 pub struct Entity2DRaw {
-    position: [f32; 3],
+    transform: [[f32; 4]; 4],
     texture_index: [f32; 2],
     texture_size: [f32; 2],
 }
 
 impl Entity2DRaw {
-    const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 3] =
-        wgpu::vertex_attr_array![2 => Float32x3, 3=> Float32x2, 4=>Float32x2];
+    const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 6] = wgpu::vertex_attr_array![2 => Float32x4, 3=> Float32x4,
+        4=> Float32x4,5=> Float32x4,6=> Float32x2, 7=>Float32x2];
 
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
@@ -31,7 +32,7 @@ impl Entity2DRaw {
 
 pub struct Entity2D {
     layer: LayerID,
-    position: Vector3,
+    transform: Transform2D,
     texture: TextureID,
     texture_index: [u32; 2],
     texture_size: PhysicalSize<f32>,
@@ -42,9 +43,11 @@ impl Entity2D {
         let tex = layer.get_texture(texture).unwrap();
         let texture_index = tex.index().expect("Tex not in given layer");
         let texture_size = layer.tex_coord_size();
+        let mut transform = Transform2D::new();
+        Transform2DSystem::translate(&mut transform, position);
         Self {
             layer: layer.id(),
-            position,
+            transform,
             texture,
             texture_index,
             texture_size,
@@ -53,9 +56,8 @@ impl Entity2D {
 
     // will include "model" with pos and rotation later...
     pub fn to_raw(&self) -> Entity2DRaw {
-        let position = [self.position.x, self.position.y, self.position.z];
         Entity2DRaw {
-            position,
+            transform: self.transform.to_raw(),
             texture_index: [self.texture_index[0] as f32, self.texture_index[1] as f32],
             texture_size: self.texture_size.into(),
         }
@@ -66,7 +68,7 @@ impl Entity2D {
     }
 
     pub fn position(&self) -> &Vector3 {
-        &self.position
+        &self.transform.position()
     }
 }
 
@@ -85,15 +87,13 @@ impl EntitySystem2D {
         Ok(())
     }
 
-    pub fn set_x(entity: &mut Entity2D, x: f32) {
-        entity.position.x = x;
-    }
-
-    pub fn set_y(entity: &mut Entity2D, y: f32) {
-        entity.position.y = y;
-    }
-
     pub fn set_position(entity: &mut Entity2D, position: Vector3) {
-        entity.position = position;
+        Transform2DSystem::translate(&mut entity.transform, position);
+    }
+    pub fn set_rotation(entity: &mut Entity2D, degrees: f32) {
+        Transform2DSystem::rotate(&mut entity.transform, degrees);
+    }
+    pub fn set_scale(entity: &mut Entity2D, scale: f32) {
+        Transform2DSystem::scale(&mut entity.transform, scale);
     }
 }
