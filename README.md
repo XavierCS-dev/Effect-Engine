@@ -19,7 +19,7 @@
 - [x] Fix broken buffers
 - [x] Fix bug which causes different entities to use the texture of the first one in the buffer
 - [ ] Finish rewrite and clean everything up
-  - [ ] Very bad idea, find alternative to limit worldspace inaccuracies.
+  - [ ] Find alternative to limit worldspace inaccuracies.
   - [ ] Remove unnecessary params
   - [ ] Remove unecessary functions
   - [ ] Add functions so user doesn't need to access queue and device
