@@ -24,21 +24,10 @@ fn main() {
     let mut layer = app
         .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32))
         .unwrap();
-    let position = Vector3 {
-        x: -0.5,
-        y: -0.5,
-        z: 0.0,
-    };
+    let position = Vector3::new(-0.5, -0.5, 0.0);
     let ent = app.init_entity(position, evil_id, &mut layer);
     let mut ent_good = app.init_entity(position, tex_id, &mut layer);
-    EntitySystem2D::set_position(
-        &mut ent_good,
-        Vector3 {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-        },
-    );
+    EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.0, 0.0, 0.0));
     EntitySystem2D::set_rotation(&mut ent_good, 30.0);
     EntitySystem2D::set_scale(&mut ent_good, 0.5);
     let mut ents_owner = vec![ent, ent_good];
