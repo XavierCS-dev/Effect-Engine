@@ -26,8 +26,8 @@ pub struct Layer2D {
     id: LayerID,
     textures: HashMap<TextureID, Texture2D>,
     atlas: TextureAtlas2D,
-    vertex_buffer: Option<wgpu::Buffer>,
-    index_buffer: Option<wgpu::Buffer>,
+    vertex_buffer: wgpu::Buffer,
+    index_buffer: wgpu::Buffer,
     entity_count: usize,
     entity_maximum: usize,
     entity_buffer: Option<wgpu::Buffer>,
@@ -42,26 +42,40 @@ impl Layer2D {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
+        texture_size: PhysicalSize<u32>,
     ) -> Result<Self> {
-        let atlas = TextureAtlas2D::new(&mut textures, device, queue, bind_group_layout)?;
+        let atlas = TextureAtlas2D::new(
+            &mut textures,
+            device,
+            queue,
+            bind_group_layout,
+            texture_size,
+        )?;
         let mut textures_layer = HashMap::new();
         for texture in textures {
             textures_layer.insert(texture.id().clone(), texture);
         }
-        let index_buffer = None;
+        let index_buffer = Layer2DSystem::create_index_buffer(device, queue);
         let entity_count = 0;
         let entity_maximum = 0;
+        let vertex_buffer =
+            Layer2DSystem::create_vertex_buffer(atlas.tex_coord_size(), device, queue);
         Ok(Self {
             id,
             textures: textures_layer,
             atlas,
-            vertex_buffer: None,
+            vertex_buffer,
             index_buffer,
             entity_count,
             entity_buffer: None,
             entity_maximum,
             dimensions,
         })
+    }
+
+    pub fn tex_coord_size(&self) -> PhysicalSize<f32> {
+        println!("{:?}", self.atlas.tex_coord_size());
+        self.atlas.tex_coord_size()
     }
 
     pub fn id(&self) -> LayerID {
@@ -79,25 +93,13 @@ impl Layer2D {
     // if using the 2x technique, its probably better to return the exact slice where the data is
     // instead of the whole buffer, same for the other buffers
     // 4 is the number of vertices per entity
-    pub fn vertex_buffer(&self) -> Option<wgpu::BufferSlice> {
-        match self.vertex_buffer.as_ref() {
-            Some(v_buf) => {
-                let length = self.entity_count * std::mem::size_of::<Vertex>() * 4;
-                Some(v_buf.slice(0..length as u64))
-            }
-            None => None,
-        }
+    pub fn vertex_buffer(&self) -> wgpu::BufferSlice {
+        self.vertex_buffer.slice(..)
     }
 
     // 6 is the number of indicies per entity.
-    pub fn index_buffer(&self) -> Option<wgpu::BufferSlice> {
-        match self.index_buffer.as_ref() {
-            Some(i_buf) => {
-                let length = self.entity_count * std::mem::size_of::<u16>() * 6;
-                Some(i_buf.slice(0..length as u64))
-            }
-            None => None,
-        }
+    pub fn index_buffer(&self) -> wgpu::BufferSlice {
+        self.index_buffer.slice(..)
     }
 
     pub fn entity_buffer(&self) -> Option<wgpu::BufferSlice> {
@@ -162,7 +164,7 @@ impl Layer2DSystem {
         }
         let buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some(label),
-            size: size * 2,
+            size,
             usage: usage | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
@@ -179,36 +181,42 @@ impl Layer2DSystem {
         let ents = entities.iter().map(|e| e.to_raw()).collect::<Vec<_>>();
         let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
         let size = std::mem::size_of_val(data) as u64;
-        Layer2DSystem::alloc_buffer(data, size, device, queue, "Entity Buffer", false)
+        Layer2DSystem::alloc_buffer(data, size * 2, device, queue, "Entity Buffer", false)
     }
 
-    fn create_index_buffer(
-        device: &wgpu::Device,
-        entity_count: usize,
-        queue: &wgpu::Queue,
-    ) -> wgpu::Buffer {
+    fn create_index_buffer(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Buffer {
         let mut indices: Vec<u16> = Vec::new();
-        indices.reserve(std::mem::size_of::<u16>() * entity_count as usize);
-        for _ in 0..entity_count {
-            indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);
-        }
+        indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);
         let data: &[u8] = bytemuck::cast_slice(&indices);
-        let size = (entity_count * std::mem::size_of::<u16>() * 6) as u64;
+        let size = (std::mem::size_of::<u16>() * 6) as u64;
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Index Buffer", true)
     }
 
     fn create_vertex_buffer(
-        entities: &[Entity2D],
+        tex_coord_size: PhysicalSize<f32>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
-        let ents = entities
-            .iter()
-            .flat_map(|e| e.vertices())
-            .copied()
-            .collect::<Vec<_>>();
-        let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
-        let size = std::mem::size_of_val(data) as u64;
+        let verts = vec![
+            Vertex {
+                position: [0.5, 0.5, 0.0],
+                tex_coords: [tex_coord_size.width, 0.0],
+            },
+            Vertex {
+                position: [0.5, 0.5, 0.0],
+                tex_coords: [0.0, 0.0],
+            },
+            Vertex {
+                position: [0.5, 0.5, 0.0],
+                tex_coords: [0.0, tex_coord_size.height],
+            },
+            Vertex {
+                position: [0.5, 0.5, 0.0],
+                tex_coords: [tex_coord_size.width, tex_coord_size.height],
+            },
+        ];
+        let data: &[u8] = bytemuck::cast_slice(verts.as_slice());
+        let size = (std::mem::size_of::<Vertex>() * verts.len()) as u64;
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)
     }
 
@@ -237,39 +245,17 @@ impl Layer2DSystem {
         // perhaps a strategy of allocatin 2X needed data would be better
         layer.entity_count = entities.len();
 
-        if layer.entity_count() > layer.entity_maximum() || layer.vertex_buffer().is_none() {
+        if layer.entity_count() > layer.entity_maximum() || layer.entity_buffer().is_none() {
             // Allocate new buffers
             layer.entity_buffer = Some(Layer2DSystem::create_entity_buffer(
                 &entities, device, queue,
-            ));
-            layer.vertex_buffer = Some(Layer2DSystem::create_vertex_buffer(
-                &entities, device, queue,
-            ));
-            layer.index_buffer = Some(Layer2DSystem::create_index_buffer(
-                device,
-                layer.entity_count(),
-                queue,
             ));
             layer.entity_maximum = layer.entity_count * 2;
         } else {
             // Reuse buffers
             let ents = entities.iter().map(|e| e.to_raw()).collect::<Vec<_>>();
             let entity_data: &[u8] = bytemuck::cast_slice(ents.as_slice());
-            let verts = entities
-                .iter()
-                .flat_map(|e| e.vertices())
-                .copied()
-                .collect::<Vec<_>>();
-            let vertex_data: &[u8] = bytemuck::cast_slice(verts.as_slice());
-            let mut indices: Vec<u16> = Vec::new();
-            indices.reserve(std::mem::size_of::<u16>() * layer.entity_count());
-            for _ in 0..layer.entity_count() {
-                indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);
-            }
-            let index_data: &[u8] = bytemuck::cast_slice(&indices);
             queue.write_buffer(&layer.entity_buffer.as_ref().unwrap(), 0, entity_data);
-            queue.write_buffer(&layer.vertex_buffer.as_ref().unwrap(), 0, vertex_data);
-            queue.write_buffer(&layer.index_buffer.as_ref().unwrap(), 0, index_data);
         }
     }
 }

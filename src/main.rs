@@ -6,7 +6,10 @@ use effect_engine::engine::{
     primitives::vector::Vector3,
     texture::texture2d::{Texture2D, TextureID},
 };
-use winit::event::{Event, WindowEvent};
+use winit::{
+    dpi::PhysicalSize,
+    event::{Event, WindowEvent},
+};
 
 fn main() {
     println!("Hello, world!");
@@ -18,7 +21,9 @@ fn main() {
     let layer_id = LayerID(1);
     let tex = app.init_texture(tex_id, "bob.png");
     let evil = app.init_texture(evil_id, "evil.png");
-    let mut layer = app.init_layer(layer_id, vec![tex, evil]).unwrap();
+    let mut layer = app
+        .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32))
+        .unwrap();
     let position = Vector3 {
         x: 0.2,
         y: 0.4,
