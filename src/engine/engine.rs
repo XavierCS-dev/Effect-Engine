@@ -233,6 +233,9 @@ impl Engine {
         Entity2D::new(position, layer, texture)
     }
 
+    /// Make sure your texture_size is set to the larger dimension that appears in your textures.
+    /// It would be easier to use textures which all have the same dimensions
+    /// The maximum texture size for a layer is 8192px * 8192px
     pub fn init_layer(
         &self,
         id: LayerID,
