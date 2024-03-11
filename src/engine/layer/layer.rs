@@ -32,6 +32,7 @@ pub struct Layer2D {
     entity_maximum: usize,
     entity_buffer: Option<wgpu::Buffer>,
     dimensions: winit::dpi::PhysicalSize<u32>,
+    texture_size: PhysicalSize<u32>,
 }
 
 impl Layer2D {
@@ -58,8 +59,12 @@ impl Layer2D {
         let index_buffer = Layer2DSystem::create_index_buffer(device, queue);
         let entity_count = 0;
         let entity_maximum = 0;
-        let vertex_buffer =
-            Layer2DSystem::create_vertex_buffer(atlas.tex_coord_size(), device, queue);
+        let vertex_buffer = Layer2DSystem::create_vertex_buffer(
+            texture_size,
+            atlas.tex_coord_size(),
+            device,
+            queue,
+        );
         Ok(Self {
             id,
             textures: textures_layer,
@@ -70,11 +75,11 @@ impl Layer2D {
             entity_buffer: None,
             entity_maximum,
             dimensions,
+            texture_size,
         })
     }
 
     pub fn tex_coord_size(&self) -> PhysicalSize<f32> {
-        println!("{:?}", self.atlas.tex_coord_size());
         self.atlas.tex_coord_size()
     }
 
@@ -193,28 +198,32 @@ impl Layer2DSystem {
     }
 
     fn create_vertex_buffer(
+        texture_size: PhysicalSize<u32>,
         tex_coord_size: PhysicalSize<f32>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
+        let width = (texture_size.width as f32 / texture_size.width as f32) as f32;
+        let height = (texture_size.height as f32 / texture_size.height as f32) as f32;
         let verts = vec![
             Vertex {
-                position: [0.5, 0.5, 0.0],
+                position: [width, height, 0.0],
                 tex_coords: [tex_coord_size.width, 0.0],
             },
             Vertex {
-                position: [0.5, 0.5, 0.0],
+                position: [0.0, height, 0.0],
                 tex_coords: [0.0, 0.0],
             },
             Vertex {
-                position: [0.5, 0.5, 0.0],
+                position: [0.0, 0.0, 0.0],
                 tex_coords: [0.0, tex_coord_size.height],
             },
             Vertex {
-                position: [0.5, 0.5, 0.0],
+                position: [width, 0.0, 0.0],
                 tex_coords: [tex_coord_size.width, tex_coord_size.height],
             },
         ];
+        println!("{:?}", verts);
         let data: &[u8] = bytemuck::cast_slice(verts.as_slice());
         let size = (std::mem::size_of::<Vertex>() * verts.len()) as u64;
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)

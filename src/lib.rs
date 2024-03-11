@@ -23,7 +23,7 @@ impl EffectSystem {
         event_loop.set_control_flow(ControlFlow::Poll);
         let window = WindowBuilder::new()
             .with_title("Effect Engine")
-            .with_inner_size(PhysicalSize::new(800, 600))
+            .with_inner_size(PhysicalSize::new(800, 800))
             .with_resizable(false)
             .build(&event_loop)
             .unwrap();

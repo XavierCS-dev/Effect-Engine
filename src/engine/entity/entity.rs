@@ -49,13 +49,7 @@ pub struct Entity2D {
 }
 
 impl Entity2D {
-    pub fn new(
-        position: Vector3,
-        layer: &Layer2D,
-        texture: TextureID,
-        screen_width: u32,
-        screen_height: u32,
-    ) -> Self {
+    pub fn new(position: Vector3, layer: &Layer2D, texture: TextureID) -> Self {
         let tex = layer.get_texture(texture).unwrap();
         let texture_index = tex.index().expect("Tex not in given layer");
         let texture_size = layer.tex_coord_size();

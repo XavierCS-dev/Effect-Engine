@@ -4,6 +4,7 @@ use crate::engine::{
 };
 
 use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
+use wgpu::Extent3d;
 use winit::dpi::PhysicalSize;
 
 use super::texture2d::{Texture2D, TextureID};
@@ -11,8 +12,8 @@ use super::texture2d::{Texture2D, TextureID};
 use anyhow::{bail, Result};
 use image::EncodableLayout;
 
-const MAX_WIDTH: u32 = 8196;
-const MAX_HEIGHT: u32 = 8196;
+const MAX_WIDTH: u32 = 8192;
+const MAX_HEIGHT: u32 = 8192;
 
 pub struct TextureAtlas2D {
     bind_group: wgpu::BindGroup,
@@ -38,12 +39,6 @@ impl TextureAtlas2D {
         if (width_count as usize * height_count as usize) < textures.len() {
             bail!(EffectError::new("Not enough space for textures in atlas"));
         }
-
-        let extent = wgpu::Extent3d {
-            width: 64,
-            height: 32,
-            depth_or_array_layers: 1,
-        };
 
         let mut current_width = 0;
         let mut current_height = 0;
@@ -89,18 +84,17 @@ impl TextureAtlas2D {
         }
         let mut combined_tex = ImageBuffer::new(total_width, total_height);
         for ((width, height), texture) in dimensions.iter().zip(image_buffers) {
-            combined_tex.copy_from(&texture, *width, *height).unwrap();
+            combined_tex
+                .copy_from(&texture, *width, *height)
+                .or(Err(EffectError::new(
+                    "Texture size to small for largest texture",
+                )))?;
         }
-
-        image::save_buffer_with_format(
-            "memes.png",
-            &combined_tex,
-            64,
-            32,
-            image::ColorType::Rgba8,
-            image::ImageFormat::Png,
-        )
-        .unwrap();
+        let extent = wgpu::Extent3d {
+            width: total_width,
+            height: total_height,
+            depth_or_array_layers: 1,
+        };
 
         let (bind_group, atlas, view, sampler) =
             Texture2DSystem::init_texture(extent, combined_tex, bind_group_layout, device, queue);

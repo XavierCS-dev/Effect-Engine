@@ -230,14 +230,7 @@ impl Engine {
         texture: TextureID,
         layer: &mut Layer2D,
     ) -> Entity2D {
-        let dimensions = self.window().inner_size();
-        Entity2D::new(
-            position,
-            layer,
-            texture,
-            dimensions.width,
-            dimensions.height,
-        )
+        Entity2D::new(position, layer, texture)
     }
 
     pub fn init_layer(
