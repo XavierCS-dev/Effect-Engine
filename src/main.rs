@@ -41,7 +41,6 @@ fn main() {
     let mut layers = vec![layer];
     let camera = app.camera_mut();
     Camera2DSystem::transform(camera, Vector3::new(-0.5, -0.5, 0.0));
-    Camera2DSystem::rotate(camera, 45.0);
     app.update_camera();
 
     let mut rotation = 0.0;
