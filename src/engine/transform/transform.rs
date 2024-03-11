@@ -50,8 +50,8 @@ impl Transform2DSystem {
         let radians = degrees.to_radians();
         transform.rotation = radians;
         transform.matrix.inner[0][0] = radians.cos() * transform.scale;
-        transform.matrix.inner[0][1] = radians.sin();
-        transform.matrix.inner[1][0] = -(radians.sin());
+        transform.matrix.inner[0][1] = radians.sin() * transform.scale;
+        transform.matrix.inner[1][0] = -(radians.sin()) * transform.scale;
         transform.matrix.inner[1][1] = radians.cos() * transform.scale;
     }
 
@@ -66,6 +66,5 @@ impl Transform2DSystem {
         transform.scale = scale;
         transform.matrix.inner[0][0] = transform.rotation.cos() * scale;
         transform.matrix.inner[1][1] = transform.rotation.cos() * scale;
-        transform.matrix.inner[2][2] = scale;
     }
 }
