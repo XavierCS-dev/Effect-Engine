@@ -18,17 +18,15 @@ fn main() {
     let mut after = Instant::now();
     let tex_id = TextureID("tree");
     let evil_id = TextureID("evil");
-    let bob_id = TextureID("bob");
     let layer_id = LayerID(1);
     let tex = app.init_texture(tex_id, "tree.png");
     let evil = app.init_texture(evil_id, "evil.png");
-    let bob = app.init_texture(bob_id, "bob.png");
     let mut layer = app
-        .init_layer(layer_id, vec![tex, evil, bob], PhysicalSize::new(64, 64))
+        .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32))
         .unwrap();
     let position = Vector3 {
-        x: -1.0,
-        y: -1.0,
+        x: -0.5,
+        y: -0.5,
         z: 0.0,
     };
     let ent = app.init_entity(position, evil_id, &mut layer);
@@ -43,8 +41,7 @@ fn main() {
     );
     EntitySystem2D::set_rotation(&mut ent_good, 30.0);
     EntitySystem2D::set_scale(&mut ent_good, 0.5);
-    let bob_ent = app.init_entity(position, bob_id, &mut layer);
-    let mut ents_owner = vec![ent, ent_good, bob_ent];
+    let mut ents_owner = vec![ent, ent_good];
     let mut ents = Vec::new();
     for ent in ents_owner.iter() {
         ents.push(ent);

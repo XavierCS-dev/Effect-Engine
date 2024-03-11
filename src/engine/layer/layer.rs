@@ -204,23 +204,23 @@ impl Layer2DSystem {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
-        let width = (texture_size.width as f32 / texture_size.width as f32) as f32;
-        let height = (texture_size.height as f32 / texture_size.height as f32) as f32;
+        let width = (texture_size.width as f32 / texture_size.width as f32) / 2.0;
+        let height = (texture_size.height as f32 / texture_size.height as f32) / 2.0;
         let verts = vec![
             Vertex {
                 position: [width, height, 0.0],
                 tex_coords: [tex_coord_size.width, 0.0],
             },
             Vertex {
-                position: [0.0, height, 0.0],
+                position: [-width, height, 0.0],
                 tex_coords: [0.0, 0.0],
             },
             Vertex {
-                position: [0.0, 0.0, 0.0],
+                position: [-width, -height, 0.0],
                 tex_coords: [0.0, tex_coord_size.height],
             },
             Vertex {
-                position: [width, 0.0, 0.0],
+                position: [width, -height, 0.0],
                 tex_coords: [tex_coord_size.width, tex_coord_size.height],
             },
         ];
