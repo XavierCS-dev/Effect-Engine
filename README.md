@@ -1,11 +1,11 @@
 ## Next Steps (Rewrite)
 - [x] Remove TexturePool entirely.
 - [x] Implement one time texture init for layer2D and atlas2D
-- [ ] Cleanup entity2D
+- [x] Cleanup entity2D
 - [x] Reimplement TextureAtlas2D.
-- [ ] Increase use of ECS paradigm.
-- [ ] Increase simplicity of Layer2D to be used directly by a user.
-- [ ] Increase overall simplicity and reduce abstraction.
+- [x] Increase use of ECS paradigm.
+- [x] Increase simplicity of Layer2D to be used directly by a user.
+- [x] Increase overall simplicity and reduce abstraction.
 - [x] Make complex high performance paths optional
 - [x] Make layers and their atlases not allow dynamic addition and removal of textures
 - [x] Fix incorrect buffer allocation / entity copying
@@ -18,12 +18,12 @@
 ~~¬- [ ] Implement 2D transformations first~~
 - [x] Fix broken buffers
 - [x] Fix bug which causes different entities to use the texture of the first one in the buffer
-- [ ] Finish rewrite and clean everything up
+- [x] Finish rewrite and clean everything up
   - [ ] Find alternative to limit worldspace inaccuracies.
-  - [ ] Remove unnecessary params
-  - [ ] Remove unecessary functions
-  - [ ] Add functions so user doesn't need to access queue and device
-  - [ ] Any other issues
+  - [x] Remove unnecessary params
+  - [x] Remove unecessary functions
+  - [x] Add functions so user doesn't need to access queue and device
+  - [x] Any other issues
 - [ ] Merge with main
 
 - [ ] Further goals (0.2.0 release blockers)
