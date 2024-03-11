@@ -1,4 +1,3 @@
-use core::slice::SlicePattern;
 use std::time::{Duration, Instant};
 
 use effect_engine::engine::{
