@@ -1,6 +1,7 @@
 pub mod engine;
 use anyhow::Result;
 use engine::{
+    camera::{self, camera::Camera2D},
     engine as effect,
     entity::entity::Entity2D,
     layer::layer::{Layer2D, LayerID},
@@ -14,11 +15,11 @@ use winit::{
 };
 
 pub struct EffectSystem {
-    pub engine: effect::Engine,
+    engine: effect::Engine,
 }
 
 impl EffectSystem {
-    pub fn new(screen_dimensions: PhysicalSize<u32>) -> (Self, EventLoop<()>) {
+    pub fn new(screen_dimensions: PhysicalSize<u32>, camera_fov: f32) -> (Self, EventLoop<()>) {
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(ControlFlow::Poll);
         let window = WindowBuilder::new()
@@ -27,7 +28,7 @@ impl EffectSystem {
             .with_resizable(false)
             .build(&event_loop)
             .unwrap();
-        let engine = pollster::block_on(effect::Engine::new(window));
+        let engine = pollster::block_on(effect::Engine::new(window, camera_fov));
         (Self { engine }, event_loop)
     }
 
@@ -69,15 +70,22 @@ impl EffectSystem {
         self.engine.set_entities(layer, entities);
     }
 
-    pub fn device(&self) -> &wgpu::Device {
-        self.engine.device()
+    pub fn camera(&self) -> &Camera2D {
+        self.engine.camera()
     }
 
-    pub fn queue(&self) -> &wgpu::Queue {
-        self.engine.queue()
+    pub fn camera_mut(&mut self) -> &mut Camera2D {
+        self.engine.camera_mut()
+    }
+
+    pub fn update_camera(&mut self) {
+        self.engine.update_camera();
     }
 }
 
-pub fn init_engine(screen_dimensions: PhysicalSize<u32>) -> (EffectSystem, EventLoop<()>) {
-    EffectSystem::new(screen_dimensions)
+pub fn init_engine(
+    screen_dimensions: PhysicalSize<u32>,
+    camera_fov: f32,
+) -> (EffectSystem, EventLoop<()>) {
+    EffectSystem::new(screen_dimensions, camera_fov)
 }

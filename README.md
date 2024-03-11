@@ -19,10 +19,11 @@
   - [ ] Increase unit test friendliness
   - [ ] Hide main loop from user, or at least, make it easier to use
   - [ ] Event System
+- [ ] Provide a method to set a background image
 
-- [ ] Further goals (0.2.0 release blockers)
-  - [ ] Implement Transformation2D
-  - [ ] Implement Camera2D (using 3D proj matrix)
+- [x] Further goals (0.2.0 release blockers)
+  - [x] Implement Transformation2D
+  - [x] Implement Camera2D (using 3D proj matrix)
 
 - [ ] Possible 0.3.0 release
   - [ ] Sound system

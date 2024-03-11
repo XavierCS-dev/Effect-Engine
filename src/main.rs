@@ -1,6 +1,7 @@
 use std::time::{Duration, Instant};
 
 use effect_engine::engine::{
+    camera::camera::Camera2DSystem,
     entity::entity::{Entity2D, EntitySystem2D},
     layer::layer::{Layer2DSystem, LayerID},
     primitives::vector::Vector3,
@@ -13,7 +14,7 @@ use winit::{
 
 fn main() {
     println!("Hello, world!");
-    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600));
+    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600), 90.0);
     let mut before = Instant::now();
     let mut after = Instant::now();
     let tex_id = TextureID("tree");
@@ -27,9 +28,9 @@ fn main() {
     let position = Vector3::new(-0.5, -0.5, 0.0);
     let ent = app.init_entity(position, evil_id, &mut layer);
     let mut ent_good = app.init_entity(position, tex_id, &mut layer);
-    EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.5, 0.0, 0.0));
+    EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.0, 0.0, 0.0));
     EntitySystem2D::set_rotation(&mut ent_good, 30.0);
-    EntitySystem2D::set_scale(&mut ent_good, 0.5);
+    EntitySystem2D::set_scale(&mut ent_good, 0.25);
     let mut ents_owner = vec![ent, ent_good];
     let mut ents = Vec::new();
     for ent in ents_owner.iter() {
@@ -38,12 +39,15 @@ fn main() {
     app.set_entities(&mut layer, ents.as_slice());
     drop(ents);
     let mut layers = vec![layer];
+    let camera = app.camera_mut();
+    Camera2DSystem::transform(camera, Vector3::new(-0.5, -0.5, 0.0));
+    app.update_camera();
 
     let mut rotation = 0.0;
     let _ = event_loop.run(|event, control| {
         after = Instant::now();
         let delta_time = after - before;
-        app.engine.input(&event, &delta_time);
+        // app.engine.input(&event, &delta_time);
         match event {
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
@@ -52,7 +56,7 @@ fn main() {
                 control.exit();
             }
             Event::AboutToWait => {
-                app.engine.update(&delta_time);
+                // app.engine.update(&delta_time);
                 EntitySystem2D::set_rotation(&mut ents_owner.get_mut(1).unwrap(), rotation);
                 let mut ents = Vec::new();
                 for ent in ents_owner.iter() {
@@ -62,7 +66,7 @@ fn main() {
                 drop(ents);
                 rotation += 0.05;
                 rotation = rotation % 360.0;
-                app.engine.render(&layers).unwrap();
+                app.render(&layers).unwrap();
             }
             _ => (),
         }

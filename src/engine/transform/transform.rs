@@ -25,8 +25,8 @@ impl Transform2D {
         }
     }
 
-    pub fn to_raw(&self) -> [[f32; 4]; 4] {
-        self.matrix.inner
+    pub fn to_raw(&self) -> Matrix4 {
+        self.matrix
     }
 
     pub fn position(&self) -> &Vector3 {

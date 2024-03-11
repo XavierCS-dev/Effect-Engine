@@ -18,6 +18,13 @@ struct VertexOutput {
     @location(0) tex_coords: vec2<f32>,
 }
 
+struct Camera {
+    proj_mat: mat4x4<f32>,
+}
+
+@group(1) @binding(0)
+var<uniform> camera: Camera;
+
 @vertex
 fn vrt_main(
     model: VertexInput,
@@ -32,7 +39,7 @@ fn vrt_main(
     );
     out.tex_coords = vec2<f32>(model.tex_coords.x + (entity.index.x * entity.size.x), 
     model.tex_coords.y + (entity.index.y * entity.size.y));
-    out.clip_position = model_mat * vec4<f32>(model.position, 1.0);
+    out.clip_position = camera.proj_mat * model_mat * vec4<f32>(model.position, 1.0);
     return out;
 }
 
