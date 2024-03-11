@@ -1,6 +1,7 @@
 use std::time::{Duration, Instant};
 
 use effect_engine::engine::{
+    camera::camera::Camera2DSystem,
     entity::entity::{Entity2D, EntitySystem2D},
     layer::layer::{Layer2DSystem, LayerID},
     primitives::vector::Vector3,
@@ -38,6 +39,10 @@ fn main() {
     app.set_entities(&mut layer, ents.as_slice());
     drop(ents);
     let mut layers = vec![layer];
+    let camera = app.camera_mut();
+    Camera2DSystem::transform(camera, Vector3::new(-0.5, -0.5, 0.0));
+    Camera2DSystem::rotate(camera, 45.0);
+    app.update_camera();
 
     let mut rotation = 0.0;
     let _ = event_loop.run(|event, control| {

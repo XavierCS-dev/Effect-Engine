@@ -268,7 +268,15 @@ impl Engine {
         Layer2DSystem::set_entities(layer, entities, &self.device, &self.queue)
     }
 
-    pub fn update_camera(&self, camera: &mut Camera2D) {
-        Camera2DSystem::update(camera, &self.queue);
+    pub fn update_camera(&mut self) {
+        Camera2DSystem::update(&mut self.camera, &self.queue);
+    }
+
+    pub fn camera(&self) -> &Camera2D {
+        &self.camera
+    }
+
+    pub fn camera_mut(&mut self) -> &mut Camera2D {
+        &mut self.camera
     }
 }

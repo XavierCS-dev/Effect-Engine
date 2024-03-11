@@ -1,6 +1,7 @@
 pub mod engine;
 use anyhow::Result;
 use engine::{
+    camera::{self, camera::Camera2D},
     engine as effect,
     entity::entity::Entity2D,
     layer::layer::{Layer2D, LayerID},
@@ -67,6 +68,18 @@ impl EffectSystem {
 
     pub fn set_entities(&self, layer: &mut Layer2D, entities: &[&Entity2D]) {
         self.engine.set_entities(layer, entities);
+    }
+
+    pub fn camera(&self) -> &Camera2D {
+        self.engine.camera()
+    }
+
+    pub fn camera_mut(&mut self) -> &mut Camera2D {
+        self.engine.camera_mut()
+    }
+
+    pub fn update_camera(&mut self) {
+        self.engine.update_camera();
     }
 }
 
