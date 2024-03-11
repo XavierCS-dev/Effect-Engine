@@ -2,6 +2,7 @@ use crate::engine::entity::entity::Entity2D;
 use crate::engine::entity::entity::Entity2DRaw;
 use crate::engine::layer::layer::*;
 use wgpu::util::DeviceExt;
+use winit::dpi::PhysicalSize;
 
 use super::primitives::vector::Vector3;
 use super::{
@@ -199,14 +200,10 @@ impl Engine {
         render_pass.set_pipeline(&self.render_pipeline);
         for layer in entities {
             render_pass.set_bind_group(0, layer.bind_group(), &[]);
-            render_pass.set_vertex_buffer(0, layer.vertex_buffer().unwrap());
+            render_pass.set_vertex_buffer(0, layer.vertex_buffer());
             render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
-            render_pass.set_index_buffer(layer.index_buffer().unwrap(), wgpu::IndexFormat::Uint16);
-            render_pass.draw_indexed(
-                0..(layer.entity_count() * 6) as u32,
-                0,
-                0..layer.entity_count() as u32,
-            );
+            render_pass.set_index_buffer(layer.index_buffer(), wgpu::IndexFormat::Uint16);
+            render_pass.draw_indexed(0..6 as u32, 0, 0..layer.entity_count() as u32);
         }
 
         drop(render_pass);
@@ -233,17 +230,18 @@ impl Engine {
         texture: TextureID,
         layer: &mut Layer2D,
     ) -> Entity2D {
-        let dimensions = self.window().inner_size();
-        Entity2D::new(
-            position,
-            layer,
-            texture,
-            dimensions.width,
-            dimensions.height,
-        )
+        Entity2D::new(position, layer, texture)
     }
 
-    pub fn init_layer(&self, id: LayerID, textures: Vec<Texture2D>) -> Result<Layer2D> {
+    /// Make sure your texture_size is set to the larger dimension that appears in your textures.
+    /// It would be easier to use textures which all have the same dimensions
+    /// The maximum texture size for a layer is 8192px * 8192px
+    pub fn init_layer(
+        &self,
+        id: LayerID,
+        textures: Vec<Texture2D>,
+        texture_size: PhysicalSize<u32>,
+    ) -> Result<Layer2D> {
         Layer2D::new(
             id,
             self.window.inner_size(),
@@ -251,6 +249,7 @@ impl Engine {
             &self.device,
             &self.queue,
             &self.texture_bgl,
+            texture_size,
         )
     }
 }

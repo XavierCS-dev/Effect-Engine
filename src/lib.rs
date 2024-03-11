@@ -23,7 +23,7 @@ impl EffectSystem {
         event_loop.set_control_flow(ControlFlow::Poll);
         let window = WindowBuilder::new()
             .with_title("Effect Engine")
-            .with_inner_size(PhysicalSize::new(800, 600))
+            .with_inner_size(PhysicalSize::new(800, 800))
             .with_resizable(false)
             .build(&event_loop)
             .unwrap();
@@ -49,8 +49,13 @@ impl EffectSystem {
         Texture2D::new(id, path, self.engine.device(), self.engine.queue())
     }
 
-    pub fn init_layer(&self, id: LayerID, textures: Vec<Texture2D>) -> Result<Layer2D> {
-        self.engine.init_layer(id, textures)
+    pub fn init_layer(
+        &self,
+        id: LayerID,
+        textures: Vec<Texture2D>,
+        texture_size: PhysicalSize<u32>,
+    ) -> Result<Layer2D> {
+        self.engine.init_layer(id, textures, texture_size)
     }
 
     pub fn device(&self) -> &wgpu::Device {

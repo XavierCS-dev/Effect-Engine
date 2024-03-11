@@ -1,4 +1,5 @@
 use anyhow::Result;
+use winit::dpi::PhysicalSize;
 
 use crate::engine::{
     layer::layer::{Layer2D, LayerID},
@@ -16,12 +17,13 @@ use super::vertex_group::VertexGroup2D;
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy)]
 pub struct Entity2DRaw {
     position: [f32; 3],
-    texture_offset: [u32; 2],
+    texture_index: [f32; 2],
+    texture_size: [f32; 2],
 }
 
 impl Entity2DRaw {
-    const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 2] =
-        wgpu::vertex_attr_array![2 => Float32x3, 3=> Uint32x2];
+    const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 3] =
+        wgpu::vertex_attr_array![2 => Float32x3, 3=> Float32x2, 4=>Float32x2];
 
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
@@ -42,35 +44,21 @@ pub struct Entity2D {
     layer: LayerID,
     position: Vector3,
     texture: TextureID,
-    vertex_group: VertexGroup2D,
-    texture_offset: [u32; 2],
+    texture_index: [u32; 2],
+    texture_size: PhysicalSize<f32>,
 }
 
 impl Entity2D {
-    pub fn new(
-        position: Vector3,
-        layer: &Layer2D,
-        texture: TextureID,
-        screen_width: u32,
-        screen_height: u32,
-    ) -> Self {
+    pub fn new(position: Vector3, layer: &Layer2D, texture: TextureID) -> Self {
         let tex = layer.get_texture(texture).unwrap();
-        let vertex_group = VertexGroup2D::new(
-            tex.width(),
-            tex.height(),
-            screen_width,
-            screen_height,
-            layer.atlas_dimensions(),
-            tex.offset().unwrap(),
-        );
-        let layer = layer.id();
-        let texture_offset = tex.offset().unwrap();
+        let texture_index = tex.index().expect("Tex not in given layer");
+        let texture_size = layer.tex_coord_size();
         Self {
-            layer,
+            layer: layer.id(),
             position,
             texture,
-            vertex_group,
-            texture_offset,
+            texture_index,
+            texture_size,
         }
     }
 
@@ -79,7 +67,8 @@ impl Entity2D {
         let position = [self.position.x, self.position.y, self.position.z];
         Entity2DRaw {
             position,
-            texture_offset: self.texture_offset,
+            texture_index: [self.texture_index[0] as f32, self.texture_index[1] as f32],
+            texture_size: self.texture_size.into(),
         }
     }
 
@@ -89,10 +78,6 @@ impl Entity2D {
 
     pub fn position(&self) -> &Vector3 {
         &self.position
-    }
-
-    pub fn vertices(&self) -> &[Vertex; 4] {
-        self.vertex_group.vertices()
     }
 }
 
@@ -104,15 +89,9 @@ impl EntitySystem2D {
         let tex = layer
             .get_texture(texture)
             .ok_or(EffectError::new("Texture is not in given layer"))?;
-        entity.texture_offset = tex.offset().unwrap();
-        entity.vertex_group = VertexGroup2D::new(
-            tex.width(),
-            tex.height(),
-            layer.width(),
-            layer.height(),
-            layer.atlas_dimensions(),
-            tex.offset().unwrap(),
-        );
+        entity.texture_index = tex.index().unwrap();
+        entity.texture_size = layer.tex_coord_size();
+        entity.layer = layer.id();
         entity.texture = texture;
         Ok(())
     }

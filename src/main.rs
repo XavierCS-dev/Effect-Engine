@@ -6,7 +6,10 @@ use effect_engine::engine::{
     primitives::vector::Vector3,
     texture::texture2d::{Texture2D, TextureID},
 };
-use winit::event::{Event, WindowEvent};
+use winit::{
+    dpi::PhysicalSize,
+    event::{Event, WindowEvent},
+};
 
 fn main() {
     println!("Hello, world!");
@@ -15,26 +18,36 @@ fn main() {
     let mut after = Instant::now();
     let tex_id = TextureID("tree");
     let evil_id = TextureID("evil");
+    let bob_id = TextureID("bob");
     let layer_id = LayerID(1);
-    let tex = app.init_texture(tex_id, "bob.png");
+    let tex = app.init_texture(tex_id, "tree.png");
     let evil = app.init_texture(evil_id, "evil.png");
-    let mut layer = app.init_layer(layer_id, vec![tex, evil]).unwrap();
+    let bob = app.init_texture(bob_id, "bob.png");
+    let mut layer = app
+        .init_layer(layer_id, vec![tex, evil, bob], PhysicalSize::new(64, 64))
+        .unwrap();
     let position = Vector3 {
-        x: 0.2,
-        y: 0.4,
-        z: 0.0,
-    };
-    let position_g = Vector3 {
         x: 0.0,
         y: 0.0,
         z: 0.0,
     };
+    let position_g = Vector3 {
+        x: -1.0,
+        y: 0.0,
+        z: 0.0,
+    };
+    let position_b = Vector3 {
+        x: -1.0,
+        y: -1.0,
+        z: 0.0,
+    };
     let ent = app.init_entity(position, tex_id, &mut layer);
     let ent_good = app.init_entity(position_g, evil_id, &mut layer);
-    let mut ents = vec![ent, ent_good];
+    let bob_ent = app.init_entity(position_b, bob_id, &mut layer);
+    let ents = vec![ent, ent_good, bob_ent];
     Layer2DSystem::set_entities(&mut layer, ents.as_slice(), app.device(), app.queue());
-    let mut layers = vec![layer];
-    let mut check = false;
+    let layers = vec![layer];
+    let _check = false;
     let _ = event_loop.run(|event, control| {
         after = Instant::now();
         let delta_time = after - before;

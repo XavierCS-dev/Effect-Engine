@@ -15,7 +15,7 @@ pub struct Texture2D {
     path: &'static str,
     width: u32,
     height: u32,
-    offset: Option<[u32; 2]>,
+    index: Option<[u32; 2]>,
 }
 
 impl Texture2D {
@@ -34,7 +34,7 @@ impl Texture2D {
             path,
             width: 0,
             height: 0,
-            offset: None,
+            index: None,
         }
     }
 
@@ -46,8 +46,8 @@ impl Texture2D {
         &self.id
     }
 
-    pub fn offset(&self) -> Option<[u32; 2]> {
-        self.offset
+    pub fn index(&self) -> Option<[u32; 2]> {
+        self.index
     }
 
     pub fn width(&self) -> u32 {
@@ -61,8 +61,8 @@ impl Texture2D {
 
 pub struct Texture2DSystem;
 impl Texture2DSystem {
-    pub fn set_offset(texture: &mut Texture2D, x: u32, y: u32) {
-        texture.offset = Some([x, y]);
+    pub fn set_index(texture: &mut Texture2D, index: [u32; 2]) {
+        texture.index = Some(index);
     }
 
     pub fn set_dimensions(texture: &mut Texture2D, width: u32, height: u32) {

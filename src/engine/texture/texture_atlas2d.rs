@@ -4,6 +4,7 @@ use crate::engine::{
 };
 
 use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
+use wgpu::Extent3d;
 use winit::dpi::PhysicalSize;
 
 use super::texture2d::{Texture2D, TextureID};
@@ -11,8 +12,8 @@ use super::texture2d::{Texture2D, TextureID};
 use anyhow::{bail, Result};
 use image::EncodableLayout;
 
-const MAX_WIDTH: u32 = 8196;
-const MAX_HEIGHT: u32 = 8196;
+const MAX_WIDTH: u32 = 8192;
+const MAX_HEIGHT: u32 = 8192;
 
 pub struct TextureAtlas2D {
     bind_group: wgpu::BindGroup,
@@ -20,6 +21,7 @@ pub struct TextureAtlas2D {
     view: wgpu::TextureView,
     sampler: wgpu::Sampler,
     dimensions: PhysicalSize<u32>,
+    tex_coord_size: PhysicalSize<f32>,
 }
 
 impl TextureAtlas2D {
@@ -30,73 +32,83 @@ impl TextureAtlas2D {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
+        texture_size: PhysicalSize<u32>,
     ) -> Result<Self> {
-        let mut image_buffers: Vec<ImageBuffer<Rgba<u8>, _>> = Vec::new();
+        let width_count = MAX_WIDTH / texture_size.width;
+        let height_count = MAX_HEIGHT / texture_size.height;
+        if (width_count as usize * height_count as usize) < textures.len() {
+            bail!(EffectError::new("Not enough space for textures in atlas"));
+        }
+
         let mut current_width = 0;
         let mut current_height = 0;
-        let mut total_height = 0;
+        let mut row = 0;
+        let mut column = 0;
+        let mut dimensions: Vec<(u32, u32)> = Vec::new();
+        let mut image_buffers = Vec::new();
         for texture in textures.iter_mut() {
             let tex = image::open(texture.file_path())?;
-            let size;
-            if tex.height() > tex.width() {
-                size = tex.height();
-            } else {
-                size = tex.width();
-            }
-            tex.resize_to_fill(size, size, image::imageops::FilterType::Lanczos3);
+            tex.resize(
+                texture_size.width,
+                texture_size.height,
+                image::imageops::FilterType::Lanczos3,
+            );
             let tex_rgba = tex.to_rgba8();
-            let tex_dimensions = tex.dimensions();
-            Texture2DSystem::set_dimensions(texture, tex_dimensions.0, tex_dimensions.1);
-            let pot_width = current_width + texture.width();
-            let pot_depth = current_height + texture.height();
-            // start from 0,0, place each image along the width until it would exceed max width.
-            // Then start placing images along the height.
-            if pot_width < MAX_WIDTH {
-                if pot_depth < MAX_HEIGHT {
-                    Texture2DSystem::set_offset(texture, current_width, current_height);
-                    current_width = pot_width;
-                    if pot_depth > total_height {
-                        total_height = pot_depth;
-                    }
-                } else {
-                    bail!(EffectError::new("Textures exceed atlas size"))
-                }
-            } else {
-                let pot_depth = total_height + texture.height();
-                let pot_width = texture.width();
-                if pot_depth < MAX_HEIGHT {
-                    Texture2DSystem::set_offset(texture, 0, total_height);
-                    current_width = pot_width;
-                    current_height = total_height;
-                    total_height = pot_depth;
-                } else {
-                    bail!(EffectError::new("Textures exceed atlas size"))
-                }
+            Texture2DSystem::set_dimensions(texture, texture_size.width, texture_size.height);
+
+            let pot_width = current_width + texture_size.width;
+            let mut new_row = false;
+            if pot_width > MAX_WIDTH {
+                row += 1;
+                column = 0;
+                new_row = true;
             }
+            Texture2DSystem::set_index(texture, [column, row]);
+
             image_buffers.push(tex_rgba);
+            dimensions.push((current_width, current_height));
+
+            current_width += texture_size.width;
+            column += 1;
+            if new_row {
+                current_height += texture_size.height;
+            }
         }
 
-        let mut combined_tex = ImageBuffer::new(current_width, total_height);
-
-        for (tex_rgba, texture) in image_buffers.iter().zip(textures.iter_mut()) {
-            let x = texture.offset().unwrap()[0];
-            let y = texture.offset().unwrap()[1];
-            combined_tex.copy_from(tex_rgba, x, y)?;
+        let total_height = texture_size.height + (texture_size.height * row);
+        let total_width;
+        if width_count > textures.len() as u32 {
+            total_width = current_width;
+        } else {
+            total_width = MAX_WIDTH - (MAX_WIDTH % width_count);
+        }
+        let mut combined_tex = ImageBuffer::new(total_width, total_height);
+        for ((width, height), texture) in dimensions.iter().zip(image_buffers) {
+            combined_tex
+                .copy_from(&texture, *width, *height)
+                .or(Err(EffectError::new(
+                    "Texture size to small for largest texture",
+                )))?;
         }
         let extent = wgpu::Extent3d {
-            width: combined_tex.width(),
-            height: combined_tex.height(),
+            width: total_width,
+            height: total_height,
             depth_or_array_layers: 1,
         };
+
         let (bind_group, atlas, view, sampler) =
             Texture2DSystem::init_texture(extent, combined_tex, bind_group_layout, device, queue);
-        let dimensions = PhysicalSize::new(current_width, total_height);
+        let dimensions = PhysicalSize::new(total_width, total_height);
+        let tex_coord_width = (texture_size.width as f64 / total_width as f64) as f32;
+        let tex_coord_height = (texture_size.height as f64 / total_height as f64) as f32;
+        let tex_coord_size = PhysicalSize::new(tex_coord_width, tex_coord_height);
         Ok(Self {
             atlas,
             bind_group,
             view,
             sampler,
             dimensions,
+            tex_coord_size,
         })
     }
 
@@ -118,5 +130,9 @@ impl TextureAtlas2D {
 
     pub fn dimensions(&self) -> PhysicalSize<u32> {
         self.dimensions
+    }
+
+    pub fn tex_coord_size(&self) -> PhysicalSize<f32> {
+        self.tex_coord_size
     }
 }
