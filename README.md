@@ -1,25 +1,26 @@
 ## Next Steps (Rewrite)
 - [x] Remove TexturePool entirely.
-- [ ] Implement one time texture init for layer2D and atlas2D
+- [x] Implement one time texture init for layer2D and atlas2D
 - [ ] Cleanup entity2D
 - [x] Reimplement TextureAtlas2D.
 - [ ] Increase use of ECS paradigm.
 - [ ] Increase simplicity of Layer2D to be used directly by a user.
 - [ ] Increase overall simplicity and reduce abstraction.
-- [ ] Make complex high performance paths optional
-- [ ] Make layers and their atlases not allow dynamic addition and removal of textures
+- [x] Make complex high performance paths optional
+- [x] Make layers and their atlases not allow dynamic addition and removal of textures
 - [x] Fix incorrect buffer allocation / entity copying
-- [ ] Fix (shaders maybe?) to use correct texture atlas coordinates
+- [x] Fix (shaders maybe?) to use correct texture atlas coordinates
   - store total width and height in layer atlas then use to calc exact tex position
 - [x] Fix tex aspect ratio
-- [ ] Remove * 10.0 in vertex group when texture atlas complete
-- [ ] Fix issues where entity buffers aren't updated correctly
+- [x] Remove * 10.0 in vertex group when texture atlas complete
+- [x] Fix issues where entity buffers aren't updated correctly
 - [x] Fix entity positioning being incorrect
 ~~¬- [ ] Implement 2D transformations first~~
 - [x] Fix broken buffers
-- [ ] Fix bug which causes different entities to use the texture of the first one in the buffer
+- [x] Fix bug which causes different entities to use the texture of the first one in the buffer
 - [ ] Finish rewrite and clean everything up
-  - [ ] Switch from f32 to f64 if a good idea
+  ~~- [ ] Switch from f32 to f64 if a good idea~~
+      - [ ] Very bad idea, find alternative to limit worldspace inaccuracies.
   - [ ] Remove unnecessary params
   - [ ] Remove unecessary functions
   - [ ] Add functions so user doesn't need to access queue and device
@@ -30,7 +31,7 @@
   - [ ] Implement Transformation2D
   - [ ] Implement Camera2D (using 3D proj matrix)
 
-- [ ] Possible 0,3.0 release
+- [ ] Possible 0.3.0 release
   - [ ] Sound system
   - [ ] User input system
 
