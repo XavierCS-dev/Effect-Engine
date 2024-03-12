@@ -43,6 +43,7 @@ impl Layer2D {
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
         texture_size: PhysicalSize<u32>,
+        pixel_art: bool,
     ) -> Result<Self> {
         let atlas = TextureAtlas2D::new(
             &mut textures,
@@ -50,6 +51,7 @@ impl Layer2D {
             queue,
             bind_group_layout,
             texture_size,
+            pixel_art,
         )?;
         let mut textures_layer = HashMap::new();
         for texture in textures {
@@ -93,14 +95,10 @@ impl Layer2D {
         self.textures.keys()
     }
 
-    // if using the 2x technique, its probably better to return the exact slice where the data is
-    // instead of the whole buffer, same for the other buffers
-    // 4 is the number of vertices per entity
     pub fn vertex_buffer(&self) -> wgpu::BufferSlice {
         self.vertex_buffer.slice(..)
     }
 
-    // 6 is the number of indicies per entity.
     pub fn index_buffer(&self) -> wgpu::BufferSlice {
         self.index_buffer.slice(..)
     }
@@ -201,8 +199,9 @@ impl Layer2DSystem {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
-        let width = (texture_size.width as f32 / texture_size.width as f32) / 2.0;
-        let height = (texture_size.height as f32 / texture_size.height as f32) / 2.0;
+        // Vrushing bug comes from here, figure out how to calculate these properly.
+        let width = 0.5;
+        let height = 0.5;
         let verts = vec![
             Vertex {
                 position: [width, height, 0.0],
@@ -226,7 +225,8 @@ impl Layer2DSystem {
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)
     }
 
-    /// Set the vertices and entity data. Use this when adding or removing entities
+    /// Set the entity data for the particular layer.
+    /// Ensure every entity has a texture from the specified layer otherwise you will run into problems.
     pub fn set_entities(
         layer: &mut Layer2D,
         entities: &[&Entity2D],

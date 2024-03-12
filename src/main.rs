@@ -13,21 +13,31 @@ use winit::{
 };
 
 fn main() {
-    println!("Hello, world!");
-    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0);
+    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, true);
     let mut before = Instant::now();
     let mut after = Instant::now();
     let tex_id = TextureID("tree");
     let evil_id = TextureID("evil");
+    let bob_id = TextureID("bob");
     let layer_id = LayerID(1);
+    let new_layer_id = LayerID(0);
     let tex = app.init_texture(tex_id, "tree.png");
     let evil = app.init_texture(evil_id, "evil.png");
+    let bob = app.init_texture(bob_id, "bob.png");
     let mut layer = app
-        .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32))
+        .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32), true)
+        .unwrap();
+    let mut new_layer = app
+        .init_layer(new_layer_id, vec![bob], PhysicalSize::new(64, 64), false)
         .unwrap();
     let position = Vector3::new(0.0, 0.0, 0.0);
-    let mut ent = app.init_entity(position, evil_id, &mut layer);
-    let mut ent_good = app.init_entity(position, tex_id, &mut layer);
+    let bob_pos = Vector3::new(0.12, -0.06, 0.0);
+    let mut bob_ent = Entity2D::new(bob_pos, &mut new_layer, bob_id);
+    EntitySystem2D::set_scale(&mut bob_ent, 0.2);
+    let bob_ref = vec![&bob_ent];
+    app.set_entities(&mut new_layer, bob_ref.as_slice());
+    let mut ent = Entity2D::new(position, &mut layer, evil_id);
+    let mut ent_good = Entity2D::new(position, &mut layer, tex_id);
     EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.25, 0.0, 0.0));
     EntitySystem2D::set_rotation(&mut ent_good, 30.0);
     EntitySystem2D::set_scale(&mut ent_good, 0.25);
@@ -39,7 +49,7 @@ fn main() {
     }
     app.set_entities(&mut layer, ents.as_slice());
     drop(ents);
-    let mut layers = vec![layer];
+    let mut layers = vec![layer, new_layer];
     let camera = app.camera_mut();
     Camera2DSystem::transform(camera, Vector3::new(0.35, 0.25, 1.0));
     app.update_camera();
@@ -65,7 +75,7 @@ fn main() {
                 }
                 app.set_entities(layers.get_mut(0).unwrap(), ents.as_slice());
                 drop(ents);
-                rotation += (0.025 as f64 * delta_time.as_micros() as f64) as f32;
+                rotation += 0.05;
                 rotation = rotation % 360.0;
                 app.render(&layers).unwrap();
             }

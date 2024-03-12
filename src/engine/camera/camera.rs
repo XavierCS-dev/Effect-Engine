@@ -23,18 +23,6 @@ impl Camera2D {
         let near = 0.01;
         let far = 10.0;
         let fov_rad = fov_deg.to_radians();
-        let h = 1.0 / (fov_rad / 2.0).tan();
-        let inv = 1.0 / aspect_ratio;
-        let a = far / (far - near);
-        let b = -(near * far) / (far - near);
-        /*
-        let proj_mat = Matrix4::from_slice([
-            [h * inv, 0.0, 0.0, 0.0],
-            [0.0, h, 0.0, 0.0],
-            [0.0, 0.0, a, 1.0],
-            [0.0, 0.0, b, 0.0],
-        ]);
-        */
         let proj = glam::Mat4::perspective_rh(fov_rad, aspect_ratio, near, far);
         let look_at = glam::Mat4::look_at_rh(
             glam::Vec3::new(0.0f32, 0.0, 1.0),
@@ -107,10 +95,6 @@ impl Camera2DSystem {
             glam::Vec3::new(position.x, position.y, 0.0),
             glam::Vec3::Y,
         );
-    }
-
-    pub fn rotate(camera: &mut Camera2D, degrees: f32) {
-        todo!()
     }
 
     pub fn update(camera: &mut Camera2D, queue: &wgpu::Queue) {
