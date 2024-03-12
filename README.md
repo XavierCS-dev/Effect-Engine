@@ -20,7 +20,7 @@
   - [ ] Hide main loop from user, or at least, make it easier to use
   - [ ] Event System
 - [ ] Provide a method to set a background image
-- [ ] Fix camera stretching
+- [x] Fix camera stretching
 
 - [x] Further goals (0.2.0 release blockers)
   - [x] Implement Transformation2D
