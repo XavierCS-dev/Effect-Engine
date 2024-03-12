@@ -13,7 +13,6 @@ use winit::{
 };
 
 fn main() {
-    println!("Hello, world!");
     let (mut app, event_loop) =
         effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, false);
     let mut before = Instant::now();
@@ -27,8 +26,8 @@ fn main() {
         .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32))
         .unwrap();
     let position = Vector3::new(0.0, 0.0, 0.0);
-    let mut ent = app.init_entity(position, evil_id, &mut layer);
-    let mut ent_good = app.init_entity(position, tex_id, &mut layer);
+    let mut ent = Entity2D::new(position, &mut layer, evil_id);
+    let mut ent_good = Entity2D::new(position, &mut layer, tex_id);
     EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.25, 0.0, 0.0));
     EntitySystem2D::set_rotation(&mut ent_good, 30.0);
     EntitySystem2D::set_scale(&mut ent_good, 0.25);

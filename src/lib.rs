@@ -41,15 +41,6 @@ impl EffectSystem {
         self.engine.render(&layers)
     }
 
-    pub fn init_entity(
-        &mut self,
-        position: Vector3,
-        texture_id: TextureID,
-        layer: &mut Layer2D,
-    ) -> Entity2D {
-        self.engine.init_entity(position, texture_id, layer)
-    }
-
     pub fn init_texture(&self, id: TextureID, path: &'static str) -> Texture2D {
         Texture2D::new(id, path)
     }

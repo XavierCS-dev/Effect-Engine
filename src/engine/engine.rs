@@ -244,15 +244,6 @@ impl Engine {
         &self.window
     }
 
-    pub fn init_entity(
-        &mut self,
-        position: Vector3,
-        texture: TextureID,
-        layer: &mut Layer2D,
-    ) -> Entity2D {
-        Entity2D::new(position, layer, texture)
-    }
-
     pub fn init_layer(
         &self,
         id: LayerID,
