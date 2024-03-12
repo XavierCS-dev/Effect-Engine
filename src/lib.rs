@@ -19,7 +19,11 @@ pub struct EffectSystem {
 }
 
 impl EffectSystem {
-    pub fn new(screen_dimensions: PhysicalSize<u32>, camera_fov: f32) -> (Self, EventLoop<()>) {
+    pub fn new(
+        screen_dimensions: PhysicalSize<u32>,
+        camera_fov: f32,
+        v_sync: bool,
+    ) -> (Self, EventLoop<()>) {
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(ControlFlow::Poll);
         let window = WindowBuilder::new()
@@ -28,7 +32,7 @@ impl EffectSystem {
             .with_resizable(false)
             .build(&event_loop)
             .unwrap();
-        let engine = pollster::block_on(effect::Engine::new(window, camera_fov));
+        let engine = pollster::block_on(effect::Engine::new(window, camera_fov, v_sync));
         (Self { engine }, event_loop)
     }
 
@@ -86,6 +90,7 @@ impl EffectSystem {
 pub fn init_engine(
     screen_dimensions: PhysicalSize<u32>,
     camera_fov: f32,
+    v_sync: bool,
 ) -> (EffectSystem, EventLoop<()>) {
-    EffectSystem::new(screen_dimensions, camera_fov)
+    EffectSystem::new(screen_dimensions, camera_fov, v_sync)
 }

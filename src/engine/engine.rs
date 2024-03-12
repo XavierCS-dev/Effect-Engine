@@ -33,7 +33,7 @@ pub struct Engine {
 * these closures are to be stored in Engine upon initialisation
 */
 impl Engine {
-    pub async fn new(window: winit::window::Window, camera_fov: f32) -> Self {
+    pub async fn new(window: winit::window::Window, camera_fov: f32, v_sync: bool) -> Self {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
             ..Default::default()
@@ -66,6 +66,12 @@ impl Engine {
             (dims.width as f32) / (dims.height as f32),
         );
         let surface_capabilities = surface.get_capabilities(&adapter);
+        let present_mode;
+        if v_sync {
+            present_mode = wgpu::PresentMode::AutoVsync;
+        } else {
+            present_mode = wgpu::PresentMode::AutoNoVsync;
+        }
         // Check this...may need to specifically set it to some sRGB value
         let surface_format = surface_capabilities.formats[0];
         let surface_configuration = wgpu::SurfaceConfiguration {
@@ -73,7 +79,7 @@ impl Engine {
             format: surface_format,
             width: window.inner_size().width,
             height: window.inner_size().height,
-            present_mode: wgpu::PresentMode::AutoNoVsync,
+            present_mode,
             alpha_mode: surface_capabilities.alpha_modes[0],
             view_formats: Vec::new(),
             desired_maximum_frame_latency: Default::default(),
