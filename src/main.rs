@@ -65,7 +65,7 @@ fn main() {
                 }
                 app.set_entities(layers.get_mut(0).unwrap(), ents.as_slice());
                 drop(ents);
-                rotation += 0.05;
+                rotation += (0.025 as f64 * delta_time.as_micros() as f64) as f32;
                 rotation = rotation % 360.0;
                 app.render(&layers).unwrap();
             }
