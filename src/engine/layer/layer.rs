@@ -199,8 +199,9 @@ impl Layer2DSystem {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
-        let width = (texture_size.width as f32 / texture_size.width as f32) / 2.0;
-        let height = (texture_size.height as f32 / texture_size.height as f32) / 2.0;
+        // Vrushing bug comes from here, figure out how to calculate these properly.
+        let width = 0.5;
+        let height = 0.5;
         let verts = vec![
             Vertex {
                 position: [width, height, 0.0],

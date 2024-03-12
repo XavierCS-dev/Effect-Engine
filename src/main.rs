@@ -31,7 +31,7 @@ fn main() {
         .init_layer(new_layer_id, vec![bob], PhysicalSize::new(64, 64), false)
         .unwrap();
     let position = Vector3::new(0.0, 0.0, 0.0);
-    let bob_pos = Vector3::new(0.25, 0.25, 0.0);
+    let bob_pos = Vector3::new(0.12, -0.06, 0.0);
     let mut bob_ent = Entity2D::new(bob_pos, &mut new_layer, bob_id);
     EntitySystem2D::set_scale(&mut bob_ent, 0.2);
     let bob_ref = vec![&bob_ent];

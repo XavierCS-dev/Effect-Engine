@@ -6,3 +6,5 @@ pub struct Background2D;
 
 // manage all background related operations
 pub struct Background2DSystem;
+
+pub struct BackgroundID(&'static str);
