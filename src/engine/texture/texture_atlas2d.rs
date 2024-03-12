@@ -33,6 +33,7 @@ impl TextureAtlas2D {
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
         texture_size: PhysicalSize<u32>,
+        pixel_art: bool,
     ) -> Result<Self> {
         let width_count = MAX_WIDTH / texture_size.width;
         let height_count = MAX_HEIGHT / texture_size.height;
@@ -100,7 +101,7 @@ impl TextureAtlas2D {
             extent,
             combined_tex,
             bind_group_layout,
-            true,
+            pixel_art,
             device,
             queue,
         );

@@ -54,7 +54,6 @@ impl Entity2D {
         }
     }
 
-    // will include "model" with pos and rotation later...
     pub fn to_raw(&self) -> Entity2DRaw {
         Entity2DRaw {
             transform: self.transform.to_raw().inner,
@@ -75,8 +74,9 @@ impl Entity2D {
 pub struct EntitySystem2D;
 
 impl EntitySystem2D {
+    /// Sets tht texture of the given entity. The texture must be in the layer provided.
+    /// Make sure to store a reference to this entity in the correct layer if you change it
     pub fn set_texture(entity: &mut Entity2D, texture: TextureID, layer: &Layer2D) -> Result<()> {
-        // find texture in layer, return the ID and set here, otherwise error
         let tex = layer
             .get_texture(texture)
             .ok_or(EffectError::new("Texture is not in given layer"))?;

@@ -13,8 +13,7 @@ use winit::{
 };
 
 fn main() {
-    let (mut app, event_loop) =
-        effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, false);
+    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, true);
     let mut before = Instant::now();
     let mut after = Instant::now();
     let tex_id = TextureID("tree");
@@ -23,7 +22,7 @@ fn main() {
     let tex = app.init_texture(tex_id, "tree.png");
     let evil = app.init_texture(evil_id, "evil.png");
     let mut layer = app
-        .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32))
+        .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32), true)
         .unwrap();
     let position = Vector3::new(0.0, 0.0, 0.0);
     let mut ent = Entity2D::new(position, &mut layer, evil_id);

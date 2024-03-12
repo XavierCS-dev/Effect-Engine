@@ -7,8 +7,6 @@ use std::io::prelude::*;
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Debug, Copy)]
 pub struct TextureID(pub &'static str);
 
-// add tex coords here, make bind group mandatory.
-// Don't want to copy, as we want to make it clear it is something to be modified
 #[derive(Clone, Debug)]
 pub struct Texture2D {
     id: TextureID,
@@ -20,10 +18,6 @@ pub struct Texture2D {
 
 impl Texture2D {
     pub fn new(id: TextureID, path: &'static str) -> Self {
-        // havig one bind group per texure isn't very performant.
-        // It may be better to have one bind group per zone of loaded textures,
-        // each bind group having all the textures it needs for a zone,
-        // then swap out the bind group for new zones.
         Self {
             id,
             path,

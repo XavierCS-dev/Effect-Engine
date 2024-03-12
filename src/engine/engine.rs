@@ -249,6 +249,7 @@ impl Engine {
         id: LayerID,
         textures: Vec<Texture2D>,
         texture_size: PhysicalSize<u32>,
+        pixel_art: bool,
     ) -> Result<Layer2D> {
         Layer2D::new(
             id,
@@ -258,6 +259,7 @@ impl Engine {
             &self.queue,
             &self.texture_bgl,
             texture_size,
+            pixel_art,
         )
     }
 

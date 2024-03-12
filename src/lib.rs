@@ -57,8 +57,10 @@ impl EffectSystem {
         id: LayerID,
         textures: Vec<Texture2D>,
         texture_size: PhysicalSize<u32>,
+        pixel_art: bool,
     ) -> Result<Layer2D> {
-        self.engine.init_layer(id, textures, texture_size)
+        self.engine
+            .init_layer(id, textures, texture_size, pixel_art)
     }
 
     pub fn set_entities(&self, layer: &mut Layer2D, entities: &[&Entity2D]) {
