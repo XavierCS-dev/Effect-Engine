@@ -21,6 +21,7 @@
   - [ ] Event System
 - [ ] Provide a method to set a background image
 - [x] Fix camera stretching
+- [ ] Fix crushing of non-square textures
 
 - [x] Further goals (0.2.0 release blockers)
   - [x] Implement Transformation2D
