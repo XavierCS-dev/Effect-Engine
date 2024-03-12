@@ -52,6 +52,7 @@ impl EffectSystem {
     /// The maximum texture size for a layer is 8192px * 8192px
     /// The optimal stratergy is to keep similar textures on the same layer
     /// (provided you want the rendered in that order)
+    /// It is advisable to have the texture_size be a square to avoid some textures getting crushed.
     pub fn init_layer(
         &self,
         id: LayerID,

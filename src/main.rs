@@ -28,7 +28,7 @@ fn main() {
         .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32), true)
         .unwrap();
     let mut new_layer = app
-        .init_layer(new_layer_id, vec![bob], PhysicalSize::new(64, 32), false)
+        .init_layer(new_layer_id, vec![bob], PhysicalSize::new(64, 64), false)
         .unwrap();
     let position = Vector3::new(0.0, 0.0, 0.0);
     let bob_pos = Vector3::new(0.25, 0.25, 0.0);
