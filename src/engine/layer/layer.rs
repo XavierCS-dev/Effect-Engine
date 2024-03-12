@@ -182,9 +182,6 @@ impl Layer2DSystem {
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
         let ents = entities.iter().map(|e| e.to_raw()).collect::<Vec<_>>();
-        for &ent in ents.iter() {
-            println!("{:?}", ent);
-        }
         let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
         let size = std::mem::size_of_val(data) as u64;
         Layer2DSystem::alloc_buffer(data, size * 2, device, queue, "Entity Buffer", false)
@@ -224,9 +221,6 @@ impl Layer2DSystem {
                 tex_coords: [tex_coord_size.width, tex_coord_size.height],
             },
         ];
-        for vert in verts.iter() {
-            println!("{:?}", vert);
-        }
         let data: &[u8] = bytemuck::cast_slice(verts.as_slice());
         let size = (std::mem::size_of::<Vertex>() * verts.len()) as u64;
         Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)
