@@ -57,14 +57,18 @@ impl Transform2DSystem {
 
     pub fn translate(transform: &mut Transform2D, position: Vector3) {
         transform.position = position;
-        transform.matrix.inner[3][0] = position.x;
-        transform.matrix.inner[3][1] = position.y;
+        transform.matrix.inner[3][0] = position.x * transform.rotation.cos() * transform.scale
+            + position.y * (-(transform.rotation.sin())) * transform.scale;
+        transform.matrix.inner[3][1] = position.x * transform.rotation.sin() * transform.scale
+            + position.y * transform.rotation.cos() * transform.scale;
         transform.matrix.inner[3][2] = position.z;
     }
 
     pub fn scale(transform: &mut Transform2D, scale: f32) {
         transform.scale = scale;
         transform.matrix.inner[0][0] = transform.rotation.cos() * scale;
+        transform.matrix.inner[0][1] = transform.rotation.sin() * scale;
+        transform.matrix.inner[1][0] = -(transform.rotation.sin()) * scale;
         transform.matrix.inner[1][1] = transform.rotation.cos() * scale;
     }
 }

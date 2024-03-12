@@ -25,13 +25,13 @@ fn main() {
     let mut layer = app
         .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32))
         .unwrap();
-    let position = Vector3::new(-0.5, -0.5, 0.0);
+    let position = Vector3::new(0.0, 0.0, 0.0);
     let mut ent = app.init_entity(position, evil_id, &mut layer);
     let mut ent_good = app.init_entity(position, tex_id, &mut layer);
-    EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.0, 0.0, 0.0));
+    EntitySystem2D::set_position(&mut ent_good, Vector3::new(0.25, 0.0, 0.0));
     EntitySystem2D::set_rotation(&mut ent_good, 30.0);
     EntitySystem2D::set_scale(&mut ent_good, 0.25);
-    EntitySystem2D::set_scale(&mut ent, 0.5);
+    EntitySystem2D::set_scale(&mut ent, 0.2);
     let mut ents_owner = vec![ent, ent_good];
     let mut ents = Vec::new();
     for ent in ents_owner.iter() {
@@ -41,7 +41,7 @@ fn main() {
     drop(ents);
     let mut layers = vec![layer];
     let camera = app.camera_mut();
-    Camera2DSystem::transform(camera, Vector3::new(-1.0, -1.0, 0.0));
+    Camera2DSystem::transform(camera, Vector3::new(0.35, 0.25, 1.0));
     app.update_camera();
 
     let mut rotation = 0.0;

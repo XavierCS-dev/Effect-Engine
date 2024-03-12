@@ -14,6 +14,7 @@ bytemuck = { version = "1.14", features = [ "derive" ] }
 anyhow = "1.0.75"
 rand = "0.8.5"
 rayon = "1.8.0"
+glam = "0.25"
 
 [dependencies.image]
 version = "0.24"
