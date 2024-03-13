@@ -63,6 +63,7 @@ impl Engine {
             &device,
             camera_fov,
             (dims.width as f32) / (dims.height as f32),
+            0.5,
         );
         let indices: [u16; 6] = [0, 1, 2, 0, 2, 3];
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {

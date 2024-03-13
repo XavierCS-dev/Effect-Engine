@@ -1,4 +1,10 @@
+use std::{cmp, collections::HashMap, time::Duration};
+
 use wgpu::util::DeviceExt;
+use winit::{
+    event::{ElementState, WindowEvent},
+    keyboard::KeyCode,
+};
 
 use crate::engine::primitives::vector::Vector3;
 
@@ -11,10 +17,22 @@ pub struct Camera2D {
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
     buffer: wgpu::Buffer,
+    key_codes: HashMap<CameraAction, winit::keyboard::KeyCode>,
+    speed: f32,
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub enum CameraAction {
+    Forward,
+    Right,
+    Left,
+    Backward,
+    ZoomIn,
+    ZoomOut,
 }
 
 impl Camera2D {
-    pub fn new(device: &wgpu::Device, fov_deg: f32, aspect_ratio: f32) -> Self {
+    pub fn new(device: &wgpu::Device, fov_deg: f32, aspect_ratio: f32, speed: f32) -> Self {
         let near = 0.01;
         let far = 10.0;
         let fov_rad = fov_deg.to_radians();
@@ -52,6 +70,7 @@ impl Camera2D {
                 resource: buffer.as_entire_binding(),
             }],
         });
+        let key_codes = HashMap::new();
         Self {
             proj,
             look_at,
@@ -61,6 +80,8 @@ impl Camera2D {
             buffer,
             bind_group,
             bind_group_layout,
+            key_codes,
+            speed,
         }
     }
 
@@ -92,6 +113,10 @@ impl Camera2DSystem {
         );
     }
 
+    pub fn set_speed(camera: &mut Camera2D, speed: f32) {
+        camera.speed = speed;
+    }
+
     pub fn update(camera: &mut Camera2D, queue: &wgpu::Queue) {
         let comp = camera.proj * camera.look_at;
         queue.write_buffer(
@@ -99,5 +124,22 @@ impl Camera2DSystem {
             0,
             bytemuck::cast_slice(&comp.to_cols_array()),
         );
+    }
+
+    pub fn process_inputs(camera: &mut Camera2D, event: &WindowEvent, delta_time: Duration) {
+        match event {
+            WindowEvent::KeyboardInput { event, .. } => {
+                if event.state == ElementState::Pressed {
+                    todo!()
+                }
+            }
+            _ => (),
+        }
+    }
+
+    pub fn set_inputs(camera: &mut Camera2D, inputs: Vec<(CameraAction, KeyCode)>) {
+        for (action, code) in inputs {
+            camera.key_codes.insert(action, code);
+        }
     }
 }
