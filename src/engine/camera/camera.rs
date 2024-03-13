@@ -21,7 +21,7 @@ pub struct Camera2D {
     speed: f32,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum CameraAction {
     Forward,
     Right,
@@ -137,9 +137,9 @@ impl Camera2DSystem {
         }
     }
 
-    pub fn set_inputs(camera: &mut Camera2D, inputs: Vec<(CameraAction, KeyCode)>) {
+    pub fn set_inputs(camera: &mut Camera2D, inputs: &[(CameraAction, KeyCode)]) {
         for (action, code) in inputs {
-            camera.key_codes.insert(action, code);
+            camera.key_codes.insert(*action, *code);
         }
     }
 }

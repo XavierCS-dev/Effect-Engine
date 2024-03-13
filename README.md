@@ -3,10 +3,13 @@
 - [ ] Move event loop into lib or engine
   - [x] Decided against doing this, managing input becomes very complex and is likely to hurt performance.
   - [x] Let user handle their inputs, it isn't so bad
+  - [x] Nevermind it really isn't user friendly.
+  - [ ] Write a thin wrapper for winit events in a context struct
+  - [ ] Pass this context struct to a closure supplied by a user
 
 - [ ] 0.3.0 release blockers
   - [ ] Sound system
-  ~~- [ ] User input system~~
+  - [ ] User input system
 
 - [ ] Possible 0.4.0 release
   - [ ] GUI using framework eg iced egui

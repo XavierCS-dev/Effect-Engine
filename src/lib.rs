@@ -1,4 +1,5 @@
 pub mod engine;
+pub mod event;
 use anyhow::Result;
 use engine::{
     camera::camera::Camera2D,
@@ -7,10 +8,12 @@ use engine::{
     layer::layer::{Layer2D, LayerID},
     texture::texture2d::{Texture2D, TextureID},
 };
+use event::input::context::Context;
 use winit::{
     dpi::PhysicalSize,
-    event::{Event, WindowEvent},
+    event::{ElementState, Event, WindowEvent},
     event_loop::{self, ControlFlow, EventLoop},
+    keyboard::KeyCode,
     window::WindowBuilder,
 };
 
@@ -82,6 +85,30 @@ impl EffectSystem {
 
     pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
         self.engine.set_background(texture, pixel_art)
+    }
+
+    pub fn run<F>(event_loop: EventLoop<()>, mut user_loop: F)
+    where
+        F: FnMut(&Context) -> (),
+    {
+        let ctx = Context;
+        let _ = event_loop.run(|event, control| match event {
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::KeyboardInput { event, .. } => {
+                    if event.state == ElementState::Pressed {
+                        if event.physical_key == KeyCode::Escape {
+                            control.exit();
+                        }
+                    }
+                }
+                _ => (),
+            },
+            Event::AboutToWait => {
+                let ctx = Context;
+                user_loop(&ctx);
+            }
+            _ => (),
+        });
     }
 }
 
