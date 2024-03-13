@@ -83,24 +83,6 @@ impl EffectSystem {
     pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
         self.engine.set_background(texture, pixel_art)
     }
-
-    pub fn run<F>(mut event_loop: EventLoop<()>, mut user_loop: F)
-    where
-        F: FnMut() -> (),
-    {
-        let _ = event_loop.run(|event, control| match event {
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => {
-                control.exit();
-            }
-            Event::AboutToWait => {
-                user_loop();
-            }
-            _ => (),
-        });
-    }
 }
 
 pub fn init_engine(
