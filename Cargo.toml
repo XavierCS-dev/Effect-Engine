@@ -17,6 +17,6 @@ rayon = "1.8.0"
 glam = "0.25"
 
 [dependencies.image]
-version = "0.24"
+version = "0.25"
 default-features = false
 features = ["png", "jpeg"]

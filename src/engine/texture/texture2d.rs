@@ -66,12 +66,7 @@ impl Texture2DSystem {
         pixel_art: bool,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-    ) -> (
-        wgpu::BindGroup,
-        wgpu::Texture,
-        wgpu::TextureView,
-        wgpu::Sampler,
-    ) {
+    ) -> wgpu::BindGroup {
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("texture"),
             size: extent,
@@ -131,6 +126,6 @@ impl Texture2DSystem {
             ],
         });
 
-        (bind_group, texture, view, sampler)
+        bind_group
     }
 }

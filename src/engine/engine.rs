@@ -9,6 +9,7 @@ use winit::dpi::PhysicalSize;
 use super::camera::camera::Camera2D;
 use super::camera::camera::Camera2DSystem;
 use super::primitives::vector::Vector3;
+use super::texture::background2d::Background2D;
 use super::{
     primitives::vertex::Vertex,
     texture::texture2d::{Texture2D, TextureID},
@@ -26,6 +27,7 @@ pub struct Engine {
     render_pipeline: wgpu::RenderPipeline,
     texture_bgl: wgpu::BindGroupLayout,
     camera: Camera2D,
+    background: Option<Background2D>,
 }
 
 /*
@@ -152,7 +154,7 @@ impl Engine {
             }),
             multiview: None,
         });
-
+        let background = None;
         Self {
             surface,
             device,
@@ -162,6 +164,7 @@ impl Engine {
             render_pipeline,
             texture_bgl,
             camera,
+            background,
         }
     }
 
@@ -217,15 +220,26 @@ impl Engine {
             occlusion_query_set: None,
         });
         render_pass.set_pipeline(&self.render_pipeline);
+
+        match self.background.as_ref() {
+            Some(bg) => {
+                render_pass.set_bind_group(0, bg.bind_group(), &[]);
+                render_pass.set_bind_group(1, bg.camera_bind_group(), &[]);
+                render_pass.set_vertex_buffer(0, bg.vertex_buffer());
+                render_pass.set_vertex_buffer(1, bg.entity_buffer());
+                render_pass.draw(0..6, 0..1);
+            }
+            None => (),
+        };
+
+        render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
         for layer in entities {
             render_pass.set_bind_group(0, layer.bind_group(), &[]);
-            render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
             render_pass.set_vertex_buffer(0, layer.vertex_buffer());
             render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
             render_pass.set_index_buffer(layer.index_buffer(), wgpu::IndexFormat::Uint16);
             render_pass.draw_indexed(0..6 as u32, 0, 0..layer.entity_count() as u32);
         }
-
         drop(render_pass);
         self.queue.submit(std::iter::once(command_encoder.finish()));
         surface_texture.present();
@@ -277,5 +291,16 @@ impl Engine {
 
     pub fn camera_mut(&mut self) -> &mut Camera2D {
         &mut self.camera
+    }
+
+    pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
+        self.background = Some(Background2D::new(
+            texture,
+            &self.texture_bgl,
+            pixel_art,
+            &self.device,
+            &self.queue,
+        )?);
+        Ok(())
     }
 }

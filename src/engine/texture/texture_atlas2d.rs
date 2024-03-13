@@ -17,9 +17,6 @@ const MAX_HEIGHT: u32 = 8192;
 
 pub struct TextureAtlas2D {
     bind_group: wgpu::BindGroup,
-    atlas: wgpu::Texture,
-    view: wgpu::TextureView,
-    sampler: wgpu::Sampler,
     dimensions: PhysicalSize<u32>,
     tex_coord_size: PhysicalSize<f32>,
 }
@@ -97,7 +94,7 @@ impl TextureAtlas2D {
             depth_or_array_layers: 1,
         };
 
-        let (bind_group, atlas, view, sampler) = Texture2DSystem::init_texture(
+        let bind_group = Texture2DSystem::init_texture(
             extent,
             combined_tex,
             bind_group_layout,
@@ -110,10 +107,7 @@ impl TextureAtlas2D {
         let tex_coord_height = (texture_size.height as f64 / total_height as f64) as f32;
         let tex_coord_size = PhysicalSize::new(tex_coord_width, tex_coord_height);
         Ok(Self {
-            atlas,
             bind_group,
-            view,
-            sampler,
             dimensions,
             tex_coord_size,
         })
@@ -121,18 +115,6 @@ impl TextureAtlas2D {
 
     pub fn bind_group(&self) -> &wgpu::BindGroup {
         &self.bind_group
-    }
-
-    pub fn atlas(&self) -> &wgpu::Texture {
-        &self.atlas
-    }
-
-    pub fn view(&self) -> &wgpu::TextureView {
-        &self.view
-    }
-
-    pub fn sampler(&self) -> &wgpu::Sampler {
-        &self.sampler
     }
 
     pub fn dimensions(&self) -> PhysicalSize<u32> {

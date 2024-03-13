@@ -79,6 +79,10 @@ impl EffectSystem {
     pub fn update_camera(&mut self) {
         self.engine.update_camera();
     }
+
+    pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
+        self.engine.set_background(texture, pixel_art)
+    }
 }
 
 pub fn init_engine(
