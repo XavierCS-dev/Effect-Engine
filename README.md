@@ -19,26 +19,30 @@
   - [ ] Increase unit test friendliness
   - [ ] Hide main loop from user, or at least, make it easier to use
   - [ ] Event System
-- [ ] Provide a method to set a background image
+- [x] Provide a method to set a background image
 - [x] Fix camera stretching
 - [x] Fix crushing of non-square textures
 - [ ] Add separate world coordinate system
-- [ ] Store index buffer in engine as it is the same accross all layers
+- [x] Store index buffer in engine as it is the same accross all layers
 - [ ] Tile rendering
 
 - [x] Further goals (0.2.0 release blockers)
   - [x] Implement Transformation2D
   - [x] Implement Camera2D (using 3D proj matrix)
-  - [ ] Background texture
+  - [x] Background texture
 
 - [ ] Possible 0.3.0 release
   - [ ] Sound system
   - [ ] User input system
 
 - [ ] Possible 0.4.0 release
-  - [ ] Physics system including Collision2D suvat etc
+  - [ ] GUI using framework eg iced egui
 
 - [ ] Possible 0.5.0 release
-  - [ ] GUI using framework eg iced egui
+  - [ ] Physics system including Collision2D suvat etc
+
+- [ ] Possible 0.6.0 release
+  - [ ] Tilemap (stores entities and a Tile2D type maybe)
+
 
 - [ ] 1.0 release when all basic components needed to make a game present and code is in good shape + performant
