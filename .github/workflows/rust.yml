@@ -17,6 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Check
-      run: cargo check --verbose --exclude=rodio
+      run: cargo check --verbose --workspace --exclude=rodio
     - name: Run tests
-      run: cargo test --verbose --exclude=rodio
+      run: cargo test --verbose --workspace --exclude=rodio
