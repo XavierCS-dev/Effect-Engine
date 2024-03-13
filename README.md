@@ -1,5 +1,7 @@
 ## Next Steps (Phase 2 - Sound and Input)
 
+- [ ] Move event loop into lib or engine
+
 - [ ] 0.3.0 release blockers
   - [ ] Sound system
   - [ ] User input system
