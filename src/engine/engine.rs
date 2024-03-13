@@ -28,6 +28,7 @@ pub struct Engine {
     texture_bgl: wgpu::BindGroupLayout,
     camera: Camera2D,
     background: Option<Background2D>,
+    index_buffer: wgpu::Buffer,
 }
 
 /*
@@ -67,6 +68,13 @@ impl Engine {
             camera_fov,
             (dims.width as f32) / (dims.height as f32),
         );
+        let indices: [u16; 6] = [0, 1, 2, 0, 2, 3];
+        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Index Buffer"),
+            contents: bytemuck::cast_slice(&indices),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+
         let surface_capabilities = surface.get_capabilities(&adapter);
         let present_mode;
         if v_sync {
@@ -154,6 +162,7 @@ impl Engine {
             }),
             multiview: None,
         });
+
         let background = None;
         Self {
             surface,
@@ -165,6 +174,7 @@ impl Engine {
             texture_bgl,
             camera,
             background,
+            index_buffer,
         }
     }
 
@@ -220,6 +230,7 @@ impl Engine {
             occlusion_query_set: None,
         });
         render_pass.set_pipeline(&self.render_pipeline);
+        render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
 
         match self.background.as_ref() {
             Some(bg) => {
@@ -227,7 +238,7 @@ impl Engine {
                 render_pass.set_bind_group(1, bg.camera_bind_group(), &[]);
                 render_pass.set_vertex_buffer(0, bg.vertex_buffer());
                 render_pass.set_vertex_buffer(1, bg.entity_buffer());
-                render_pass.draw(0..6, 0..1);
+                render_pass.draw_indexed(0..6, 0, 0..1);
             }
             None => (),
         };
@@ -237,7 +248,6 @@ impl Engine {
             render_pass.set_bind_group(0, layer.bind_group(), &[]);
             render_pass.set_vertex_buffer(0, layer.vertex_buffer());
             render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
-            render_pass.set_index_buffer(layer.index_buffer(), wgpu::IndexFormat::Uint16);
             render_pass.draw_indexed(0..6 as u32, 0, 0..layer.entity_count() as u32);
         }
         drop(render_pass);

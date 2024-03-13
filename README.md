@@ -21,14 +21,15 @@
   - [ ] Event System
 - [ ] Provide a method to set a background image
 - [x] Fix camera stretching
-- [ ] Fix crushing of non-square textures
+- [x] Fix crushing of non-square textures
 - [ ] Add separate world coordinate system
+- [ ] Store index buffer in engine as it is the same accross all layers
+- [ ] Tile rendering
 
 - [x] Further goals (0.2.0 release blockers)
   - [x] Implement Transformation2D
   - [x] Implement Camera2D (using 3D proj matrix)
   - [ ] Background texture
-  - [ ] World coordinates
 
 - [ ] Possible 0.3.0 release
   - [ ] Sound system

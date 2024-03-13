@@ -27,7 +27,6 @@ pub struct Layer2D {
     textures: HashMap<TextureID, Texture2D>,
     atlas: TextureAtlas2D,
     vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
     entity_count: usize,
     entity_maximum: usize,
     entity_buffer: Option<wgpu::Buffer>,
@@ -57,7 +56,6 @@ impl Layer2D {
         for texture in textures {
             textures_layer.insert(texture.id().clone(), texture);
         }
-        let index_buffer = Layer2DSystem::create_index_buffer(device, queue);
         let entity_count = 0;
         let entity_maximum = 0;
         let vertex_buffer = Layer2DSystem::create_vertex_buffer(
@@ -71,7 +69,6 @@ impl Layer2D {
             textures: textures_layer,
             atlas,
             vertex_buffer,
-            index_buffer,
             entity_count,
             entity_buffer: None,
             entity_maximum,
@@ -97,10 +94,6 @@ impl Layer2D {
 
     pub fn vertex_buffer(&self) -> wgpu::BufferSlice {
         self.vertex_buffer.slice(..)
-    }
-
-    pub fn index_buffer(&self) -> wgpu::BufferSlice {
-        self.index_buffer.slice(..)
     }
 
     pub fn entity_buffer(&self) -> Option<wgpu::BufferSlice> {
