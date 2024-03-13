@@ -1,16 +1,11 @@
-use crate::engine::{
-    texture::texture2d::Texture2DSystem,
-    util::{effect_error::EffectError, file_to_bytes::file_to_bytes},
-};
+use crate::engine::{texture::texture2d::Texture2DSystem, util::effect_error::EffectError};
 
-use image::{GenericImage, GenericImageView, ImageBuffer, Rgba};
-use wgpu::Extent3d;
+use image::{GenericImage, ImageBuffer};
 use winit::dpi::PhysicalSize;
 
-use super::texture2d::{Texture2D, TextureID};
+use super::texture2d::Texture2D;
 
 use anyhow::{bail, Result};
-use image::EncodableLayout;
 
 const MAX_WIDTH: u32 = 8192;
 const MAX_HEIGHT: u32 = 8192;

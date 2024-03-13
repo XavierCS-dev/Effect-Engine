@@ -169,6 +169,14 @@ impl Background2D {
     pub fn camera_bind_group(&self) -> &wgpu::BindGroup {
         &self.camera_bind_group
     }
+
+    pub fn texture(&self) -> &Texture2D {
+        &self.texture_data
+    }
+
+    pub fn dimensions(&self) -> PhysicalSize<u32> {
+        self.dimensions
+    }
 }
 
 // manage all background related operations

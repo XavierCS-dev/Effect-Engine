@@ -1,18 +1,13 @@
-use std::f32::consts::PI;
+use wgpu::util::DeviceExt;
 
-use wgpu::{util::DeviceExt, Queue};
-
-use crate::engine::{
-    primitives::{matrix::Matrix4, vector::Vector3},
-    transform::transform::{Transform2D, Transform2DSystem},
-};
+use crate::engine::primitives::vector::Vector3;
 
 pub struct Camera2D {
     look_at: glam::Mat4,
     proj: glam::Mat4,
-    near: f32,
-    far: f32,
-    fov_deg: f32,
+    _near: f32,
+    _far: f32,
+    _fov_deg: f32,
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
     buffer: wgpu::Buffer,
@@ -60,9 +55,9 @@ impl Camera2D {
         Self {
             proj,
             look_at,
-            near,
-            far,
-            fov_deg,
+            _near: near,
+            _far: far,
+            _fov_deg: fov_deg,
             buffer,
             bind_group,
             bind_group_layout,

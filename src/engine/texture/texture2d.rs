@@ -1,8 +1,5 @@
-use image::GenericImageView;
 use image::ImageBuffer;
 use image::Rgba;
-use std::fs;
-use std::io::prelude::*;
 
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Debug, Copy)]
 pub struct TextureID(pub &'static str);

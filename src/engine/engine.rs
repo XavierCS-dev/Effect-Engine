@@ -8,13 +8,8 @@ use winit::dpi::PhysicalSize;
 
 use super::camera::camera::Camera2D;
 use super::camera::camera::Camera2DSystem;
-use super::primitives::vector::Vector3;
 use super::texture::background2d::Background2D;
-use super::{
-    primitives::vertex::Vertex,
-    texture::texture2d::{Texture2D, TextureID},
-    traits::layer::Layer,
-};
+use super::{primitives::vertex::Vertex, texture::texture2d::Texture2D};
 
 use anyhow::Result;
 
@@ -34,6 +29,7 @@ pub struct Engine {
 /*
 * Update and input should run closures defined by the user
 * these closures are to be stored in Engine upon initialisation
+* 0.3.0 release
 */
 impl Engine {
     pub async fn new(window: winit::window::Window, camera_fov: f32, v_sync: bool) -> Self {
@@ -187,13 +183,13 @@ impl Engine {
         }
     }
 
-    pub fn input(&mut self, event: &winit::event::Event<()>, delta: &std::time::Duration) {
+    pub fn input(&mut self, _event: &winit::event::Event<()>, _delta: &std::time::Duration) {
         // do nothing
         // not sure what to do with this yet
         // TODO: move input to be a burden on user.
     }
 
-    pub fn update(&mut self, delta: &std::time::Duration) {
+    pub fn update(&mut self, _delta: &std::time::Duration) {
         // TODO: Move update to be a burden on user
 
         // millis returns 0 for some reason...use nano

@@ -1,11 +1,11 @@
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use effect_engine::engine::{
     camera::camera::Camera2DSystem,
     entity::entity::{Entity2D, EntitySystem2D},
-    layer::layer::{Layer2DSystem, LayerID},
+    layer::layer::LayerID,
     primitives::vector::Vector3,
-    texture::texture2d::{Texture2D, TextureID},
+    texture::texture2d::TextureID,
 };
 use winit::{
     dpi::PhysicalSize,
@@ -62,7 +62,7 @@ fn main() {
     let mut rotation = 0.0;
     let _ = event_loop.run(|event, control| {
         after = Instant::now();
-        let delta_time = after - before;
+        let _delta_time = after - before;
         // app.engine.input(&event, &delta_time);
         match event {
             Event::WindowEvent {

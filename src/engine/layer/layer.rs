@@ -1,20 +1,14 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use std::collections::{hash_map::Keys, HashMap};
 use winit::dpi::PhysicalSize;
 
-use wgpu::util::DeviceExt;
-
-use crate::{
-    engine::{
-        entity::entity::{Entity2D, Entity2DRaw},
-        primitives::vertex::Vertex,
-        texture::{
-            texture2d::{Texture2D, TextureID},
-            texture_atlas2d::TextureAtlas2D,
-        },
-        util::effect_error::EffectError,
+use crate::engine::{
+    entity::entity::{Entity2D, Entity2DRaw},
+    primitives::vertex::Vertex,
+    texture::{
+        texture2d::{Texture2D, TextureID},
+        texture_atlas2d::TextureAtlas2D,
     },
-    EffectSystem,
 };
 
 #[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
@@ -178,7 +172,7 @@ impl Layer2DSystem {
         Layer2DSystem::alloc_buffer(data, size * 2, device, queue, "Entity Buffer", false)
     }
 
-    fn create_index_buffer(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Buffer {
+    fn _create_index_buffer(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Buffer {
         let mut indices: Vec<u16> = Vec::new();
         indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);
         let data: &[u8] = bytemuck::cast_slice(&indices);
@@ -187,7 +181,7 @@ impl Layer2DSystem {
     }
 
     fn create_vertex_buffer(
-        texture_size: PhysicalSize<u32>,
+        _texture_size: PhysicalSize<u32>,
         tex_coord_size: PhysicalSize<f32>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,

@@ -1,11 +1,10 @@
 pub mod engine;
 use anyhow::Result;
 use engine::{
-    camera::{self, camera::Camera2D},
+    camera::camera::Camera2D,
     engine as effect,
     entity::entity::Entity2D,
     layer::layer::{Layer2D, LayerID},
-    primitives::vector::Vector3,
     texture::texture2d::{Texture2D, TextureID},
 };
 use winit::{
