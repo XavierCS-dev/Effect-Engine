@@ -12,6 +12,21 @@ use winit::{
     dpi::PhysicalSize,
     keyboard::{KeyCode, PhysicalKey},
 };
+/*
+An aside my thoughts concerning f32. Currently figuring out solutions to solve accuracy problems
+in a larger world. Current solution is one that is better done by users. Floating origin.
+Store a list of chunks and their integer coordinates. Everything in a chunk has a local coordinate
+relative the the origin of the chunk. Then each entity has a global coordinate which is relative to
+the current origin. Entities chunk integer location and f32 local position can be used to calculate
+positive relative to current origin. More accurate the closer the player is. The current origin
+is the origin of the chunk the player is currently in.
+Each time the player loads a new chunk, these coordinates will need to be recalculated.
+So it is best to keep each chunk as large as possible to minimise this, and not load in all chunks of the world.
+(Can use layers cache nearby unloaded chunks data to cut disk load times).
+
+This comment will hopefully end up in the docs on the Vector3 page, I also intend to change Vector3 to generic
+for floating point or perhaps integer too, will have to see.
+*/
 
 fn main() {
     /*
