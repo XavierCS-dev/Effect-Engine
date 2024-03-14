@@ -50,6 +50,9 @@ fn camera_example() {
     // give user access to delta time
     let mut pos = Vector3::new(0.0, 0.0, 5.0);
     EffectSystem::run(event_loop, |ctx, delta_time, control| {
+        if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::Escape)) {
+            control.exit();
+        }
         let mut cam = app.camera_mut();
         if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::KeyW)) {
             pos.y += 0.005 * ((delta_time.as_micros() as f32) / 1000.0);
