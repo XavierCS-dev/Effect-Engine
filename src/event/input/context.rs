@@ -44,8 +44,12 @@ impl Context2DSystem {
                         context.keys_pressed.insert(event.physical_key);
                     }
                     ElementState::Released => {
-                        let key = context.keys_pressed.take(&event.physical_key).unwrap();
-                        context.keys_released.insert(key);
+                        match context.keys_pressed.take(&event.physical_key) {
+                            Some(key) => {
+                                context.keys_released.insert(key);
+                            }
+                            _ => (),
+                        };
                     }
                 },
                 _ => (),
