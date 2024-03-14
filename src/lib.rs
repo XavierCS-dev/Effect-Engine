@@ -1,5 +1,7 @@
 pub mod engine;
 pub mod event;
+use std::time::{Duration, Instant};
+
 use anyhow::Result;
 use engine::{
     camera::camera::Camera2D,
@@ -8,7 +10,7 @@ use engine::{
     layer::layer::{Layer2D, LayerID},
     texture::texture2d::{Texture2D, TextureID},
 };
-use event::input::context::Context;
+use event::input::context::Context2D;
 use winit::{
     dpi::PhysicalSize,
     event::{ElementState, Event, WindowEvent},
@@ -42,10 +44,6 @@ impl EffectSystem {
     /// it is up to the user to sort the layers, they have the tools to do so.
     pub fn render(&mut self, layers: &Vec<Layer2D>) -> Result<(), wgpu::SurfaceError> {
         self.engine.render(&layers)
-    }
-
-    pub fn init_texture(&self, id: TextureID, path: &'static str) -> Texture2D {
-        Texture2D::new(id, path)
     }
 
     /// Make sure your texture_size is set to the larger dimension that appears in your textures.
@@ -85,30 +83,6 @@ impl EffectSystem {
 
     pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
         self.engine.set_background(texture, pixel_art)
-    }
-
-    pub fn run<F>(event_loop: EventLoop<()>, mut user_loop: F)
-    where
-        F: FnMut(&Context) -> (),
-    {
-        let ctx = Context;
-        let _ = event_loop.run(|event, control| match event {
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::KeyboardInput { event, .. } => {
-                    if event.state == ElementState::Pressed {
-                        if event.physical_key == KeyCode::Escape {
-                            control.exit();
-                        }
-                    }
-                }
-                _ => (),
-            },
-            Event::AboutToWait => {
-                let ctx = Context;
-                user_loop(&ctx);
-            }
-            _ => (),
-        });
     }
 }
 
