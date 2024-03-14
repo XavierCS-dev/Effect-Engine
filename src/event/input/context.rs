@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use winit::{
     event::{ElementState, Event, WindowEvent},
@@ -8,14 +8,14 @@ use winit::{
 // Should provide all the currently pressed keys
 // and the keys released on the previous frame
 pub struct Context2D {
-    keys_pressed: HashMap<PhysicalKey, ()>,
-    keys_released: HashMap<PhysicalKey, ()>,
+    keys_pressed: HashSet<PhysicalKey>,
+    keys_released: HashSet<PhysicalKey>,
 }
 
 impl Context2D {
     pub fn new() -> Self {
-        let keys_pressed = HashMap::new();
-        let keys_released = HashMap::new();
+        let keys_pressed = HashSet::new();
+        let keys_released = HashSet::new();
         Self {
             keys_pressed,
             keys_released,
@@ -23,10 +23,10 @@ impl Context2D {
     }
 
     pub fn is_key_pressed(&self, key: PhysicalKey) -> bool {
-        self.keys_pressed.contains_key(&key)
+        self.keys_pressed.contains(&key)
     }
     pub fn is_key_released(&self, key: PhysicalKey) -> bool {
-        self.keys_released.contains_key(&key)
+        self.keys_released.contains(&key)
     }
 }
 
@@ -41,15 +41,11 @@ impl Context2DSystem {
                     is_synthetic,
                 } => match event.state {
                     ElementState::Pressed => {
-                        context.keys_pressed.insert(event.physical_key, ());
+                        context.keys_pressed.insert(event.physical_key);
                     }
                     ElementState::Released => {
-                        let key = context
-                            .keys_pressed
-                            .remove_entry(&event.physical_key)
-                            .unwrap()
-                            .0;
-                        context.keys_released.insert(key, ());
+                        let key = context.keys_pressed.take(&event.physical_key).unwrap();
+                        context.keys_released.insert(key);
                     }
                 },
                 _ => (),
