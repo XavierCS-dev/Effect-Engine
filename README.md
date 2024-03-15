@@ -16,9 +16,11 @@
 - [ ] 0.3.0 release blockers
   - [ ] Sound system
   - [ ] User input system
+  - [ ] Project restructure
 
 - [ ] Possible 0.4.0 release
   - [ ] GUI using framework eg iced egui
+  - [ ] 2D Shadows and lighting
 
 - [ ] Possible 0.5.0 release
   - [ ] Physics system including Collision2D suvat etc

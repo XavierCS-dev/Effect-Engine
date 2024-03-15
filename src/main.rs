@@ -39,6 +39,9 @@ fn main() {
     camera_example()
 }
 
+// You can also use your own custom camera system by using
+// Camera2DSystem::Transform. That way you can use mouse camera control,
+// or move the camera only when an entity reaches the edge, etc
 fn camera_example() {
     let (mut app, event_loop) =
         effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, false);
@@ -62,11 +65,7 @@ fn camera_example() {
     let tree_vec = vec![&tree, &evil];
     app.set_entities(&mut tree_layer, tree_vec.as_slice());
     let layers = vec![tree_layer];
-    // give user access to delta time
     let mut cam = app.init_camera(45.0);
-    // You can also use your own custom camera system by using
-    // Camera2DSystem::Transform. That way you can use mouse camera control,
-    // or move the camera only when an entity reaches the edge, etc
     Camera2DSystem::set_inputs(
         &mut cam,
         &[
