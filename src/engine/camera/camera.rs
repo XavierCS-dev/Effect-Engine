@@ -183,4 +183,14 @@ impl Camera2DSystem {
             camera.key_codes.insert(*action, *code);
         }
     }
+
+    pub fn remove_inputs(camera: &mut Camera2D, inputs: &[(CameraAction, KeyCode)]) {
+        for (action, _) in inputs {
+            let _ = camera.key_codes.remove(&action);
+        }
+    }
+
+    pub fn reset_inputs(camera: &mut Camera2D) {
+        camera.key_codes.clear();
+    }
 }
