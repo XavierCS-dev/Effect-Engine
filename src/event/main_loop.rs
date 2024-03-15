@@ -6,7 +6,7 @@ use winit::{
     keyboard::KeyCode,
 };
 
-use crate::EffectSystem;
+use crate::{engine::camera::camera::Camera2DSystem, EffectSystem};
 
 use super::input::context::{Context2D, Context2DSystem};
 

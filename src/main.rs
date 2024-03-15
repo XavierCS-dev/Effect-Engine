@@ -1,6 +1,6 @@
 use effect_engine::{
     engine::{
-        camera::camera::Camera2DSystem,
+        camera::camera::{Camera2D, Camera2DSystem, CameraAction},
         entity::entity::Entity2D,
         layer::layer::LayerID,
         primitives::vector::Vector3,
@@ -63,27 +63,27 @@ fn camera_example() {
     app.set_entities(&mut tree_layer, tree_vec.as_slice());
     let layers = vec![tree_layer];
     // give user access to delta time
-    let mut pos = Vector3::new(0.0, 0.0, 5.0);
+    let cam = app.camera_mut();
+    Camera2DSystem::set_inputs(
+        cam,
+        &[
+            (CameraAction::Up, KeyCode::KeyW),
+            (CameraAction::Down, KeyCode::KeyS),
+            (CameraAction::Left, KeyCode::KeyA),
+            (CameraAction::Right, KeyCode::KeyD),
+            (CameraAction::ZoomIn, KeyCode::KeyZ),
+            (CameraAction::ZoomOut, KeyCode::KeyX),
+        ],
+    );
+    Camera2DSystem::set_speed(cam, 0.005);
     EffectSystem::run(event_loop, |ctx, delta_time, control| {
         if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::Escape)) {
             control.exit();
         }
-        let mut cam = app.camera_mut();
-        if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::KeyW)) {
-            pos.y += 0.005 * ((delta_time.as_micros() as f32) / 1000.0);
-        }
-        if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::KeyS)) {
-            pos.y -= 0.005 * ((delta_time.as_micros() as f32) / 1000.0);
-        }
-        if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::KeyA)) {
-            pos.x -= 0.005 * ((delta_time.as_micros() as f32) / 1000.0);
-        }
-        if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::KeyD)) {
-            pos.x += 0.005 * ((delta_time.as_micros() as f32) / 1000.0);
-        }
-        Camera2DSystem::transform(&mut cam, pos);
-        app.update_camera();
 
+        let cam = app.camera_mut();
+        Camera2DSystem::process_inputs(cam, ctx, delta_time);
+        app.update_camera();
         app.render(&layers).unwrap();
     })
 }

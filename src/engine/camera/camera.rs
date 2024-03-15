@@ -1,32 +1,39 @@
-use std::{cmp, collections::HashMap, time::Duration};
+use std::{
+    cmp,
+    collections::{HashMap, HashSet},
+    sync::Arc,
+    time::Duration,
+};
 
 use wgpu::util::DeviceExt;
 use winit::{
     event::{ElementState, WindowEvent},
-    keyboard::KeyCode,
+    keyboard::{KeyCode, PhysicalKey},
 };
 
-use crate::engine::primitives::vector::Vector3;
+use crate::{engine::primitives::vector::Vector3, event::input::context::Context2D};
 
 pub struct Camera2D {
     look_at: glam::Mat4,
     proj: glam::Mat4,
+    position: Vector3,
     _near: f32,
     _far: f32,
     _fov_deg: f32,
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
     buffer: wgpu::Buffer,
-    key_codes: HashMap<CameraAction, winit::keyboard::KeyCode>,
+    key_codes: HashMap<CameraAction, winit::keyboard::PhysicalKey>,
+    current_actions: HashSet<CameraAction>,
     speed: f32,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum CameraAction {
-    Forward,
+    Up,
     Right,
     Left,
-    Backward,
+    Down,
     ZoomIn,
     ZoomOut,
 }
@@ -34,7 +41,7 @@ pub enum CameraAction {
 impl Camera2D {
     pub fn new(device: &wgpu::Device, fov_deg: f32, aspect_ratio: f32, speed: f32) -> Self {
         let near = 0.01;
-        let far = 10.0;
+        let far = 100.0;
         let fov_rad = fov_deg.to_radians();
         let proj = glam::Mat4::perspective_rh(fov_rad, aspect_ratio, near, far);
         let look_at = glam::Mat4::look_at_rh(
@@ -71,6 +78,8 @@ impl Camera2D {
             }],
         });
         let key_codes = HashMap::new();
+        let current_actions = HashSet::new();
+        let position = Vector3::new(0.0, 0.0, 1.0);
         Self {
             proj,
             look_at,
@@ -82,6 +91,8 @@ impl Camera2D {
             bind_group_layout,
             key_codes,
             speed,
+            current_actions,
+            position,
         }
     }
 
@@ -126,20 +137,49 @@ impl Camera2DSystem {
         );
     }
 
-    pub fn process_inputs(camera: &mut Camera2D, event: &WindowEvent, delta_time: Duration) {
-        match event {
-            WindowEvent::KeyboardInput { event, .. } => {
-                if event.state == ElementState::Pressed {
-                    todo!()
+    pub fn process_inputs(camera: &mut Camera2D, ctx: &Context2D, delta_time: Duration) {
+        for (camera_action, key_code) in camera.key_codes.iter() {
+            if ctx.is_key_pressed(*key_code) {
+                camera.current_actions.insert(*camera_action);
+            }
+            if ctx.is_key_released(*key_code) {
+                camera.current_actions.remove(camera_action);
+            }
+        }
+        let dt = delta_time.as_micros() as f32 / 1000.0;
+        for action in camera.current_actions.iter() {
+            match action {
+                CameraAction::Up => {
+                    camera.position.y += camera.speed * dt;
+                }
+                CameraAction::Down => {
+                    camera.position.y -= camera.speed * dt;
+                }
+                CameraAction::Right => {
+                    camera.position.x += camera.speed * dt;
+                }
+                CameraAction::Left => {
+                    camera.position.x -= camera.speed * dt;
+                }
+                CameraAction::ZoomIn => {
+                    camera.position.z -= camera.speed * dt;
+                }
+                CameraAction::ZoomOut => {
+                    camera.position.z += camera.speed * dt;
                 }
             }
-            _ => (),
         }
+
+        camera.look_at = glam::Mat4::look_at_rh(
+            glam::Vec3::new(camera.position.x, camera.position.y, camera.position.z),
+            glam::Vec3::new(camera.position.x, camera.position.y, 0.0),
+            glam::Vec3::Y,
+        );
     }
 
     pub fn set_inputs(camera: &mut Camera2D, inputs: &[(CameraAction, KeyCode)]) {
         for (action, code) in inputs {
-            camera.key_codes.insert(*action, *code);
+            camera.key_codes.insert(*action, PhysicalKey::Code(*code));
         }
     }
 }
