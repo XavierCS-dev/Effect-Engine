@@ -63,12 +63,12 @@ fn camera_example() {
     app.set_entities(&mut tree_layer, tree_vec.as_slice());
     let layers = vec![tree_layer];
     // give user access to delta time
-    let cam = app.camera_mut();
+    let mut cam = app.init_camera(45.0);
     // You can also use your own custom camera system by using
     // Camera2DSystem::Transform. That way you can use mouse camera control,
     // or move the camera only when an entity reaches the edge, etc
     Camera2DSystem::set_inputs(
-        cam,
+        &mut cam,
         &[
             (CameraAction::Up, KeyCode::KeyW),
             (CameraAction::Down, KeyCode::KeyS),
@@ -78,15 +78,14 @@ fn camera_example() {
             (CameraAction::ZoomOut, KeyCode::KeyX),
         ],
     );
-    Camera2DSystem::set_speed(cam, 0.005);
+    Camera2DSystem::set_speed(&mut cam, 0.005);
     EffectSystem::run(event_loop, |ctx, delta_time, control| {
         if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::Escape)) {
             control.exit();
         }
 
-        let cam = app.camera_mut();
-        Camera2DSystem::process_inputs(cam, ctx, delta_time);
-        app.update_camera();
-        app.render(&layers).unwrap();
+        Camera2DSystem::process_inputs(&mut cam, ctx, delta_time);
+        app.update_camera(&mut cam);
+        app.render(&layers, &cam).unwrap();
     })
 }

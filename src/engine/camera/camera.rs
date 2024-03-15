@@ -69,6 +69,7 @@ impl Camera2D {
                 count: None,
             }],
         });
+
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: None,
             layout: &bind_group_layout,
