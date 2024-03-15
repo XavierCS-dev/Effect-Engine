@@ -6,6 +6,7 @@
 - [ ] Use more ECS where possible to user can update their data in parallel more easily
 - [ ] Introduce the use of multiple threads
 - [ ] Re expose device and queue to allow for massive parallel operations should the user want it
+  - [ ] Wait until consequences of parallel buffers writes are fully understood
 
 - [ ] Move event loop into lib or engine
   - [x] Decided against doing this, managing input becomes very complex and is likely to hurt performance.
