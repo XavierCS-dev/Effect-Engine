@@ -64,6 +64,9 @@ fn camera_example() {
     let layers = vec![tree_layer];
     // give user access to delta time
     let cam = app.camera_mut();
+    // You can also use your own custom camera system by using
+    // Camera2DSystem::Transform. That way you can use mouse camera control,
+    // or move the camera only when an entity reaches the edge, etc
     Camera2DSystem::set_inputs(
         cam,
         &[
