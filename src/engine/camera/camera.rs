@@ -23,7 +23,7 @@ pub struct Camera2D {
     bind_group: wgpu::BindGroup,
     bind_group_layout: wgpu::BindGroupLayout,
     buffer: wgpu::Buffer,
-    key_codes: HashMap<CameraAction, winit::keyboard::PhysicalKey>,
+    key_codes: HashMap<CameraAction, KeyCode>,
     current_actions: HashSet<CameraAction>,
     speed: f32,
 }
@@ -180,7 +180,7 @@ impl Camera2DSystem {
 
     pub fn set_inputs(camera: &mut Camera2D, inputs: &[(CameraAction, KeyCode)]) {
         for (action, code) in inputs {
-            camera.key_codes.insert(*action, PhysicalKey::Code(*code));
+            camera.key_codes.insert(*action, *code);
         }
     }
 }

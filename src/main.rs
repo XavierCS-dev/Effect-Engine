@@ -79,7 +79,7 @@ fn camera_example() {
     );
     Camera2DSystem::set_speed(&mut cam, 0.005);
     EffectSystem::run(event_loop, |ctx, delta_time, control| {
-        if ctx.is_key_pressed(PhysicalKey::Code(KeyCode::Escape)) {
+        if ctx.is_key_pressed(KeyCode::Escape) {
             control.exit();
         }
 

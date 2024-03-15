@@ -22,11 +22,11 @@ impl Context2D {
         }
     }
 
-    pub fn is_key_pressed(&self, key: PhysicalKey) -> bool {
-        self.keys_pressed.contains(&key)
+    pub fn is_key_pressed(&self, key: KeyCode) -> bool {
+        self.keys_pressed.contains(&PhysicalKey::Code(key))
     }
-    pub fn is_key_released(&self, key: PhysicalKey) -> bool {
-        self.keys_released.contains(&key)
+    pub fn is_key_released(&self, key: KeyCode) -> bool {
+        self.keys_released.contains(&PhysicalKey::Code(key))
     }
 }
 
