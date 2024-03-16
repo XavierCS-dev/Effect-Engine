@@ -1,3 +1,5 @@
+use std::{fs::File, io::BufReader, time::Duration};
+
 use effect_engine::{
     engine::{
         camera::camera::{Camera2D, Camera2DSystem, CameraAction},
@@ -6,8 +8,10 @@ use effect_engine::{
         primitives::vector::Vector3,
         texture::texture2d::{Texture2D, TextureID},
     },
+    sound::mixer::{AudioID, Mixer, MixerSystem},
     EffectSystem,
 };
+use rodio::{source::SineWave, Decoder, OutputStream, Source};
 use winit::{
     dpi::PhysicalSize,
     event::MouseButton,
@@ -30,14 +34,8 @@ for floating point or perhaps integer too, will have to see.
 */
 
 fn main() {
-    /*
-    let (mut app, event_loop) = effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, true);
-    let layers = Vec::new();
-    EffectSystem::run(event_loop, |ctx, delta_time, control| {
-        app.render(&layers).unwrap();
-    })
-    */
-    camera_example()
+    sound_example();
+    // camera_example();
 }
 
 // You can also use your own custom camera system by using
@@ -85,6 +83,31 @@ fn camera_example() {
         }
 
         Camera2DSystem::process_inputs(&mut cam, ctx, delta_time);
+        app.update_camera(&mut cam);
+        app.render(&layers, &cam).unwrap();
+    })
+}
+
+fn sound_example() {
+    /*
+    "Cloud Dancer " Kevin MacLeod (incompetech.com)
+    Licensed under Creative Commons: By Attribution 4.0 License
+    http://creativecommons.org/licenses/by/4.0/
+    */
+    let (mut app, event_loop) =
+        effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, false);
+    let mut cam = app.init_camera(45.0);
+    let layers = Vec::new();
+    let mut mixer = Mixer::new();
+    let track_id = AudioID("Kevin");
+    MixerSystem::add_track(&mut mixer, track_id, "Cloud Dancer.mp3").unwrap();
+    MixerSystem::play_track(&mixer, track_id).unwrap();
+
+    EffectSystem::run(event_loop, |ctx, delta_time, control| {
+        if ctx.is_key_pressed(KeyCode::Escape) {
+            control.exit();
+        }
+
         app.update_camera(&mut cam);
         app.render(&layers, &cam).unwrap();
     })

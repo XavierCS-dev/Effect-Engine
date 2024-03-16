@@ -1,5 +1,6 @@
 pub mod engine;
 pub mod event;
+pub mod sound;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
