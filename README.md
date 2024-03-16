@@ -10,8 +10,8 @@
         to take burden from user.
   - [ ] Add worker task system for internal loop, only use when number of tasks becomes high
 - [ ] Re expose device and queue to allow for massive parallel operations should the user want it
-  - [ ] Wait until consequences of parallel buffers writes are fully understood
-
+  - [ ] Create own parallel functions instead
+  
 - [ ] Move event loop into lib or engine
   - [x] Decided against doing this, managing input becomes very complex and is likely to hurt performance.
   - [x] Let user handle their inputs, it isn't so bad

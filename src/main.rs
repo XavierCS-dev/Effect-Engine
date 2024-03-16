@@ -10,6 +10,7 @@ use effect_engine::{
 };
 use winit::{
     dpi::PhysicalSize,
+    event::MouseButton,
     keyboard::{KeyCode, PhysicalKey},
 };
 /*

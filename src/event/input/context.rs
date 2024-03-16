@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use winit::{
-    event::{ElementState, Event, WindowEvent},
+    event::{ElementState, Event, MouseButton, WindowEvent},
     keyboard::{KeyCode, PhysicalKey},
 };
 
@@ -10,23 +10,38 @@ use winit::{
 pub struct Context2D {
     keys_pressed: HashSet<PhysicalKey>,
     keys_released: HashSet<PhysicalKey>,
+    mouse_pressed: HashSet<MouseButton>,
+    mouse_released: HashSet<MouseButton>,
 }
 
 impl Context2D {
     pub fn new() -> Self {
         let keys_pressed = HashSet::new();
         let keys_released = HashSet::new();
+        let mouse_pressed = HashSet::new();
+        let mouse_released = HashSet::new();
         Self {
             keys_pressed,
             keys_released,
+            mouse_pressed,
+            mouse_released,
         }
     }
 
     pub fn is_key_pressed(&self, key: KeyCode) -> bool {
         self.keys_pressed.contains(&PhysicalKey::Code(key))
     }
+
     pub fn is_key_released(&self, key: KeyCode) -> bool {
         self.keys_released.contains(&PhysicalKey::Code(key))
+    }
+
+    pub fn is_mouse_pressed(&self, button: MouseButton) -> bool {
+        self.mouse_pressed.contains(&button)
+    }
+
+    pub fn is_mouse_released(&self, button: MouseButton) -> bool {
+        self.mouse_released.contains(&button)
     }
 }
 
@@ -52,6 +67,21 @@ impl Context2DSystem {
                         };
                     }
                 },
+                WindowEvent::MouseInput {
+                    device_id,
+                    state,
+                    button,
+                } => match state {
+                    ElementState::Pressed => {
+                        context.mouse_pressed.insert(*button);
+                    }
+                    ElementState::Released => match context.mouse_pressed.take(button) {
+                        Some(button) => {
+                            context.mouse_released.insert(button);
+                        }
+                        _ => (),
+                    },
+                },
                 _ => (),
             },
             _ => (),
@@ -60,5 +90,6 @@ impl Context2DSystem {
 
     pub fn clear_released(context: &mut Context2D) {
         context.keys_released.clear();
+        context.mouse_released.clear();
     }
 }
