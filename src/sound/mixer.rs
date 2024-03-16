@@ -41,7 +41,7 @@ impl Mixer {
 pub struct MixerSystem;
 
 impl MixerSystem {
-    pub fn create_sink(path: &'static str) -> Result<AudioTrack> {
+    pub fn create_sink(path: &'static str, is_track: bool) -> Result<AudioTrack> {
         let mut file: Vec<u8> = Vec::new();
         File::open(path)?.read_to_end(&mut file)?;
         let cursor = Cursor::new(file);
@@ -52,22 +52,27 @@ impl MixerSystem {
             stream_handle,
             data: cursor,
         };
-        let source = Decoder::new(track.data.clone()).unwrap();
         let sink = Sink::try_new(&track.stream_handle).unwrap();
-        sink.append(source);
+        if is_track {
+            let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+            sink.append(source);
+        } else {
+            let source = Decoder::new(track.data.clone()).unwrap();
+            sink.append(source);
+        }
         sink.pause();
         track.sink = Some(sink);
         Ok(track)
     }
 
     pub fn add_track(mixer: &mut Mixer, id: AudioID, path: &'static str) -> Result<()> {
-        let sink = MixerSystem::create_sink(path)?;
+        let sink = MixerSystem::create_sink(path, true)?;
         mixer.tracks.insert(id, sink);
         Ok(())
     }
 
     pub fn add_effect(mixer: &mut Mixer, id: AudioID, path: &'static str) -> Result<()> {
-        let sink = MixerSystem::create_sink(path)?;
+        let sink = MixerSystem::create_sink(path, true)?;
         mixer.effects.insert(id, sink);
         Ok(())
     }
