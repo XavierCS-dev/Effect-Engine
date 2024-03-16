@@ -11,7 +11,7 @@ use effect_engine::{
     sound::mixer::{AudioID, Mixer, MixerSystem},
     EffectSystem,
 };
-use rodio::{source::SineWave, Decoder, OutputStream, Source};
+use rodio::{source::SineWave, Decoder, OutputStream, Sink, Source};
 use winit::{
     dpi::PhysicalSize,
     event::MouseButton,
