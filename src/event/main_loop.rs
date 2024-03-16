@@ -1,4 +1,7 @@
-use std::time::{Duration, Instant};
+use std::{
+    sync::{Arc, Mutex},
+    time::{Duration, Instant},
+};
 
 use winit::{
     event::{ElementState, Event, WindowEvent},
@@ -19,6 +22,9 @@ impl EffectSystem {
         let mut before = Instant::now();
         let mut after = Instant::now();
         let _ = event_loop.run(|event, control| {
+            // As more systems are updated here and get more complex,
+            // these updated can be run in a worker task multithreading fashion
+            // before joining back together
             Context2DSystem::update(&mut ctx, &event);
             match event {
                 Event::AboutToWait => {

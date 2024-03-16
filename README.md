@@ -5,6 +5,10 @@
 - [ ] Look for obsolete code and sections where performance can be optimised
 - [ ] Use more ECS where possible to user can update their data in parallel more easily
 - [ ] Introduce the use of multiple threads
+  - [ ] Do this on a PER system basis, ie system functions are muktithreaded themselves.
+  - [ ] Add parallel operations to app ie settings entities for multiple layers at a time.
+        to take burden from user.
+  - [ ] Add worker task system for internal loop, only use when number of tasks becomes high
 - [ ] Re expose device and queue to allow for massive parallel operations should the user want it
   - [ ] Wait until consequences of parallel buffers writes are fully understood
 
