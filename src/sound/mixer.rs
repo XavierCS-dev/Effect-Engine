@@ -10,8 +10,9 @@ use crate::engine::util::effect_error::EffectError;
 #[derive(Hash, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub struct AudioID(pub &'static str);
 
-struct AudioTrack {
+pub struct AudioTrack {
     sink: Option<Sink>,
+    data: Cursor<Vec<u8>>,
     _stream: OutputStream,
     stream_handle: OutputStreamHandle,
 }
@@ -40,15 +41,18 @@ impl Mixer {
 pub struct MixerSystem;
 
 impl MixerSystem {
-    pub fn create_sink(mixer: &mut Mixer, path: &'static str) -> Result<AudioTrack> {
-        let file = BufReader::new(File::open(path)?);
-        let source = Decoder::new(file).unwrap();
+    pub fn create_sink(path: &'static str) -> Result<AudioTrack> {
+        let mut file: Vec<u8> = Vec::new();
+        File::open(path)?.read_to_end(&mut file)?;
+        let cursor = Cursor::new(file);
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
         let mut track = AudioTrack {
             sink: None,
             _stream,
             stream_handle,
+            data: cursor,
         };
+        let source = Decoder::new(track.data.clone()).unwrap();
         let sink = Sink::try_new(&track.stream_handle).unwrap();
         sink.append(source);
         sink.pause();
@@ -57,13 +61,13 @@ impl MixerSystem {
     }
 
     pub fn add_track(mixer: &mut Mixer, id: AudioID, path: &'static str) -> Result<()> {
-        let sink = MixerSystem::create_sink(mixer, path)?;
+        let sink = MixerSystem::create_sink(path)?;
         mixer.tracks.insert(id, sink);
         Ok(())
     }
 
     pub fn add_effect(mixer: &mut Mixer, id: AudioID, path: &'static str) -> Result<()> {
-        let sink = MixerSystem::create_sink(mixer, path)?;
+        let sink = MixerSystem::create_sink(path)?;
         mixer.effects.insert(id, sink);
         Ok(())
     }
