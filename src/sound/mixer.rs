@@ -77,4 +77,13 @@ impl MixerSystem {
 
         Ok(())
     }
+
+    pub fn pause_track(mixer: &Mixer, id: AudioID) -> Result<()> {
+        let track = mixer
+            .tracks
+            .get(&id)
+            .ok_or(EffectError::new("Track not in mixer"))?;
+        track.sink.as_ref().unwrap().pause();
+        Ok(())
+    }
 }
