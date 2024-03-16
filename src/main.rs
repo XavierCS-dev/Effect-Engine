@@ -102,6 +102,9 @@ fn sound_example() {
     let track_id = AudioID("Kevin");
     MixerSystem::add_track(&mut mixer, track_id, "Cloud Dancer.mp3").unwrap();
     MixerSystem::play_track(&mixer, track_id).unwrap();
+    MixerSystem::pause_track(&mixer, track_id).unwrap();
+    MixerSystem::reset_track(&mut mixer, track_id).unwrap();
+    MixerSystem::play_track(&mixer, track_id).unwrap();
 
     EffectSystem::run(event_loop, |ctx, delta_time, control| {
         if ctx.is_key_pressed(KeyCode::Escape) {

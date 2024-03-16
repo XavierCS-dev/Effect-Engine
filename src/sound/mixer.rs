@@ -95,4 +95,21 @@ impl MixerSystem {
         track.sink.as_ref().unwrap().pause();
         Ok(())
     }
+
+    pub fn reset_track(mixer: &mut Mixer, id: AudioID) -> Result<()> {
+        let track = mixer
+            .tracks
+            .get_mut(&id)
+            .ok_or(EffectError::new("Track not in mixer"))?;
+        let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+        let sink = track.sink.as_ref().unwrap();
+        sink.clear();
+        sink.append(source);
+        sink.pause();
+        Ok(())
+    }
+
+    pub fn remove_track(mixer: &mut Mixer, id: AudioID) {
+        let _ = mixer.tracks.remove(&id);
+    }
 }
