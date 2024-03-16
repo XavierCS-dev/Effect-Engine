@@ -1,7 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
 use winit::{
-    event::{ElementState, Event, MouseButton, WindowEvent},
+    dpi::PhysicalPosition,
+    event::{DeviceEvent, ElementState, Event, MouseButton, WindowEvent},
     keyboard::{KeyCode, PhysicalKey},
 };
 
@@ -12,6 +13,9 @@ pub struct Context2D {
     keys_released: HashSet<PhysicalKey>,
     mouse_pressed: HashSet<MouseButton>,
     mouse_released: HashSet<MouseButton>,
+    mouse_within_window: bool,
+    mouse_position: PhysicalPosition<f64>,
+    mouse_travel: (f64, f64),
 }
 
 impl Context2D {
@@ -20,11 +24,17 @@ impl Context2D {
         let keys_released = HashSet::new();
         let mouse_pressed = HashSet::new();
         let mouse_released = HashSet::new();
+        let mouse_within_window = false;
+        let mouse_position = PhysicalPosition::new(0.0, 0.0);
+        let mouse_travel = (0.0, 0.0);
         Self {
             keys_pressed,
             keys_released,
             mouse_pressed,
             mouse_released,
+            mouse_within_window,
+            mouse_position,
+            mouse_travel,
         }
     }
 
@@ -42,6 +52,14 @@ impl Context2D {
 
     pub fn is_mouse_released(&self, button: MouseButton) -> bool {
         self.mouse_released.contains(&button)
+    }
+
+    pub fn mouse_position(&self) -> PhysicalPosition<f64> {
+        self.mouse_position
+    }
+
+    pub fn mouse_delta(&self) -> (f64, f64) {
+        self.mouse_travel
     }
 }
 
@@ -82,6 +100,24 @@ impl Context2DSystem {
                         _ => (),
                     },
                 },
+                WindowEvent::CursorMoved {
+                    device_id,
+                    position,
+                } => {
+                    context.mouse_position = *position;
+                }
+                WindowEvent::CursorEntered { device_id } => {
+                    context.mouse_within_window = true;
+                }
+                WindowEvent::CursorLeft { device_id } => {
+                    context.mouse_within_window = false;
+                }
+                _ => (),
+            },
+            Event::DeviceEvent { device_id, event } => match event {
+                DeviceEvent::MouseMotion { delta } => {
+                    context.mouse_travel = *delta;
+                }
                 _ => (),
             },
             _ => (),
