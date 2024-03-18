@@ -112,12 +112,17 @@ impl Camera2D {
     pub fn bind_group_layout(&self) -> &wgpu::BindGroupLayout {
         &self.bind_group_layout
     }
+
+    pub fn position(&self) -> Vector3<f32> {
+        self.position
+    }
 }
 
 pub struct Camera2DSystem;
 
 impl Camera2DSystem {
     pub fn transform(camera: &mut Camera2D, position: Vector3<f32>) {
+        camera.position = position;
         camera.look_at = glam::Mat4::look_at_rh(
             glam::Vec3::new(position.x, position.y, position.z),
             glam::Vec3::new(position.x, position.y, 0.0),

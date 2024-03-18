@@ -15,7 +15,7 @@ use effect_engine::{
     sound::mixer::{AudioID, Mixer, MixerSystem},
     EffectSystem,
 };
-use rodio::{source::SineWave, Decoder, OutputStream, Sink, Source};
+use rodio::{source::SineWave, Decoder, OutputStream, Sink, Source, SpatialSink};
 use winit::{
     dpi::PhysicalSize,
     event::MouseButton,
@@ -105,6 +105,7 @@ fn sound_example() {
     let mut mixer = Mixer::new();
     let track_id = AudioID("Kevin");
     let effect_id = AudioID("effect");
+
     MixerSystem::add_track(&mut mixer, track_id, "Cloud Dancer.mp3", true).unwrap();
     MixerSystem::play_track(&mixer, track_id).unwrap();
     MixerSystem::pause_track(&mixer, track_id).unwrap();
@@ -119,11 +120,6 @@ fn sound_example() {
         }
 
         passed += delta_time;
-        if passed > Duration::from_millis(1000) {
-            MixerSystem::play_effect(&mixer, effect_id).unwrap();
-            passed = Duration::from_secs(0);
-        }
-
         app.update_camera(&mut cam);
         app.render(&layers, &cam).unwrap();
     })
