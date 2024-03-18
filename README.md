@@ -1,3 +1,5 @@
+# Effect Engine 2
+
 ## Next Steps (Phase 2 - Sound and Input)
 - [x] Add mouse information to Context2D
 - [ ] Restructure project into workspace
@@ -40,3 +42,6 @@
 
 - [ ] 1.0 release:
   - [ ] Could create Touhou or Stardew Valley
+
+- [ ] 2.0 release (Effect Engine 3 rebrand)
+  - [ ] Full 3D support
