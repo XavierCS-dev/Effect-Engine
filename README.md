@@ -1,3 +1,5 @@
+Effect Engine 2
+
 ## Next Steps (Phase 2 - Sound and Input)
 
 - [ ] Move event loop into lib or engine
