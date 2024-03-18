@@ -31,16 +31,20 @@
 
 - [ ] Possible 0.4.0 release
   - [ ] GUI using framework eg iced egui
-  - [ ] 2D Shadows and lighting
 
 - [ ] Possible 0.5.0 release
   - [ ] Physics system including Collision2D suvat etc
-  - [ ] 2D particle system
-  - [ ] Better coordinate system
+  - [ ] Improved coordinate system
 
 - [ ] Possible 0.6.0 release
-  - [ ] Tilemap (stores entities and a Tile2D type maybe)
   - [ ] Parallax backgrounds
+  - [ ] 2D Shadows and lighting, fog etc
+
+- [ ] Possible 0.7.0 release
+  - [ ] 2D particle system
+
+- [ ] Possible 0.8.0 release
+  - [ ] Tilemap (stores entities and a Tile2D type maybe)
 
 - [ ] 1.0 release:
   - [ ] Could create Touhou or Stardew Valley
