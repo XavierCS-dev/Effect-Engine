@@ -1,4 +1,4 @@
-Effect Engine 2
+# Effect Engine 2
 
 ## Next Steps (Phase 2 - Sound and Input)
 
