@@ -1,4 +1,8 @@
-use std::{fs::File, io::BufReader, time::Duration};
+use std::{
+    fs::File,
+    io::BufReader,
+    time::{Duration, Instant},
+};
 
 use effect_engine::{
     engine::{
@@ -100,15 +104,24 @@ fn sound_example() {
     let layers = Vec::new();
     let mut mixer = Mixer::new();
     let track_id = AudioID("Kevin");
-    MixerSystem::add_track(&mut mixer, track_id, "Cloud Dancer.mp3").unwrap();
+    let effect_id = AudioID("effect");
+    MixerSystem::add_track(&mut mixer, track_id, "Cloud Dancer.mp3", true).unwrap();
     MixerSystem::play_track(&mixer, track_id).unwrap();
     MixerSystem::pause_track(&mixer, track_id).unwrap();
     MixerSystem::reset_track(&mut mixer, track_id).unwrap();
     MixerSystem::play_track(&mixer, track_id).unwrap();
+    MixerSystem::add_effect(&mut mixer, effect_id, "sound.wav").unwrap();
 
+    let mut passed = Duration::from_secs(0);
     EffectSystem::run(event_loop, |ctx, delta_time, control| {
         if ctx.is_key_pressed(KeyCode::Escape) {
             control.exit();
+        }
+
+        passed += delta_time;
+        if passed > Duration::from_millis(1000) {
+            MixerSystem::play_effect(&mixer, effect_id).unwrap();
+            passed = Duration::from_secs(0);
         }
 
         app.update_camera(&mut cam);
