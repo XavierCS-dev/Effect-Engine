@@ -92,6 +92,25 @@ impl MixerSystem {
         Ok(())
     }
 
+    pub fn play_effect_controlled(
+        mixer: &Mixer,
+        id: AudioID,
+        speed: f32,
+        volume: f32,
+    ) -> Result<()> {
+        let effect = mixer
+            .effects
+            .get(&id)
+            .ok_or(EffectError::new("Effect not in mixer"))?;
+        let sink = Sink::try_new(&effect.stream_handle).unwrap();
+        sink.set_volume(volume);
+        sink.set_speed(speed);
+        let source = Decoder::new(effect.data.clone()).unwrap().repeat_infinite();
+        sink.append(source);
+        sink.detach();
+        Ok(())
+    }
+
     pub fn play_effect(mixer: &Mixer, id: AudioID) -> Result<()> {
         let effect = mixer
             .effects
@@ -133,6 +152,24 @@ impl MixerSystem {
         sink.clear();
         sink.append(source);
         sink.pause();
+        Ok(())
+    }
+
+    pub fn set_track_speed(mixer: &Mixer, id: AudioID, speed: f32) -> Result<()> {
+        let track = mixer
+            .tracks
+            .get(&id)
+            .ok_or(EffectError::new("Track not in mixer"))?;
+        track.sink.as_ref().unwrap().set_speed(speed);
+        Ok(())
+    }
+
+    pub fn set_track_volume(mixer: &Mixer, id: AudioID, volume: f32) -> Result<()> {
+        let track = mixer
+            .tracks
+            .get(&id)
+            .ok_or(EffectError::new("Track not in mixer"))?;
+        track.sink.as_ref().unwrap().set_volume(volume);
         Ok(())
     }
 
