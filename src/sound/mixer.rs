@@ -36,6 +36,30 @@ impl Mixer {
     pub fn get_effects(&self) -> Vec<&AudioID> {
         self.effects.keys().collect()
     }
+
+    pub fn track_volume(&self, id: AudioID) -> Result<f32> {
+        let track = self
+            .tracks
+            .get(&id)
+            .ok_or(EffectError::new("Track not in mixer"))?;
+        Ok(track.sink.as_ref().unwrap().volume())
+    }
+
+    pub fn track_speed(&self, id: AudioID) -> Result<f32> {
+        let track = self
+            .tracks
+            .get(&id)
+            .ok_or(EffectError::new("Track not in mixer"))?;
+        Ok(track.sink.as_ref().unwrap().speed())
+    }
+
+    pub fn is_paused(&self, id: AudioID) -> Result<bool> {
+        let track = self
+            .tracks
+            .get(&id)
+            .ok_or(EffectError::new("Track not in mixer"))?;
+        Ok(track.sink.as_ref().unwrap().is_paused())
+    }
 }
 
 pub struct MixerSystem;
