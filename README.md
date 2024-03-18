@@ -24,7 +24,8 @@
 
 - [ ] 0.3.0 release blockers
   - [ ] Sound system
-    - [ ] Allow tracks to be replayed..somehow
+    - [x] Allow tracks to be replayed..somehow
+    - [ ] Separate system for spacial audio
   - [ ] User input system
   - [ ] Project restructure
 

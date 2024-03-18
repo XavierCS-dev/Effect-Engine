@@ -27,22 +27,13 @@ pub struct SpatialAudioTrack {
 pub struct Mixer {
     tracks: HashMap<AudioID, AudioTrack>,
     effects: HashMap<AudioID, AudioTrack>,
-    spacial_tracks: HashMap<AudioID, SpatialAudioTrack>,
-    spacial_effects: HashMap<AudioID, SpatialAudioTrack>,
 }
 
 impl Mixer {
     pub fn new() -> Self {
         let tracks = HashMap::new();
         let effects = HashMap::new();
-        let spacial_tracks = HashMap::new();
-        let spacial_effects = HashMap::new();
-        Self {
-            tracks,
-            effects,
-            spacial_tracks,
-            spacial_effects,
-        }
+        Self { tracks, effects }
     }
 
     pub fn get_tracks(&self) -> Vec<&AudioID> {
