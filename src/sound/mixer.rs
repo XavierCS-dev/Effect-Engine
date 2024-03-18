@@ -176,4 +176,8 @@ impl MixerSystem {
     pub fn remove_track(mixer: &mut Mixer, id: AudioID) {
         let _ = mixer.tracks.remove(&id);
     }
+
+    pub fn remove_effect(mixer: &mut Mixer, id: AudioID) {
+        let _ = mixer.effects.remove(&id);
+    }
 }
