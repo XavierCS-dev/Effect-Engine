@@ -27,6 +27,7 @@
     - [x] Allow tracks to be replayed..somehow
     - [ ] Separate system for spacial audio
   - [ ] User input system
+  - [ ] Renderer optimisation
   - [ ] Project restructure
 
 - [ ] Possible 0.4.0 release
