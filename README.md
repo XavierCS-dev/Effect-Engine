@@ -35,6 +35,7 @@
 
 - [ ] Possible 0.5.0 release
   - [ ] Physics system including Collision2D suvat etc
+  - [ ] 2D particle system
   - [ ] Better coordinate system
 
 - [ ] Possible 0.6.0 release
