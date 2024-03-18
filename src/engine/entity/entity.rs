@@ -39,7 +39,7 @@ pub struct Entity2D {
 }
 
 impl Entity2D {
-    pub fn new(position: Vector3, layer: &Layer2D, texture: TextureID) -> Self {
+    pub fn new(position: Vector3<f32>, layer: &Layer2D, texture: TextureID) -> Self {
         let tex = layer.get_texture(texture).unwrap();
         let texture_index = tex.index().expect("Tex not in given layer");
         let texture_size = layer.tex_coord_size();
@@ -66,7 +66,7 @@ impl Entity2D {
         &self.layer
     }
 
-    pub fn position(&self) -> &Vector3 {
+    pub fn position(&self) -> &Vector3<f32> {
         &self.transform.position()
     }
 }
@@ -87,7 +87,7 @@ impl EntitySystem2D {
         Ok(())
     }
 
-    pub fn set_position(entity: &mut Entity2D, position: Vector3) {
+    pub fn set_position(entity: &mut Entity2D, position: Vector3<f32>) {
         Transform2DSystem::translate(&mut entity.transform, position);
     }
     pub fn set_rotation(entity: &mut Entity2D, degrees: f32) {

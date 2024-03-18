@@ -17,13 +17,6 @@ pub struct AudioTrack {
     stream_handle: OutputStreamHandle,
 }
 
-pub struct SpatialAudioTrack {
-    sink: Option<SpatialSink>,
-    data: Cursor<Vec<u8>>,
-    _stream: OutputStream,
-    stream_handle: OutputStreamHandle,
-}
-
 pub struct Mixer {
     tracks: HashMap<AudioID, AudioTrack>,
     effects: HashMap<AudioID, AudioTrack>,

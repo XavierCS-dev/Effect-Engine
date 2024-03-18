@@ -16,7 +16,7 @@ use crate::{engine::primitives::vector::Vector3, event::input::context::Context2
 pub struct Camera2D {
     look_at: glam::Mat4,
     proj: glam::Mat4,
-    position: Vector3,
+    position: Vector3<f32>,
     _near: f32,
     _far: f32,
     _fov_deg: f32,
@@ -117,7 +117,7 @@ impl Camera2D {
 pub struct Camera2DSystem;
 
 impl Camera2DSystem {
-    pub fn transform(camera: &mut Camera2D, position: Vector3) {
+    pub fn transform(camera: &mut Camera2D, position: Vector3<f32>) {
         camera.look_at = glam::Mat4::look_at_rh(
             glam::Vec3::new(position.x, position.y, position.z),
             glam::Vec3::new(position.x, position.y, 0.0),
