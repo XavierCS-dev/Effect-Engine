@@ -3,7 +3,7 @@ use rodio::{
     queue::SourcesQueueOutput, source::SamplesConverter, Decoder, OutputStream, OutputStreamHandle,
     Sink, Source, SpatialSink,
 };
-use std::{collections::HashMap, fs::*, io::*};
+use std::{collections::HashMap, fs::*, io::*, time::Duration};
 
 use crate::engine::util::effect_error::EffectError;
 
@@ -69,6 +69,7 @@ impl MixerSystem {
         path: &'static str,
         is_track: bool,
         repeat_infinite: bool,
+        starting_point: Duration,
     ) -> Result<AudioTrack> {
         let mut file: Vec<u8> = Vec::new();
         File::open(path)?.read_to_end(&mut file)?;
@@ -83,10 +84,15 @@ impl MixerSystem {
         if is_track {
             let sink = Sink::try_new(&track.stream_handle).unwrap();
             if repeat_infinite {
-                let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+                let source = Decoder::new(track.data.clone())
+                    .unwrap()
+                    .repeat_infinite()
+                    .skip_duration(starting_point);
                 sink.append(source);
             } else {
-                let source = Decoder::new(track.data.clone()).unwrap();
+                let source = Decoder::new(track.data.clone())
+                    .unwrap()
+                    .skip_duration(starting_point);
                 sink.append(source);
             }
             sink.pause();
@@ -101,9 +107,10 @@ impl MixerSystem {
         mixer: &mut Mixer,
         id: AudioID,
         path: &'static str,
+        starting_point: Duration,
         repeat_infinite: bool,
     ) -> Result<()> {
-        let sink = MixerSystem::create_sink(path, true, repeat_infinite)?;
+        let sink = MixerSystem::create_sink(path, true, repeat_infinite, starting_point)?;
         mixer.tracks.insert(id, sink);
         Ok(())
     }
@@ -111,7 +118,7 @@ impl MixerSystem {
     /// Effects can be replayed as many times as you like without reset
     /// There is a performance penality for this, however it is smaller for short effects.
     pub fn add_effect(mixer: &mut Mixer, id: AudioID, path: &'static str) -> Result<()> {
-        let sink = MixerSystem::create_sink(path, true, false)?;
+        let sink = MixerSystem::create_sink(path, true, false, Duration::from_secs(0))?;
         mixer.effects.insert(id, sink);
         Ok(())
     }
@@ -166,7 +173,12 @@ impl MixerSystem {
         Ok(())
     }
 
-    pub fn reset_track(mixer: &mut Mixer, id: AudioID, repeat_infinite: bool) -> Result<()> {
+    pub fn reset_track(
+        mixer: &mut Mixer,
+        id: AudioID,
+        starting_point: Duration,
+        repeat_infinite: bool,
+    ) -> Result<()> {
         let track = mixer
             .tracks
             .get_mut(&id)
@@ -175,10 +187,15 @@ impl MixerSystem {
         sink.pause();
         sink.clear();
         if repeat_infinite {
-            let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+            let source = Decoder::new(track.data.clone())
+                .unwrap()
+                .repeat_infinite()
+                .skip_duration(starting_point);
             sink.append(source);
         } else {
-            let source = Decoder::new(track.data.clone()).unwrap();
+            let source = Decoder::new(track.data.clone())
+                .unwrap()
+                .skip_duration(starting_point);
             sink.append(source);
         }
         sink.pause();

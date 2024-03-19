@@ -1,4 +1,4 @@
-use std::{fs::*, io::*};
+use std::{fs::*, io::*, time::Duration};
 
 use anyhow::Result;
 use rodio::{Decoder, OutputStream, OutputStreamHandle, Source, SpatialSink};
@@ -75,6 +75,7 @@ impl SpatialAudioSystem {
     pub fn new_track(
         position: Vector3<f32>,
         path: &'static str,
+        starting_point: Duration,
         repeat_infinite: bool,
     ) -> Result<SpatialAudioTrack> {
         let mut file: Vec<u8> = Vec::new();
@@ -101,10 +102,15 @@ impl SpatialAudioSystem {
         )
         .unwrap();
         if repeat_infinite {
-            let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+            let source = Decoder::new(track.data.clone())
+                .unwrap()
+                .repeat_infinite()
+                .skip_duration(starting_point);
             sink.append(source);
         } else {
-            let source = Decoder::new(track.data.clone()).unwrap();
+            let source = Decoder::new(track.data.clone())
+                .unwrap()
+                .skip_duration(starting_point);
             sink.append(source);
         }
         sink.pause();
@@ -124,13 +130,22 @@ impl SpatialAudioSystem {
         track.position = position;
     }
 
-    pub fn reset_track(track: &mut SpatialAudioTrack, repeat_infinite: bool) {
+    pub fn reset_track(
+        track: &mut SpatialAudioTrack,
+        starting_point: Duration,
+        repeat_infinite: bool,
+    ) {
         let sink = track.sink.as_mut().unwrap();
         if repeat_infinite {
-            let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+            let source = Decoder::new(track.data.clone())
+                .unwrap()
+                .repeat_infinite()
+                .skip_duration(starting_point);
             sink.append(source);
         } else {
-            let source = Decoder::new(track.data.clone()).unwrap();
+            let source = Decoder::new(track.data.clone())
+                .unwrap()
+                .skip_duration(starting_point);
             sink.append(source);
         }
         sink.pause();
