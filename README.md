@@ -40,6 +40,7 @@
 - [ ] Possible 0.6.0 release
   - [ ] Parallax backgrounds
   - [ ] 2D Shadows and lighting, fog etc
+  - [ ] Normal maps
 
 - [ ] Possible 0.7.0 release
   - [ ] 2D particle system

@@ -12,7 +12,10 @@ use effect_engine::{
         primitives::vector::Vector3,
         texture::texture2d::{Texture2D, TextureID},
     },
-    sound::mixer::{AudioID, Mixer, MixerSystem},
+    sound::{
+        mixer::{AudioID, Mixer, MixerSystem},
+        spatial::SpatialAudioSystem,
+    },
     EffectSystem,
 };
 use rodio::{source::SineWave, Decoder, OutputStream, Sink, Source, SpatialSink};
@@ -110,8 +113,10 @@ fn sound_example() {
     MixerSystem::play_track(&mixer, track_id).unwrap();
     MixerSystem::pause_track(&mixer, track_id).unwrap();
     MixerSystem::reset_track(&mut mixer, track_id).unwrap();
-    MixerSystem::play_track(&mixer, track_id).unwrap();
+    // MixerSystem::play_track(&mixer, track_id).unwrap();
     MixerSystem::add_effect(&mut mixer, effect_id, "sound.wav").unwrap();
+    let effect = SpatialAudioSystem::new_effect(Vector3::new(0.0, 0.0, 0.0), "sound.wav").unwrap();
+    SpatialAudioSystem::play_effect(&effect, 10.0, 0.5);
 
     let mut passed = Duration::from_secs(0);
     EffectSystem::run(event_loop, |ctx, delta_time, control| {
