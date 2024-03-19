@@ -42,6 +42,7 @@
   - [ ] 2D Shadows and lighting, fog etc
   - [ ] Normal maps
 
+This may or may not need to come before shadows, lighting and fog etc
 - [ ] Possible 0.7.0 release
   - [ ] 2D particle system
 
