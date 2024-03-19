@@ -29,6 +29,8 @@ pub struct SpatialAudioTrack {
 pub struct SpatialAudioSystem;
 
 impl SpatialAudioSystem {
+    // Since camera z affects x and y coordinate ratios, find way to integerate the camera's
+    // z coordinate to have consistent sptial audio distance
     pub fn calculate_position_2d(camera: Vector3<f32>, entity: Vector3<f32>) -> Vector3<f32> {
         Vector3::new(entity.x - camera.x, entity.y - camera.y, 0.0)
     }
@@ -116,6 +118,10 @@ impl SpatialAudioSystem {
 
     pub fn pause_track(track: &SpatialAudioTrack) {
         track.sink.as_ref().unwrap().pause();
+    }
+
+    pub fn set_position_track(track: &mut SpatialAudioTrack, position: Vector3<f32>) {
+        track.position = position;
     }
 
     pub fn reset_track(track: &mut SpatialAudioTrack, repeat_infinite: bool) {
