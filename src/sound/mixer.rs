@@ -166,15 +166,21 @@ impl MixerSystem {
         Ok(())
     }
 
-    pub fn reset_track(mixer: &mut Mixer, id: AudioID) -> Result<()> {
+    pub fn reset_track(mixer: &mut Mixer, id: AudioID, repeat_infinite: bool) -> Result<()> {
         let track = mixer
             .tracks
             .get_mut(&id)
             .ok_or(EffectError::new("Track not in mixer"))?;
-        let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
         let sink = track.sink.as_ref().unwrap();
+        sink.pause();
         sink.clear();
-        sink.append(source);
+        if repeat_infinite {
+            let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+            sink.append(source);
+        } else {
+            let source = Decoder::new(track.data.clone()).unwrap();
+            sink.append(source);
+        }
         sink.pause();
         Ok(())
     }

@@ -112,11 +112,11 @@ fn sound_example() {
     MixerSystem::add_track(&mut mixer, track_id, "Cloud Dancer.mp3", true).unwrap();
     MixerSystem::play_track(&mixer, track_id).unwrap();
     MixerSystem::pause_track(&mixer, track_id).unwrap();
-    MixerSystem::reset_track(&mut mixer, track_id).unwrap();
-    // MixerSystem::play_track(&mixer, track_id).unwrap();
+    MixerSystem::reset_track(&mut mixer, track_id, true).unwrap();
+    MixerSystem::play_track(&mixer, track_id).unwrap();
     MixerSystem::add_effect(&mut mixer, effect_id, "sound.wav").unwrap();
-    let effect = SpatialAudioSystem::new_effect(Vector3::new(0.0, 0.0, 0.0), "sound.wav").unwrap();
-    SpatialAudioSystem::play_effect(&effect, 10.0, 0.5);
+    let effect = SpatialAudioSystem::new_effect(Vector3::new(2.0, 0.0, 0.0), "sound.wav").unwrap();
+    SpatialAudioSystem::play_effect(&effect, 5.0, 0.5);
 
     let mut passed = Duration::from_secs(0);
     EffectSystem::run(event_loop, |ctx, delta_time, control| {

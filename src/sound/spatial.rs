@@ -1,7 +1,7 @@
 use std::{fs::*, io::*};
 
 use anyhow::Result;
-use rodio::{Decoder, OutputStream, OutputStreamHandle, SpatialSink};
+use rodio::{Decoder, OutputStream, OutputStreamHandle, Source, SpatialSink};
 
 use crate::engine::{camera::camera::Camera2D, primitives::vector::Vector3};
 
@@ -37,6 +37,7 @@ impl SpatialAudioSystem {
         let mut file: Vec<u8> = Vec::new();
         File::open(path)?.read_to_end(&mut file)?;
         let cursor = Cursor::new(file);
+        // Having this way around means the sound positions are correct
         let right_ear = [-0.1, 0.0, 0.0];
         let left_ear = [0.1, 0.0, 0.0];
         let (_stream, stream_handle) = OutputStream::try_default().unwrap();
@@ -65,23 +66,67 @@ impl SpatialAudioSystem {
         sink.detach();
     }
 
+    pub fn set_position_effect(effect: &mut SpatialAudioEffect, position: Vector3<f32>) {
+        effect.position = position;
+    }
+
     pub fn new_track(
         position: Vector3<f32>,
         path: &'static str,
         repeat_infinite: bool,
     ) -> Result<SpatialAudioTrack> {
-        todo!()
+        let mut file: Vec<u8> = Vec::new();
+        File::open(path)?.read_to_end(&mut file)?;
+        let cursor = Cursor::new(file);
+        // Having this way around means the sound positions are correct
+        let right_ear = [-0.1, 0.0, 0.0];
+        let left_ear = [0.1, 0.0, 0.0];
+        let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+        let mut track = SpatialAudioTrack {
+            data: cursor,
+            sink: None,
+            _stream,
+            stream_handle,
+            position,
+            left_ear,
+            right_ear,
+        };
+        let sink = SpatialSink::try_new(
+            &track.stream_handle,
+            [track.position.x, track.position.y, track.position.z],
+            track.left_ear,
+            track.right_ear,
+        )
+        .unwrap();
+        if repeat_infinite {
+            let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+            sink.append(source);
+        } else {
+            let source = Decoder::new(track.data.clone()).unwrap();
+            sink.append(source);
+        }
+        sink.pause();
+        track.sink = Some(sink);
+        Ok(track)
     }
 
-    pub fn play_track(track: &SpatialAudioTrack) -> Result<()> {
-        todo!()
+    pub fn play_track(track: &SpatialAudioTrack) {
+        track.sink.as_ref().unwrap().play();
     }
 
-    pub fn pause_track(track: &SpatialAudioTrack) -> Result<()> {
-        todo!()
+    pub fn pause_track(track: &SpatialAudioTrack) {
+        track.sink.as_ref().unwrap().pause();
     }
 
-    pub fn reset_track(track: &mut SpatialAudioTrack) -> Result<()> {
-        todo!()
+    pub fn reset_track(track: &mut SpatialAudioTrack, repeat_infinite: bool) {
+        let sink = track.sink.as_mut().unwrap();
+        if repeat_infinite {
+            let source = Decoder::new(track.data.clone()).unwrap().repeat_infinite();
+            sink.append(source);
+        } else {
+            let source = Decoder::new(track.data.clone()).unwrap();
+            sink.append(source);
+        }
+        sink.pause();
     }
 }
