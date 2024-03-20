@@ -5,7 +5,7 @@
 - [ ] Restructure project into workspace
   - [ ] Have set of examples
 - [ ] Look for obsolete code and sections where performance can be optimised
-- [ ] Use more ECS where possible to user can update their data in parallel more easily
+- [x] Use more ECS where possible to user can update their data in parallel more easily
 - [ ] Introduce the use of multiple threads
   - [ ] Do this on a PER system basis, ie system functions are muktithreaded themselves.
   - [ ] Add parallel operations to app ie settings entities for multiple layers at a time.
@@ -23,10 +23,10 @@
   - [x] Pass this context struct to a closure supplied by a user
 
 - [ ] 0.3.0 release blockers
-  - [ ] Sound system
+  - [x] Sound system
     - [x] Allow tracks to be replayed..somehow
-    - [ ] Separate system for spacial audio
-  - [ ] User input system
+    - [x] Separate system for spacial audio
+  - [x] User input system
   - [ ] Renderer optimisation
   - [ ] Project restructure
 

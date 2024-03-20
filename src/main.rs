@@ -107,7 +107,6 @@ fn sound_example() {
     let layers = Vec::new();
     let mut mixer = Mixer::new();
     let track_id = AudioID("Kevin");
-    let effect_id = AudioID("effect");
 
     MixerSystem::add_track(
         &mut mixer,
@@ -120,26 +119,15 @@ fn sound_example() {
     MixerSystem::play_track(&mixer, track_id).unwrap();
     MixerSystem::pause_track(&mixer, track_id).unwrap();
     MixerSystem::reset_track(&mut mixer, track_id, Duration::from_secs(8), true).unwrap();
-    // MixerSystem::play_track(&mixer, track_id).unwrap();
-    MixerSystem::add_effect(&mut mixer, effect_id, "sound.wav").unwrap();
+    MixerSystem::play_track(&mixer, track_id).unwrap();
     let effect = SpatialAudioSystem::new_effect(Vector3::new(2.0, 0.0, 0.0), "sound.wav").unwrap();
     SpatialAudioSystem::play_effect(&effect, 5.0, 0.5);
-    let track = SpatialAudioSystem::new_track(
-        Vector3::new(-1.0, 0.0, 0.0),
-        "Cloud Dancer.mp3",
-        Duration::from_secs(8),
-        false,
-    )
-    .unwrap();
-    SpatialAudioSystem::play_track(&track);
 
-    let mut passed = Duration::from_secs(0);
     EffectSystem::run(event_loop, |ctx, delta_time, control| {
         if ctx.is_key_pressed(KeyCode::Escape) {
             control.exit();
         }
 
-        passed += delta_time;
         app.update_camera(&mut cam);
         app.render(&layers, &cam).unwrap();
     })
