@@ -85,6 +85,18 @@ impl EffectSystem {
     pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
         self.engine.set_background(texture, pixel_art)
     }
+
+    pub fn queue(&self) -> &wgpu::Queue {
+        self.engine.queue()
+    }
+
+    pub fn device(&self) -> &wgpu::Device {
+        self.engine.device()
+    }
+
+    pub fn surface(&self) -> &wgpu::Surface {
+        self.engine.surface()
+    }
 }
 
 pub fn init_engine(
