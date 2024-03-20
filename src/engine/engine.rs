@@ -270,6 +270,10 @@ impl Engine {
         &self.queue
     }
 
+    pub fn surface(&self) -> &wgpu::Surface {
+        &self.surface
+    }
+
     pub fn window(&self) -> &winit::window::Window {
         &self.window
     }
