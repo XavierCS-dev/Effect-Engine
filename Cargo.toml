@@ -16,6 +16,7 @@ rand = "0.8.5"
 rayon = "1.8.0"
 glam = "0.25"
 rodio = "0.17"
+num = "0.4.1"
 
 [dependencies.image]
 version = "0.25"

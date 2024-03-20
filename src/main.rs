@@ -1,91 +1,134 @@
-use std::time::Instant;
-
-use effect_engine::engine::{
-    camera::camera::Camera2DSystem,
-    entity::entity::{Entity2D, EntitySystem2D},
-    layer::layer::LayerID,
-    primitives::vector::Vector3,
-    texture::texture2d::TextureID,
+use std::{
+    fs::File,
+    io::BufReader,
+    time::{Duration, Instant},
 };
+
+use effect_engine::{
+    engine::{
+        camera::camera::{Camera2D, Camera2DSystem, CameraAction},
+        entity::entity::Entity2D,
+        layer::layer::LayerID,
+        primitives::vector::Vector3,
+        texture::texture2d::{Texture2D, TextureID},
+    },
+    sound::{
+        mixer::{AudioID, Mixer, MixerSystem},
+        spatial::SpatialAudioSystem,
+    },
+    EffectSystem,
+};
+use rodio::{source::SineWave, Decoder, OutputStream, Sink, Source, SpatialSink};
 use winit::{
     dpi::PhysicalSize,
-    event::{Event, WindowEvent},
+    event::MouseButton,
+    keyboard::{KeyCode, PhysicalKey},
 };
+/*
+An aside my thoughts concerning f32. Currently figuring out solutions to solve accuracy problems
+in a larger world. Current solution is one that is better done by users. Floating origin.
+Store a list of chunks and their integer coordinates. Everything in a chunk has a local coordinate
+relative the the origin of the chunk. Then each entity has a global coordinate which is relative to
+the current origin. Entities chunk integer location and f32 local position can be used to calculate
+positive relative to current origin. More accurate the closer the player is. The current origin
+is the origin of the chunk the player is currently in.
+Each time the player loads a new chunk, these coordinates will need to be recalculated.
+So it is best to keep each chunk as large as possible to minimise this, and not load in all chunks of the world.
+(Can use layers cache nearby unloaded chunks data to cut disk load times).
+
+This comment will hopefully end up in the docs on the Vector3 page, I also intend to change Vector3 to generic
+for floating point or perhaps integer too, will have to see.
+*/
 
 fn main() {
+    sound_example();
+    // camera_example();
+}
+
+// You can also use your own custom camera system by using
+// Camera2DSystem::Transform. That way you can use mouse camera control,
+// or move the camera only when an entity reaches the edge, etc
+fn camera_example() {
     let (mut app, event_loop) =
         effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, false);
-    let mut before = Instant::now();
-    let mut after = Instant::now();
-    let tex_id = TextureID("tree");
-    let evil_id = TextureID("evil");
-    let bob_id = TextureID("bob");
-    let bg_id = TextureID("bg");
-    let bg = app.init_texture(bg_id, "grass_bg_small.png");
+    let bg_id = TextureID("grass");
+    let bg = Texture2D::new(bg_id, "grass_bg_small.png");
     app.set_background(bg, true).unwrap();
-    let layer_id = LayerID(1);
-    let new_layer_id = LayerID(0);
-    let tex = app.init_texture(tex_id, "tree.png");
-    let evil = app.init_texture(evil_id, "evil.png");
-    let bob = app.init_texture(bob_id, "bob.png");
-    let mut layer = app
-        .init_layer(layer_id, vec![tex, evil], PhysicalSize::new(32, 32), true)
+    let tree_id = TextureID("tree");
+    let evil_id = TextureID("evil");
+    let evil_tex = Texture2D::new(evil_id, "evil.png");
+    let tree_tex = Texture2D::new(tree_id, "tree.png");
+    let mut tree_layer = app
+        .init_layer(
+            LayerID(0),
+            vec![tree_tex, evil_tex],
+            PhysicalSize::new(32, 32),
+            true,
+        )
         .unwrap();
-    let mut new_layer = app
-        .init_layer(new_layer_id, vec![bob], PhysicalSize::new(64, 64), false)
-        .unwrap();
-    let position = Vector3::new(0.35, 0.0, 0.0);
-    let bob_pos = Vector3::new(0.25, -0.15, 0.0);
-    let mut bob_ent = Entity2D::new(bob_pos, &mut new_layer, bob_id);
-    EntitySystem2D::set_scale(&mut bob_ent, 0.2);
-    let bob_ref = vec![&bob_ent];
-    app.set_entities(&mut new_layer, bob_ref.as_slice());
-    let mut ent = Entity2D::new(position, &mut layer, evil_id);
-    let mut ent_good = Entity2D::new(position, &mut layer, tex_id);
-    EntitySystem2D::set_position(&mut ent_good, Vector3::new(-0.075, 0.0, 0.0));
-    EntitySystem2D::set_rotation(&mut ent_good, 30.0);
-    EntitySystem2D::set_scale(&mut ent_good, 0.25);
-    EntitySystem2D::set_scale(&mut ent, 0.2);
-    let mut ents_owner = vec![ent, ent_good];
-    let mut ents = Vec::new();
-    for ent in ents_owner.iter() {
-        ents.push(ent);
-    }
-    app.set_entities(&mut layer, ents.as_slice());
-    drop(ents);
-    let mut layers = vec![layer, new_layer];
-    let camera = app.camera_mut();
-    // set camera further back and use larger sprites to control world space unit size
-    Camera2DSystem::transform(camera, Vector3::new(0.35, 0.25, 1.0));
-    app.update_camera();
-
-    let mut rotation = 0.0;
-    let _ = event_loop.run(|event, control| {
-        after = Instant::now();
-        let _delta_time = after - before;
-        // app.engine.input(&event, &delta_time);
-        match event {
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => {
-                control.exit();
-            }
-            Event::AboutToWait => {
-                // app.engine.update(&delta_time);
-                EntitySystem2D::set_rotation(&mut ents_owner.get_mut(1).unwrap(), rotation);
-                let mut ents = Vec::new();
-                for ent in ents_owner.iter() {
-                    ents.push(ent);
-                }
-                app.set_entities(layers.get_mut(0).unwrap(), ents.as_slice());
-                drop(ents);
-                rotation += 0.05;
-                rotation = rotation % 360.0;
-                app.render(&layers).unwrap();
-            }
-            _ => (),
+    let tree = Entity2D::new(Vector3::new(0.0, 0.0, 0.0), &tree_layer, tree_id);
+    let evil = Entity2D::new(Vector3::new(6.0, 3.0, 0.0), &tree_layer, evil_id);
+    let tree_vec = vec![&tree, &evil];
+    app.set_entities(&mut tree_layer, tree_vec.as_slice());
+    let layers = vec![tree_layer];
+    let mut cam = app.init_camera(45.0);
+    Camera2DSystem::set_inputs(
+        &mut cam,
+        &[
+            (CameraAction::Up, KeyCode::KeyW),
+            (CameraAction::Down, KeyCode::KeyS),
+            (CameraAction::Left, KeyCode::KeyA),
+            (CameraAction::Right, KeyCode::KeyD),
+            (CameraAction::ZoomIn, KeyCode::KeyZ),
+            (CameraAction::ZoomOut, KeyCode::KeyX),
+        ],
+    );
+    Camera2DSystem::set_speed(&mut cam, 0.005);
+    EffectSystem::run(event_loop, |ctx, delta_time, control| {
+        if ctx.is_key_pressed(KeyCode::Escape) {
+            control.exit();
         }
-        before = after;
-    });
+
+        Camera2DSystem::process_inputs(&mut cam, ctx, delta_time);
+        app.update_camera(&mut cam);
+        app.render(&layers, &cam).unwrap();
+    })
+}
+
+fn sound_example() {
+    /*
+    "Cloud Dancer " Kevin MacLeod (incompetech.com)
+    Licensed under Creative Commons: By Attribution 4.0 License
+    http://creativecommons.org/licenses/by/4.0/
+    */
+    let (mut app, event_loop) =
+        effect_engine::init_engine(PhysicalSize::new(800, 600), 45.0, false);
+    let mut cam = app.init_camera(45.0);
+    let layers = Vec::new();
+    let mut mixer = Mixer::new();
+    let track_id = AudioID("Kevin");
+
+    MixerSystem::add_track(
+        &mut mixer,
+        track_id,
+        "Cloud Dancer.mp3",
+        Duration::from_secs(0),
+        true,
+    )
+    .unwrap();
+    MixerSystem::play_track(&mixer, track_id).unwrap();
+    MixerSystem::pause_track(&mixer, track_id).unwrap();
+    MixerSystem::reset_track(&mut mixer, track_id, Duration::from_secs(8), true).unwrap();
+    MixerSystem::play_track(&mixer, track_id).unwrap();
+    let effect = SpatialAudioSystem::new_effect(Vector3::new(2.0, 0.0, 0.0), "sound.wav").unwrap();
+    SpatialAudioSystem::play_effect(&effect, 5.0, 0.5);
+
+    EffectSystem::run(event_loop, |ctx, delta_time, control| {
+        if ctx.is_key_pressed(KeyCode::Escape) {
+            control.exit();
+        }
+
+        app.update_camera(&mut cam);
+        app.render(&layers, &cam).unwrap();
+    })
 }

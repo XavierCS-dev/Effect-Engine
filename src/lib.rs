@@ -1,4 +1,8 @@
 pub mod engine;
+pub mod event;
+pub mod sound;
+use std::time::{Duration, Instant};
+
 use anyhow::Result;
 use engine::{
     camera::camera::Camera2D,
@@ -7,9 +11,12 @@ use engine::{
     layer::layer::{Layer2D, LayerID},
     texture::texture2d::{Texture2D, TextureID},
 };
+use event::input::context::Context2D;
 use winit::{
     dpi::PhysicalSize,
-    event_loop::{ControlFlow, EventLoop},
+    event::{ElementState, Event, WindowEvent},
+    event_loop::{self, ControlFlow, EventLoop},
+    keyboard::KeyCode,
     window::WindowBuilder,
 };
 
@@ -36,12 +43,12 @@ impl EffectSystem {
     }
 
     /// it is up to the user to sort the layers, they have the tools to do so.
-    pub fn render(&mut self, layers: &Vec<Layer2D>) -> Result<(), wgpu::SurfaceError> {
-        self.engine.render(&layers)
-    }
-
-    pub fn init_texture(&self, id: TextureID, path: &'static str) -> Texture2D {
-        Texture2D::new(id, path)
+    pub fn render(
+        &mut self,
+        layers: &Vec<Layer2D>,
+        camera: &Camera2D,
+    ) -> Result<(), wgpu::SurfaceError> {
+        self.engine.render(&layers, camera)
     }
 
     /// Make sure your texture_size is set to the larger dimension that appears in your textures.
@@ -67,16 +74,12 @@ impl EffectSystem {
         self.engine.set_entities(layer, entities);
     }
 
-    pub fn camera(&self) -> &Camera2D {
-        self.engine.camera()
+    pub fn init_camera(&self, fov: f32) -> Camera2D {
+        self.engine.init_camera(fov)
     }
 
-    pub fn camera_mut(&mut self) -> &mut Camera2D {
-        self.engine.camera_mut()
-    }
-
-    pub fn update_camera(&mut self) {
-        self.engine.update_camera();
+    pub fn update_camera(&self, camera: &mut Camera2D) {
+        self.engine.update_camera(camera);
     }
 
     pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {

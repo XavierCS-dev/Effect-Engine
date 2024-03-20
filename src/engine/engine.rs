@@ -21,7 +21,6 @@ pub struct Engine {
     window: Arc<winit::window::Window>,
     render_pipeline: wgpu::RenderPipeline,
     texture_bgl: wgpu::BindGroupLayout,
-    camera: Camera2D,
     background: Option<Background2D>,
     index_buffer: wgpu::Buffer,
 }
@@ -58,12 +57,6 @@ impl Engine {
             )
             .await
             .unwrap();
-        let dims = window.inner_size();
-        let camera = Camera2D::new(
-            &device,
-            camera_fov,
-            (dims.width as f32) / (dims.height as f32),
-        );
         let indices: [u16; 6] = [0, 1, 2, 0, 2, 3];
         let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Index Buffer"),
@@ -117,10 +110,24 @@ impl Engine {
             label: Some("Bind group layout"),
         });
 
+        let camera_bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: None,
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        });
+
         let render_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Pipeline layout descriptor"),
-                bind_group_layouts: &[&texture_bgl, camera.bind_group_layout()],
+                bind_group_layouts: &[&texture_bgl, &camera_bgl],
                 push_constant_ranges: &[],
             });
 
@@ -168,7 +175,6 @@ impl Engine {
             window,
             render_pipeline,
             texture_bgl,
-            camera,
             background,
             index_buffer,
         }
@@ -196,7 +202,11 @@ impl Engine {
         // if accuracy is a problem, change to floats
     }
 
-    pub fn render(&mut self, entities: &Vec<Layer2D>) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(
+        &mut self,
+        entities: &Vec<Layer2D>,
+        camera: &Camera2D,
+    ) -> Result<(), wgpu::SurfaceError> {
         let surface_texture = self.surface.get_current_texture()?;
         let texture_view = surface_texture
             .texture
@@ -239,7 +249,7 @@ impl Engine {
             None => (),
         };
 
-        render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
+        render_pass.set_bind_group(1, camera.bind_group(), &[]);
         for layer in entities {
             render_pass.set_bind_group(0, layer.bind_group(), &[]);
             render_pass.set_vertex_buffer(0, layer.vertex_buffer());
@@ -287,16 +297,18 @@ impl Engine {
         Layer2DSystem::set_entities(layer, entities, &self.device, &self.queue)
     }
 
-    pub fn update_camera(&mut self) {
-        Camera2DSystem::update(&mut self.camera, &self.queue);
+    pub fn update_camera(&self, camera: &mut Camera2D) {
+        Camera2DSystem::update(camera, &self.queue);
     }
 
-    pub fn camera(&self) -> &Camera2D {
-        &self.camera
-    }
-
-    pub fn camera_mut(&mut self) -> &mut Camera2D {
-        &mut self.camera
+    pub fn init_camera(&self, fov: f32) -> Camera2D {
+        let dims = self.window.inner_size();
+        Camera2D::new(
+            &self.device,
+            fov,
+            (dims.width as f32) / (dims.height as f32),
+            0.5,
+        )
     }
 
     pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {

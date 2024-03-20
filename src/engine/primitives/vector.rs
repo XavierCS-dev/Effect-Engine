@@ -1,12 +1,20 @@
+use num::Float;
+
 #[derive(Debug, Clone, Copy)]
-pub struct Vector3 {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
+pub struct Vector3<T>
+where
+    T: Float,
+{
+    pub x: T,
+    pub y: T,
+    pub z: T,
 }
 
-impl Vector3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+impl<T> Vector3<T>
+where
+    T: Float,
+{
+    pub fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
     }
 }

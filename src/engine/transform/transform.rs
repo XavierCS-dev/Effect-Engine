@@ -4,7 +4,7 @@ pub struct Transform2D {
     matrix: Matrix4,
     rotation: f32,
     scale: f32,
-    position: Vector3,
+    position: Vector3<f32>,
 }
 
 impl Transform2D {
@@ -29,7 +29,7 @@ impl Transform2D {
         self.matrix
     }
 
-    pub fn position(&self) -> &Vector3 {
+    pub fn position(&self) -> &Vector3<f32> {
         &self.position
     }
 
@@ -55,7 +55,7 @@ impl Transform2DSystem {
         transform.matrix.inner[1][1] = radians.cos() * transform.scale;
     }
 
-    pub fn translate(transform: &mut Transform2D, position: Vector3) {
+    pub fn translate(transform: &mut Transform2D, position: Vector3<f32>) {
         transform.position = position;
         transform.matrix.inner[3][0] = position.x * transform.rotation.cos() * transform.scale
             + position.y * (-(transform.rotation.sin())) * transform.scale;
