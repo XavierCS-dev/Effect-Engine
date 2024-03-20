@@ -1,0 +1,58 @@
+[workspace]
+resolver = "2"
+members = [
+  "effect_examples",
+  "effect_core",
+  "effect_audio",
+  "effect_events",
+  "effect_engine",
+]
+
+[workspace.package]
+name = "Effect 2"
+version = "0.2.2-alpha"
+edition = "2021"
+
+[workspace.dependencies]
+winit = { version = "0.29", features = ["rwh_05"]}
+wgpu = "0.19"
+pollster = "0.3.0"
+raw-window-handle = "0.6.0"
+bytemuck = { version = "1.14", features = [ "derive" ] }
+anyhow = "1.0.75"
+rand = "0.8.5"
+rayon = "1.8.0"
+glam = "0.25"
+rodio = "0.17"
+num = "0.4.1"
+ash = "0.37"
+
+[workspace.dependencies.effect_examples]
+package = "effect_examples"
+version = "0.2.2-alpha"
+path = "./effect_examples"
+
+[workspace.dependencies.effect_core]
+package = "effect_core"
+version = "0.2.2-alpha"
+path = "./effect_core"
+
+[workspace.dependencies.effect_audio]
+package = "effect_audio"
+version = "0.2.2-alpha"
+path = "./effect_audio"
+
+[workspace.dependencies.effect_events]
+package = "effect_events"
+version = "0.2.2-alpha"
+path = "./effect_events"
+
+[workspace.dependencies.effect_engine]
+package = "effect_engine"
+version = "0.2.2-alpha"
+path = "./effect_engine"
+
+[workspace.dependencies.image]
+version = "0.25"
+default-features = false
+features = ["png", "jpeg"]

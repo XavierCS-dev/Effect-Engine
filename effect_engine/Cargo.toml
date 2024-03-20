@@ -1,0 +1,20 @@
+[package]
+name = "effect_engine"
+version.workspace = true
+edition.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+winit.workspace = true
+wgpu.workspace = true
+pollster.workspace = true
+raw-window-handle.workspace = true
+bytemuck.workspace = true
+anyhow.workspace = true
+rand.workspace = true
+rayon.workspace = true
+glam.workspace = true
+num.workspace = true
+ash.workspace = true
+rodio.workspace = true
