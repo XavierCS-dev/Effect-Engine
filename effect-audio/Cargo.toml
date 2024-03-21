@@ -1,5 +1,5 @@
 [package]
-name = "effect_core"
+name = "effect-audio"
 version.workspace = true
 edition.workspace = true
 

@@ -1,5 +1,5 @@
 [package]
-name = "effect_events"
+name = "effect-core"
 version.workspace = true
 edition.workspace = true
 

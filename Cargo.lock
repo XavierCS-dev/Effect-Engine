@@ -551,7 +551,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
-name = "effect_audio"
+name = "effect-audio"
 version = "0.2.2-alpha"
 dependencies = [
  "anyhow",
@@ -569,7 +569,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "effect_core"
+name = "effect-core"
 version = "0.2.2-alpha"
 dependencies = [
  "anyhow",
@@ -587,7 +587,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "effect_engine"
+name = "effect-engine"
 version = "0.2.2-alpha"
 dependencies = [
  "anyhow",
@@ -605,7 +605,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "effect_events"
+name = "effect-events"
 version = "0.2.2-alpha"
 dependencies = [
  "anyhow",
@@ -623,13 +623,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "effect_examples"
+name = "effect-examples"
 version = "0.2.2-alpha"
 dependencies = [
  "anyhow",
  "ash",
  "bytemuck",
- "effect_engine",
+ "effect-engine",
  "glam",
  "num",
  "pollster",
@@ -640,6 +640,14 @@ dependencies = [
  "wgpu",
  "winit",
 ]
+
+[[package]]
+name = "effect-gui"
+version = "0.2.2-alpha"
+
+[[package]]
+name = "effect-wgpu"
+version = "0.2.2-alpha"
 
 [[package]]
 name = "either"

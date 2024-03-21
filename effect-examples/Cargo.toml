@@ -1,5 +1,5 @@
 [package]
-name = "effect_audio"
+name = "effect-examples"
 version.workspace = true
 edition.workspace = true
 
@@ -18,3 +18,4 @@ glam.workspace = true
 num.workspace = true
 ash.workspace = true
 rodio.workspace = true
+effect-engine.workspace = true

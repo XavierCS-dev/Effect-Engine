@@ -1,5 +1,5 @@
 [package]
-name = "effect_examples"
+name = "effect-engine"
 version.workspace = true
 edition.workspace = true
 
@@ -18,4 +18,3 @@ glam.workspace = true
 num.workspace = true
 ash.workspace = true
 rodio.workspace = true
-effect_engine.workspace = true
