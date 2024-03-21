@@ -7,7 +7,8 @@ members = [
   "effect-events",
   "effect-engine",
   "effect-wgpu",
-  "effect-gui",
+  "effect-gui", 
+  "effect-vulkan",
 ]
 
 [workspace.package]
@@ -63,6 +64,11 @@ path = "./effect-gui"
 package = "effect-wgpu"
 version = "0.2.2-alpha"
 path = "./effect-wgpu"
+
+[workspace.dependencies.effect-vulkan]
+package = "effect-vulkan"
+version = "0.2.2-alpha"
+path = "./effect-vulkan"
 
 [workspace.dependencies.image]
 version = "0.25"

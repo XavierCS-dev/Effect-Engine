@@ -646,6 +646,10 @@ name = "effect-gui"
 version = "0.2.2-alpha"
 
 [[package]]
+name = "effect-vulkan"
+version = "0.2.2-alpha"
+
+[[package]]
 name = "effect-wgpu"
 version = "0.2.2-alpha"
 
