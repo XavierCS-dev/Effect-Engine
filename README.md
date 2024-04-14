@@ -1,5 +1,6 @@
 - [ ] Rewrite core to be Renderer agnostic.
 - [ ] Hide layer2d variations from user to avoid exposing implementation details.
   - [ ] Write async parallel functions to provide fast way of setting all layers.
+  - [ ] Replace Context2D with EffectEvent
 - [ ] Implement Vulkan Renderer
 - [ ] Implement examples
