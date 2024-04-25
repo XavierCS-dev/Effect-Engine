@@ -1,4 +1,4 @@
-use effect_wgpu::{EffectWeb2D, EffectWeb3D};
+use effect_wgpu::app::effect2d::EffectWeb2D;
 use winit::dpi::PhysicalSize;
 
 pub enum EngineType {

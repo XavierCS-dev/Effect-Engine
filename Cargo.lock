@@ -570,17 +570,9 @@ name = "effect-audio"
 version = "0.2.2-alpha"
 dependencies = [
  "anyhow",
- "ash",
- "bytemuck",
- "glam",
- "num",
- "pollster",
- "rand",
- "raw-window-handle 0.6.0",
- "rayon",
+ "effect-core",
+ "effect-util",
  "rodio",
- "wgpu",
- "winit",
 ]
 
 [[package]]
@@ -589,7 +581,9 @@ version = "0.2.2-alpha"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "effect-events",
  "effect-util",
+ "glam",
  "num",
  "wgpu",
  "winit",
@@ -669,8 +663,10 @@ version = "0.2.2-alpha"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "effect-core",
  "effect-util",
  "image",
+ "pollster",
  "raw-window-handle 0.6.0",
  "rayon",
  "wgpu",

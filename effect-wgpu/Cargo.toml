@@ -14,3 +14,5 @@ anyhow.workspace = true
 rayon.workspace = true
 effect-util.workspace = true
 image.workspace = true
+effect-core.workspace = true
+pollster.workspace = true
