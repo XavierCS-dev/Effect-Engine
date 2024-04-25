@@ -2,6 +2,12 @@
 name = "effect-wgpu"
 version.workspace = true
 edition.workspace = true
+homepage.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "WGPU renderer for the Effect Engine"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
