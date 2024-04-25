@@ -32,6 +32,7 @@
     - [ ] Internalise WebLayer2D
       - Provide option for parallel updates
     - [ ] Remove unnecessary dependencies
+      - [ ] Possibly use features to minimise deps
 
 - [ ] Possible 0.4.0 alpha
   - [ ] Debug GUI using egui
