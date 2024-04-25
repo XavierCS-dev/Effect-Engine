@@ -569,24 +569,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "effect-core"
-version = "0.2.2-alpha"
-dependencies = [
- "anyhow",
- "ash",
- "bytemuck",
- "glam",
- "num",
- "pollster",
- "rand",
- "raw-window-handle 0.6.0",
- "rayon",
- "rodio",
- "wgpu",
- "winit",
-]
-
-[[package]]
 name = "effect-engine"
 version = "0.2.2-alpha"
 dependencies = [

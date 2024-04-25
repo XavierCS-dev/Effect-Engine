@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
   "effect-examples",
-  "effect-core",
   "effect-audio",
   "effect-events",
   "effect-engine",
@@ -34,11 +33,6 @@ ash = "0.37"
 package = "effect-examples"
 version = "0.2.2-alpha"
 path = "./effect-examples"
-
-[workspace.dependencies.effect-core]
-package = "effect-core"
-version = "0.2.2-alpha"
-path = "./effect-core"
 
 [workspace.dependencies.effect-audio]
 package = "effect-audio"
