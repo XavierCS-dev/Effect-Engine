@@ -22,11 +22,7 @@ pub struct EffectWeb2D {
 }
 
 impl EffectWeb2D {
-    pub fn new(
-        screen_dimensions: PhysicalSize<u32>,
-        camera_fov: f32,
-        v_sync: bool,
-    ) -> (Self, EventLoop<()>) {
+    pub fn new(screen_dimensions: PhysicalSize<u32>, v_sync: bool) -> (Self, EventLoop<()>) {
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(ControlFlow::Poll);
         let window = WindowBuilder::new()
@@ -35,7 +31,7 @@ impl EffectWeb2D {
             .with_resizable(false)
             .build(&event_loop)
             .unwrap();
-        let engine = pollster::block_on(WebEngine2D::new(window, camera_fov, v_sync));
+        let engine = pollster::block_on(WebEngine2D::new(window, v_sync));
         (Self { engine }, event_loop)
     }
 
@@ -101,5 +97,5 @@ pub fn init_engine(
     camera_fov: f32,
     v_sync: bool,
 ) -> (EffectWeb2D, EventLoop<()>) {
-    EffectWeb2D::new(screen_dimensions, camera_fov, v_sync)
+    EffectWeb2D::new(screen_dimensions, v_sync)
 }

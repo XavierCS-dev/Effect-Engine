@@ -35,7 +35,7 @@ pub struct WebEngine2D {
 * 0.3.0 release
 */
 impl WebEngine2D {
-    pub async fn new(window: winit::window::Window, camera_fov: f32, v_sync: bool) -> Self {
+    pub async fn new(window: winit::window::Window, v_sync: bool) -> Self {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
             ..Default::default()

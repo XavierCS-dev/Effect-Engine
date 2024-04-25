@@ -78,11 +78,9 @@ impl EffectAppBuilder {
     pub fn build(self) -> EffectAppVariant {
         match self.graphics_api {
             GraphicsAPI::WGPU => match self.engine_type {
-                EngineType::D2 => EffectAppVariant::Web2D(EffectWeb2D::new(
-                    self.window_dimensions,
-                    45.0,
-                    self.vsync,
-                )),
+                EngineType::D2 => {
+                    EffectAppVariant::Web2D(EffectWeb2D::new(self.window_dimensions, self.vsync))
+                }
                 _ => {
                     unimplemented!()
                 }
