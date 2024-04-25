@@ -4,7 +4,7 @@ pub mod primitives;
 pub mod transform;
 pub mod util;
 
-use effect_wgpu::EffectWeb2D;
+use effect_wgpu::{EffectWeb2D, EffectWeb3D};
 use winit::dpi::PhysicalSize;
 
 pub enum EngineType {
@@ -51,7 +51,7 @@ impl Default for EffectAppBuilder {
 }
 
 impl EffectAppBuilder {
-    pub fn engine_type(mut self, ty: EngineType) -> Self {
+    pub fn engine_type(mut self, ty: EngineType, vari: EffectAppVariant) -> Self {
         self.engine_type = ty;
         self
     }
@@ -83,5 +83,16 @@ impl EffectAppBuilder {
 
     pub fn build(self) -> EffectAppVariant {
         todo!()
+    }
+}
+
+impl EffectAppVariant {
+    pub fn get_wgpu_2d(self) -> EffectWeb2D {
+        match self {
+            EffectAppVariant::Web2D(val) => return val,
+            _ => {
+                panic!("App was not configured to use WGPU in 2D mode, please check your configuration.")
+            }
+        }
     }
 }
