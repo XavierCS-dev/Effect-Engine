@@ -37,7 +37,6 @@
   - [ ] Debug GUI using egui
   - [ ] Font rendering and basic GUI framework
     - [ ] WGPU renderer for GUI
-  - [ ] Publish to crates.io
 
 - [ ] Possible 0.5.0 alpha
   - [ ] Physics system including Collision2D suvat etc
