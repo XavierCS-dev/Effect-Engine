@@ -13,7 +13,7 @@ members = [
 
 [workspace.package]
 name = "Effect 2"
-version = "0.2.2-alpha"
+version = "0.2.4-alpha"
 edition = "2021"
 license = "MIT"
 homepage = "https://github.com/XavierCS-dev/Effect-Engine"
@@ -57,7 +57,7 @@ path = "./effect-events"
 
 [workspace.dependencies.effect-engine]
 package = "effect-engine"
-version = "0.2.3-alpha"
+version = "0.2.4-alpha"
 path = "./effect-engine"
 
 [workspace.dependencies.effect-gui]

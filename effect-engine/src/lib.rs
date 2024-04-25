@@ -1,3 +1,11 @@
+pub extern crate effect_audio;
+pub extern crate effect_core;
+pub extern crate effect_events;
+pub extern crate effect_gui;
+pub extern crate effect_util;
+pub extern crate effect_vulkan;
+pub extern crate effect_wgpu;
+
 use effect_wgpu::app::effect2d::EffectWeb2D;
 use winit::{dpi::PhysicalSize, event_loop::EventLoop};
 
