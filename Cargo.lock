@@ -567,7 +567,7 @@ checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
 name = "effect-audio"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 dependencies = [
  "anyhow",
  "effect-core",
@@ -577,7 +577,7 @@ dependencies = [
 
 [[package]]
 name = "effect-core"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -591,7 +591,7 @@ dependencies = [
 
 [[package]]
 name = "effect-engine"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 dependencies = [
  "anyhow",
  "ash",
@@ -616,7 +616,7 @@ dependencies = [
 
 [[package]]
 name = "effect-events"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 dependencies = [
  "anyhow",
  "ash",
@@ -634,15 +634,12 @@ dependencies = [
 
 [[package]]
 name = "effect-examples"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 dependencies = [
  "anyhow",
  "ash",
  "bytemuck",
- "effect-audio",
  "effect-engine",
- "effect-events",
- "effect-wgpu",
  "glam",
  "num",
  "pollster",
@@ -656,19 +653,19 @@ dependencies = [
 
 [[package]]
 name = "effect-gui"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 
 [[package]]
 name = "effect-util"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 
 [[package]]
 name = "effect-vulkan"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 
 [[package]]
 name = "effect-wgpu"
-version = "0.2.2-alpha"
+version = "0.2.5-alpha"
 dependencies = [
  "anyhow",
  "bytemuck",

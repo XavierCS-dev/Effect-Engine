@@ -24,6 +24,3 @@ num.workspace = true
 ash.workspace = true
 rodio.workspace = true
 effect-engine.workspace = true
-effect-events.workspace = true
-effect-audio.workspace = true
-effect-wgpu.workspace = true

@@ -1,5 +1,5 @@
+use effect_engine::events::main_loop::EffectEventLoop;
 use effect_engine::EffectAppBuilder;
-use effect_events::main_loop::EffectEventLoop;
 
 fn main() {
     let (mut app, event_loop) = EffectAppBuilder::default()
