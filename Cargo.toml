@@ -57,7 +57,7 @@ path = "./effect-events"
 
 [workspace.dependencies.effect-engine]
 package = "effect-engine"
-version = "0.2.2-alpha"
+version = "0.2.3-alpha"
 path = "./effect-engine"
 
 [workspace.dependencies.effect-gui]
