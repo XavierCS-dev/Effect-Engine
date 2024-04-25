@@ -28,6 +28,7 @@ pub struct EffectAppBuilder {
     window_dimensions: PhysicalSize<u32>,
     resizable_window: bool,
     graphics_api: GraphicsAPI, // pixel art should be on a per texture basis
+    vsync: bool,
 }
 
 impl Default for EffectAppBuilder {
@@ -37,12 +38,14 @@ impl Default for EffectAppBuilder {
         let window_dimensions = PhysicalSize::new(800, 600);
         let resizable_window = false;
         let graphics_api = GraphicsAPI::WGPU;
+        let vsync = true;
         Self {
             engine_type,
             app_name,
             window_dimensions,
             resizable_window,
             graphics_api,
+            vsync,
         }
     }
 }
@@ -70,6 +73,11 @@ impl EffectAppBuilder {
 
     pub fn graphics_api(mut self, graphics_api: GraphicsAPI) -> Self {
         self.graphics_api = graphics_api;
+        self
+    }
+
+    pub fn vsync(mut self, vsync: bool) -> Self {
+        self.vsync = vsync;
         self
     }
 
