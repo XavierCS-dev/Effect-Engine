@@ -1,10 +1,15 @@
-pub mod app;
-use app::{app_2d::EffectWeb2D, app_3d::EffectWeb3D};
+pub mod camera;
+pub mod entity;
+pub mod primitives;
+pub mod transform;
+pub mod util;
+
+use effect_wgpu::EffectWeb2D;
 use winit::dpi::PhysicalSize;
 
 pub enum EngineType {
     D2,
-    D3,
+    // D3,
 }
 
 pub enum GraphicsAPI {

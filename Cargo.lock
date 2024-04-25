@@ -593,6 +593,7 @@ dependencies = [
  "anyhow",
  "ash",
  "bytemuck",
+ "effect-wgpu",
  "glam",
  "num",
  "pollster",
