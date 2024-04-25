@@ -1,6 +1,7 @@
 use anyhow::Result;
 use effect_core::{
     primitives::vector::Vector3,
+    raw::entityraw::Entity2DRaw,
     transform::{Transform2D, Transform2DSystem},
 };
 use effect_util::effect_error::EffectError;
@@ -11,21 +12,18 @@ use crate::{
     texture::texture2d::TextureID,
 };
 
-#[repr(C)]
-#[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy, Debug)]
-pub struct WebEntity2DRaw {
-    transform: [[f32; 4]; 4],
-    texture_index: [f32; 2],
-    texture_size: [f32; 2],
+pub trait WebEntity2DRaw {
+    const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 6];
+    fn layout() -> wgpu::VertexBufferLayout<'static>;
 }
 
-impl WebEntity2DRaw {
+impl WebEntity2DRaw for Entity2DRaw {
     const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 6] = wgpu::vertex_attr_array![2 => Float32x4, 3=> Float32x4,
         4=> Float32x4,5=> Float32x4,6=> Float32x2, 7=>Float32x2];
 
-    pub fn layout() -> wgpu::VertexBufferLayout<'static> {
+    fn layout() -> wgpu::VertexBufferLayout<'static> {
         wgpu::VertexBufferLayout {
-            array_stride: std::mem::size_of::<WebEntity2DRaw>() as wgpu::BufferAddress,
+            array_stride: std::mem::size_of::<Entity2DRaw>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Instance,
             attributes: &Self::ATTRIBUTE_ARRAY,
         }
@@ -56,8 +54,8 @@ impl WebEntity2D {
         }
     }
 
-    pub fn to_raw(&self) -> WebEntity2DRaw {
-        WebEntity2DRaw {
+    pub fn to_raw(&self) -> Entity2DRaw {
+        Entity2DRaw {
             transform: self.transform.to_raw().inner,
             texture_index: [self.texture_index[0] as f32, self.texture_index[1] as f32],
             texture_size: self.texture_size.into(),

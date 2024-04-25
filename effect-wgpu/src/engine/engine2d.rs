@@ -3,6 +3,7 @@ use std::sync::Arc;
 use effect_core::{
     camera::camera2d::{Camera2D, Camera2DSystem},
     primitives::vertex::Vertex,
+    raw::entityraw::Entity2DRaw,
 };
 use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalSize;
@@ -140,7 +141,7 @@ impl WebEngine2D {
             vertex: wgpu::VertexState {
                 module: &shader_module,
                 entry_point: "vrt_main",
-                buffers: &[Vertex::layout(), WebEntity2DRaw::layout()],
+                buffers: &[Vertex::layout(), Entity2DRaw::layout()],
             },
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,

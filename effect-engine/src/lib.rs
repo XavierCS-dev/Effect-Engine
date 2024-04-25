@@ -45,7 +45,7 @@ impl Default for EffectAppBuilder {
 }
 
 impl EffectAppBuilder {
-    pub fn engine_type(mut self, ty: EngineType, vari: EffectAppVariant) -> Self {
+    pub fn engine_type(mut self, ty: EngineType) -> Self {
         self.engine_type = ty;
         self
     }

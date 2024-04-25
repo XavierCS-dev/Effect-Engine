@@ -6,6 +6,7 @@ fn main() {
         .app_name("Test")
         .window_dimensions(600, 600)
         .graphics_api(effect_engine::GraphicsAPI::WGPU)
+        .engine_type(effect_engine::EngineType::D2)
         .build()
         .get_wgpu_2d();
     let layers = Vec::new();

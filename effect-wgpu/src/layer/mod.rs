@@ -1,5 +1,5 @@
 use anyhow::Result;
-use effect_core::primitives::vertex::Vertex;
+use effect_core::{primitives::vertex::Vertex, raw::entityraw::Entity2DRaw};
 use std::collections::{hash_map::Keys, HashMap};
 use winit::dpi::PhysicalSize;
 
@@ -93,7 +93,7 @@ impl WebLayer2D {
     pub fn entity_buffer(&self) -> Option<wgpu::BufferSlice> {
         match self.entity_buffer.as_ref() {
             Some(e_buf) => {
-                let length = self.entity_count * std::mem::size_of::<WebEntity2DRaw>();
+                let length = self.entity_count * std::mem::size_of::<Entity2DRaw>();
                 Some(e_buf.slice(0..length as u64))
             }
             None => None,
