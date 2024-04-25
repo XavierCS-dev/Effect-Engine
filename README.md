@@ -6,3 +6,6 @@
   or I will write the renderer with C then FFI with Rust
 - [ ] Implement examples
 - [ ] Move background to engine
+ - [ ] Create an entity builder for each API
+  - [ ] Rename entity2D to WebEntity2D
+  - [ ] Vulkan entity2D would be VKEntiy2D

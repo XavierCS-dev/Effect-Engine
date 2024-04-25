@@ -1,9 +1,3 @@
-pub mod camera;
-pub mod entity;
-pub mod primitives;
-pub mod transform;
-pub mod util;
-
 use effect_wgpu::{EffectWeb2D, EffectWeb3D};
 use winit::dpi::PhysicalSize;
 

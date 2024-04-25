@@ -584,6 +584,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "effect-core"
+version = "0.2.2-alpha"
+dependencies = [
+ "anyhow",
+ "bytemuck",
+ "effect-util",
+ "num",
+ "wgpu",
+ "winit",
+]
+
+[[package]]
 name = "effect-engine"
 version = "0.2.2-alpha"
 dependencies = [

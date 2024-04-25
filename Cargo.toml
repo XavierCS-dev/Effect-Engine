@@ -8,7 +8,7 @@ members = [
   "effect-wgpu",
   "effect-gui", 
   "effect-vulkan", 
-  "effect-util",
+  "effect-util", "effect-core",
 ]
 
 [workspace.package]
@@ -34,6 +34,12 @@ ash = "0.37"
 package = "effect-examples"
 version = "0.2.2-alpha"
 path = "./effect-examples"
+
+
+[workspace.dependencies.effect-core]
+package = "effect-core"
+version = "0.2.2-alpha"
+path = "./effect-core"
 
 [workspace.dependencies.effect-audio]
 package = "effect-audio"
