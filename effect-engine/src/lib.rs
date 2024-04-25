@@ -73,7 +73,7 @@ impl EffectAppBuilder {
         self
     }
 
-    pub fn build(mut self) -> EffectAppVariant {
+    pub fn build(self) -> EffectAppVariant {
         todo!()
     }
 }
