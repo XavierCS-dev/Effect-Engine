@@ -2,7 +2,6 @@ pub mod app;
 use app::{app_2d::EffectWeb2D, app_3d::EffectWeb3D};
 use winit::dpi::PhysicalSize;
 
-// can be used to warn users if theu conflate 2D and 3D features
 pub enum EngineType {
     D2,
     D3,
@@ -15,11 +14,10 @@ pub enum GraphicsAPI {
 
 pub enum EffectAppVariant {
     Web2D(EffectWeb2D),
-    Web3D(EffectWeb3D),
+    // Web3D(EffectWeb3D),
 }
 
 pub struct EffectAppBuilder {
-    // add engine_3d option later
     engine_type: EngineType,
     app_name: &'static str,
     window_dimensions: PhysicalSize<u32>,
@@ -74,5 +72,3 @@ impl EffectAppBuilder {
         todo!()
     }
 }
-
-// These an go in another file
