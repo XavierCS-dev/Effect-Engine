@@ -4,7 +4,7 @@ use std::collections::{hash_map::Keys, HashMap};
 use winit::dpi::PhysicalSize;
 
 use crate::{
-    entity::entity2d::{WebEntity2D, WebEntity2DRaw},
+    entity::entity2d::WebEntity2D,
     texture::{
         texture2d::{TextureID, WebTexture2D},
         texture_atlas::WebTextureAtlas2D,

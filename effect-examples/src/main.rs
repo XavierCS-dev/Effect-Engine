@@ -11,7 +11,7 @@ fn main() {
         .get_wgpu_2d();
     let layers = Vec::new();
     let camera = app.init_camera(45.0);
-    EffectEventLoop::run(event_loop, |ctx, delta_time, control| {
+    EffectEventLoop::run(event_loop, |_ctx, _delta_time, _control| {
         app.render(&layers, &camera).unwrap();
     });
 }

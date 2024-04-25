@@ -1,9 +1,6 @@
 use anyhow::Result;
 use effect_util::effect_error::EffectError;
-use rodio::{
-    queue::SourcesQueueOutput, source::SamplesConverter, Decoder, OutputStream, OutputStreamHandle,
-    Sink, Source, SpatialSink,
-};
+use rodio::{Decoder, OutputStream, OutputStreamHandle, Sink, Source};
 use std::{collections::HashMap, fs::*, io::*, time::Duration};
 
 #[derive(Hash, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]

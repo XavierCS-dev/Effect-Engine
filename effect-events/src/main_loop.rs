@@ -1,12 +1,8 @@
-use std::{
-    sync::{Arc, Mutex},
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
 use winit::{
-    event::{ElementState, Event, WindowEvent},
-    event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
-    keyboard::KeyCode,
+    event::Event,
+    event_loop::{EventLoop, EventLoopWindowTarget},
 };
 
 use crate::input::{Context2D, Context2DSystem};

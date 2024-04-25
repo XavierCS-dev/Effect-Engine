@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use winit::{
     dpi::PhysicalPosition,
@@ -67,12 +67,8 @@ pub struct Context2DSystem;
 impl Context2DSystem {
     pub fn update(context: &mut Context2D, event: &Event<()>) {
         match event {
-            Event::WindowEvent { window_id, event } => match event {
-                WindowEvent::KeyboardInput {
-                    device_id,
-                    event,
-                    is_synthetic,
-                } => match event.state {
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::KeyboardInput { event, .. } => match event.state {
                     ElementState::Pressed => {
                         context.keys_pressed.insert(event.physical_key);
                     }
@@ -85,11 +81,7 @@ impl Context2DSystem {
                         };
                     }
                 },
-                WindowEvent::MouseInput {
-                    device_id,
-                    state,
-                    button,
-                } => match state {
+                WindowEvent::MouseInput { state, button, .. } => match state {
                     ElementState::Pressed => {
                         context.mouse_pressed.insert(*button);
                     }
@@ -100,21 +92,18 @@ impl Context2DSystem {
                         _ => (),
                     },
                 },
-                WindowEvent::CursorMoved {
-                    device_id,
-                    position,
-                } => {
+                WindowEvent::CursorMoved { position, .. } => {
                     context.mouse_position = *position;
                 }
-                WindowEvent::CursorEntered { device_id } => {
+                WindowEvent::CursorEntered { .. } => {
                     context.mouse_within_window = true;
                 }
-                WindowEvent::CursorLeft { device_id } => {
+                WindowEvent::CursorLeft { .. } => {
                     context.mouse_within_window = false;
                 }
                 _ => (),
             },
-            Event::DeviceEvent { device_id, event } => match event {
+            Event::DeviceEvent { event, .. } => match event {
                 DeviceEvent::MouseMotion { delta } => {
                     context.mouse_travel = *delta;
                 }

@@ -1,16 +1,11 @@
 use std::{
-    cmp,
     collections::{HashMap, HashSet},
-    sync::Arc,
     time::Duration,
 };
 
 use effect_events::input::Context2D;
 use wgpu::util::DeviceExt;
-use winit::{
-    event::{ElementState, WindowEvent},
-    keyboard::{KeyCode, PhysicalKey},
-};
+use winit::keyboard::KeyCode;
 
 use crate::primitives::vector::Vector3;
 

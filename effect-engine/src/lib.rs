@@ -44,6 +44,7 @@ impl Default for EffectAppBuilder {
     }
 }
 
+#[allow(unreachable_patterns)]
 impl EffectAppBuilder {
     pub fn engine_type(mut self, ty: EngineType) -> Self {
         self.engine_type = ty;
@@ -92,6 +93,7 @@ impl EffectAppBuilder {
     }
 }
 
+#[allow(unreachable_patterns)]
 impl EffectAppVariant {
     pub fn get_wgpu_2d(self) -> (EffectWeb2D, EventLoop<()>) {
         match self {

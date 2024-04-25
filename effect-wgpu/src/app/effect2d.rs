@@ -1,12 +1,8 @@
-use std::time::{Duration, Instant};
-
 use anyhow::Result;
 use effect_core::camera::camera2d::Camera2D;
 use winit::{
     dpi::PhysicalSize,
-    event::{ElementState, Event, WindowEvent},
-    event_loop::{self, ControlFlow, EventLoop},
-    keyboard::KeyCode,
+    event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
 
@@ -90,12 +86,4 @@ impl EffectWeb2D {
     pub fn surface(&self) -> &wgpu::Surface {
         self.engine.surface()
     }
-}
-
-pub fn init_engine(
-    screen_dimensions: PhysicalSize<u32>,
-    camera_fov: f32,
-    v_sync: bool,
-) -> (EffectWeb2D, EventLoop<()>) {
-    EffectWeb2D::new(screen_dimensions, v_sync)
 }
