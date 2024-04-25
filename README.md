@@ -31,6 +31,7 @@
     - [ ] Examples
     - [ ] Internalise WebLayer2D
       - Provide option for parallel updates
+    - [ ] Remove unnecessary dependencies
 
 - [ ] Possible 0.4.0 alpha
   - [ ] Debug GUI using egui
