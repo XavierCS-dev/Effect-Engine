@@ -8,7 +8,7 @@ use winit::{
 
 // Should provide all the currently pressed keys
 // and the keys released on the previous frame
-pub struct Context2D {
+pub struct EffectEvent {
     keys_pressed: HashSet<PhysicalKey>,
     keys_released: HashSet<PhysicalKey>,
     mouse_pressed: HashSet<MouseButton>,
@@ -18,7 +18,7 @@ pub struct Context2D {
     mouse_travel: (f64, f64),
 }
 
-impl Context2D {
+impl EffectEvent {
     pub fn new() -> Self {
         let keys_pressed = HashSet::new();
         let keys_released = HashSet::new();
@@ -63,9 +63,9 @@ impl Context2D {
     }
 }
 
-pub struct Context2DSystem;
-impl Context2DSystem {
-    pub fn update(context: &mut Context2D, event: &Event<()>) {
+pub struct EffectEventSystem;
+impl EffectEventSystem {
+    pub fn update(context: &mut EffectEvent, event: &Event<()>) {
         match event {
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::KeyboardInput { event, .. } => match event.state {
@@ -113,7 +113,7 @@ impl Context2DSystem {
         }
     }
 
-    pub fn clear_released(context: &mut Context2D) {
+    pub fn clear_released(context: &mut EffectEvent) {
         context.keys_released.clear();
         context.mouse_released.clear();
     }

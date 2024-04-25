@@ -3,7 +3,7 @@ use std::{
     time::Duration,
 };
 
-use effect_events::input::Context2D;
+use effect_events::input::EffectEvent;
 use wgpu::util::DeviceExt;
 use winit::keyboard::KeyCode;
 
@@ -139,7 +139,7 @@ impl Camera2DSystem {
         );
     }
 
-    pub fn process_inputs(camera: &mut Camera2D, ctx: &Context2D, delta_time: Duration) {
+    pub fn process_inputs(camera: &mut Camera2D, ctx: &EffectEvent, delta_time: Duration) {
         for (camera_action, key_code) in camera.key_codes.iter() {
             if ctx.is_key_pressed(*key_code) {
                 camera.current_actions.insert(*camera_action);
