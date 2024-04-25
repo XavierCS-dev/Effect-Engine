@@ -2,7 +2,6 @@
 
 ## Next Steps (Phase 2 - Sound and Input)
 - [x] Add mouse information to Context2D
-- [ ] Look for obsolete code and sections where performance can be optimised
 - [x] Use more ECS where possible to user can update their data in parallel more easily
 - [ ] Introduce the use of multiple threads
   - [ ] Do this on a PER system basis, ie system functions are muktithreaded themselves.
@@ -30,7 +29,8 @@
     - [x] Restructure into Cargo workspace
     - [ ] Increase abstractions
     - [ ] Examples
-
+    - [ ] Internalise WebLayer2D
+      - Provide option for parallel updates
 
 - [ ] Possible 0.4.0 release
   - [ ] GUI using framework eg iced egui
