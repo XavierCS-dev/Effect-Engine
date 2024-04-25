@@ -4,7 +4,7 @@ use winit::dpi::PhysicalSize;
 
 use anyhow::Result;
 
-use crate::texture::texture2d::{Texture2D, Texture2DSystem};
+use crate::texture::texture2d::{WebTexture2D, WebTexture2DSystem};
 
 // Render before layers.
 // Support parallax in the future.
@@ -12,7 +12,7 @@ use crate::texture::texture2d::{Texture2D, Texture2DSystem};
 // including any animations etc
 pub struct WebBackground2D {
     bind_group: wgpu::BindGroup,
-    texture_data: Texture2D,
+    texture_data: WebTexture2D,
     dimensions: PhysicalSize<u32>,
     vertex_buffer: wgpu::Buffer,
     camera_spoof: wgpu::Buffer,
@@ -33,7 +33,7 @@ pub struct EntitySpoof {
 
 impl WebBackground2D {
     pub fn new(
-        texture: Texture2D,
+        texture: WebTexture2D,
         bind_group_layout: &wgpu::BindGroupLayout,
         pixel_art: bool,
         device: &wgpu::Device,
@@ -48,10 +48,10 @@ impl WebBackground2D {
             depth_or_array_layers: 1,
         };
         let mut texture = texture;
-        Texture2DSystem::set_index(&mut texture, [0, 0]);
-        Texture2DSystem::set_dimensions(&mut texture, dimensions.width, dimensions.height);
+        WebTexture2DSystem::set_index(&mut texture, [0, 0]);
+        WebTexture2DSystem::set_dimensions(&mut texture, dimensions.width, dimensions.height);
 
-        let bind_group = Texture2DSystem::init_texture(
+        let bind_group = WebTexture2DSystem::init_texture(
             extent,
             tex_rgb,
             bind_group_layout,
@@ -170,7 +170,7 @@ impl WebBackground2D {
         &self.camera_bind_group
     }
 
-    pub fn texture(&self) -> &Texture2D {
+    pub fn texture(&self) -> &WebTexture2D {
         &self.texture_data
     }
 

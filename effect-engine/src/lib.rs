@@ -1,5 +1,5 @@
 use effect_wgpu::app::effect2d::EffectWeb2D;
-use winit::dpi::PhysicalSize;
+use winit::{dpi::PhysicalSize, event_loop::EventLoop};
 
 pub enum EngineType {
     D2,
@@ -12,7 +12,7 @@ pub enum GraphicsAPI {
 }
 
 pub enum EffectAppVariant {
-    Web2D(EffectWeb2D),
+    Web2D((EffectWeb2D, EventLoop<()>)),
     // Web3D(EffectWeb3D),
 }
 
@@ -76,12 +76,26 @@ impl EffectAppBuilder {
     }
 
     pub fn build(self) -> EffectAppVariant {
-        todo!()
+        match self.graphics_api {
+            GraphicsAPI::WGPU => match self.engine_type {
+                EngineType::D2 => EffectAppVariant::Web2D(EffectWeb2D::new(
+                    self.window_dimensions,
+                    45.0,
+                    self.vsync,
+                )),
+                _ => {
+                    unimplemented!()
+                }
+            },
+            _ => {
+                unimplemented!()
+            }
+        }
     }
 }
 
 impl EffectAppVariant {
-    pub fn get_wgpu_2d(self) -> EffectWeb2D {
+    pub fn get_wgpu_2d(self) -> (EffectWeb2D, EventLoop<()>) {
         match self {
             EffectAppVariant::Web2D(val) => return val,
             _ => {

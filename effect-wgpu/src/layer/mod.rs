@@ -6,8 +6,8 @@ use winit::dpi::PhysicalSize;
 use crate::{
     entity::entity2d::{WebEntity2D, WebEntity2DRaw},
     texture::{
-        texture2d::{Texture2D, TextureID},
-        texture_atlas::TextureAtlas2D,
+        texture2d::{TextureID, WebTexture2D},
+        texture_atlas::WebTextureAtlas2D,
     },
 };
 
@@ -18,8 +18,8 @@ pub struct LayerID(pub u32);
 // When a entity wants to get the texture offset, it must get the data from here.
 pub struct WebLayer2D {
     id: LayerID,
-    textures: HashMap<TextureID, Texture2D>,
-    atlas: TextureAtlas2D,
+    textures: HashMap<TextureID, WebTexture2D>,
+    atlas: WebTextureAtlas2D,
     vertex_buffer: wgpu::Buffer,
     entity_count: usize,
     entity_maximum: usize,
@@ -31,14 +31,14 @@ impl WebLayer2D {
     pub fn new(
         id: LayerID,
         dimensions: winit::dpi::PhysicalSize<u32>,
-        mut textures: Vec<Texture2D>,
+        mut textures: Vec<WebTexture2D>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
         texture_size: PhysicalSize<u32>,
         pixel_art: bool,
     ) -> Result<Self> {
-        let atlas = TextureAtlas2D::new(
+        let atlas = WebTextureAtlas2D::new(
             &mut textures,
             device,
             queue,
@@ -82,7 +82,7 @@ impl WebLayer2D {
         self.textures.contains_key(texture_id)
     }
 
-    pub fn texture_ids<'a>(&'a self) -> Keys<'a, TextureID, Texture2D> {
+    pub fn texture_ids<'a>(&'a self) -> Keys<'a, TextureID, WebTexture2D> {
         self.textures.keys()
     }
 
@@ -112,7 +112,7 @@ impl WebLayer2D {
         self.entity_maximum
     }
 
-    pub fn get_texture(&self, id: TextureID) -> Option<&Texture2D> {
+    pub fn get_texture(&self, id: TextureID) -> Option<&WebTexture2D> {
         self.textures.get(&id)
     }
 

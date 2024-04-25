@@ -13,7 +13,7 @@ use crate::{
     background::background2d::WebBackground2D,
     entity::entity2d::{WebEntity2D, WebEntity2DRaw},
     layer::{LayerID, WebLayer2D, WebLayer2DSystem},
-    texture::texture2d::Texture2D,
+    texture::texture2d::WebTexture2D,
 };
 
 pub struct WebEngine2D {
@@ -284,7 +284,7 @@ impl WebEngine2D {
     pub fn init_layer(
         &self,
         id: LayerID,
-        textures: Vec<Texture2D>,
+        textures: Vec<WebTexture2D>,
         texture_size: PhysicalSize<u32>,
         pixel_art: bool,
     ) -> Result<WebLayer2D> {
@@ -318,7 +318,7 @@ impl WebEngine2D {
         )
     }
 
-    pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
+    pub fn set_background(&mut self, texture: WebTexture2D, pixel_art: bool) -> Result<()> {
         self.background = Some(WebBackground2D::new(
             texture,
             &self.texture_bgl,

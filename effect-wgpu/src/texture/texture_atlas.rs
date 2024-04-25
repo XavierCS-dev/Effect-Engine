@@ -4,22 +4,22 @@ use winit::dpi::PhysicalSize;
 
 use anyhow::{bail, Result};
 
-use super::texture2d::{Texture2D, Texture2DSystem};
+use super::texture2d::{WebTexture2D, WebTexture2DSystem};
 
 const MAX_WIDTH: u32 = 8192;
 const MAX_HEIGHT: u32 = 8192;
 
-pub struct TextureAtlas2D {
+pub struct WebTextureAtlas2D {
     bind_group: wgpu::BindGroup,
     dimensions: PhysicalSize<u32>,
     tex_coord_size: PhysicalSize<f32>,
 }
 
-impl TextureAtlas2D {
+impl WebTextureAtlas2D {
     // SWITCH TO CREATION OF ATLAS THEN CAN'T BE MODIFIED
     // remember 8196 limits
     pub fn new(
-        textures: &mut Vec<Texture2D>,
+        textures: &mut Vec<WebTexture2D>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
@@ -46,7 +46,7 @@ impl TextureAtlas2D {
                 image::imageops::FilterType::Lanczos3,
             );
             let tex_rgba = tex.to_rgba8();
-            Texture2DSystem::set_dimensions(texture, texture_size.width, texture_size.height);
+            WebTexture2DSystem::set_dimensions(texture, texture_size.width, texture_size.height);
 
             let pot_width = current_width + texture_size.width;
             let mut new_row = false;
@@ -55,7 +55,7 @@ impl TextureAtlas2D {
                 column = 0;
                 new_row = true;
             }
-            Texture2DSystem::set_index(texture, [column, row]);
+            WebTexture2DSystem::set_index(texture, [column, row]);
 
             image_buffers.push(tex_rgba);
             dimensions.push((current_width, current_height));
@@ -88,7 +88,7 @@ impl TextureAtlas2D {
             depth_or_array_layers: 1,
         };
 
-        let bind_group = Texture2DSystem::init_texture(
+        let bind_group = WebTexture2DSystem::init_texture(
             extent,
             combined_tex,
             bind_group_layout,

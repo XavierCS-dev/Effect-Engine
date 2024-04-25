@@ -14,7 +14,7 @@ use crate::{
     engine::engine2d::WebEngine2D,
     entity::entity2d::WebEntity2D,
     layer::{LayerID, WebLayer2D},
-    texture::texture2d::Texture2D,
+    texture::texture2d::WebTexture2D,
 };
 
 pub struct EffectWeb2D {
@@ -59,7 +59,7 @@ impl EffectWeb2D {
     pub fn init_layer(
         &self,
         id: LayerID,
-        textures: Vec<Texture2D>,
+        textures: Vec<WebTexture2D>,
         texture_size: PhysicalSize<u32>,
         pixel_art: bool,
     ) -> Result<WebLayer2D> {
@@ -79,7 +79,7 @@ impl EffectWeb2D {
         self.engine.update_camera(camera);
     }
 
-    pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
+    pub fn set_background(&mut self, texture: WebTexture2D, pixel_art: bool) -> Result<()> {
         self.engine.set_background(texture, pixel_art)
     }
 
