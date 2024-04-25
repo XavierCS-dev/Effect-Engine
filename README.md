@@ -19,7 +19,7 @@
   - [x] Write a thin wrapper for winit events in a context struct
   - [x] Pass this context struct to a closure supplied by a user
 
-- [ ] 0.3.0 release blockers
+- [ ] 0.3.0 alpha blockers
   - [x] Sound system
     - [x] Allow tracks to be replayed..somehow
     - [x] Separate system for spacial audio
@@ -32,25 +32,26 @@
     - [ ] Internalise WebLayer2D
       - Provide option for parallel updates
 
-- [ ] Possible 0.4.0 release
+- [ ] Possible 0.4.0 alpha
   - [ ] Debug GUI using egui
   - [ ] Font rendering and basic GUI framework
     - [ ] WGPU renderer for GUI
+  - [ ] Publish to crates.io
 
-- [ ] Possible 0.5.0 release
+- [ ] Possible 0.5.0 alpha
   - [ ] Physics system including Collision2D suvat etc
   - [ ] Improved coordinate system
 
-- [ ] Possible 0.6.0 release
+- [ ] Possible 0.6.0 alpha
   - [ ] Parallax backgrounds
   - [ ] 2D Shadows and lighting, fog etc
   - [ ] Normal maps
 
 This may or may not need to come before shadows, lighting and fog etc
-- [ ] Possible 0.7.0 release
+- [ ] Possible 0.7.0 alpha
   - [ ] 2D particle system
 
-- [ ] Possible 0.8.0 release
+- [ ] Possible 0.8.0 alpha
   - [ ] Tilemap (stores entities and a Tile2D type maybe)
 
 - [ ] 1.0 release:
