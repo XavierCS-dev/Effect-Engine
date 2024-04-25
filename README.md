@@ -33,7 +33,9 @@
       - Provide option for parallel updates
 
 - [ ] Possible 0.4.0 release
-  - [ ] GUI using framework eg iced egui
+  - [ ] Debug GUI using egui
+  - [ ] Font rendering and basic GUI framework
+    - [ ] WGPU renderer for GUI
 
 - [ ] Possible 0.5.0 release
   - [ ] Physics system including Collision2D suvat etc
