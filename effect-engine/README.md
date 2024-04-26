@@ -1,5 +1,5 @@
 ## Effect Engine
-Effect Engine 2, a Rust-based game enginedesigned for simplicity and high performance.
+Effect Engine 2, a Rust-based game engine designed for simplicity and high performance.
 
 NOTE: This game engine is still in alpha state, the API is very likely to change for 
 even patch versions, many basic features are missing and performance isn't where it should be.
