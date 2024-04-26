@@ -4,7 +4,6 @@ use std::{
 };
 
 use effect_events::input::EffectEvent;
-use wgpu::util::DeviceExt;
 use winit::keyboard::KeyCode;
 
 use crate::primitives::vector::Vector3;
@@ -16,9 +15,6 @@ pub struct Camera2D {
     _near: f32,
     _far: f32,
     _fov_deg: f32,
-    bind_group: wgpu::BindGroup,
-    bind_group_layout: wgpu::BindGroupLayout,
-    buffer: wgpu::Buffer,
     key_codes: HashMap<CameraAction, KeyCode>,
     current_actions: HashSet<CameraAction>,
     speed: f32,
@@ -35,7 +31,7 @@ pub enum CameraAction {
 }
 
 impl Camera2D {
-    pub fn new(device: &wgpu::Device, fov_deg: f32, aspect_ratio: f32, speed: f32) -> Self {
+    pub fn new(fov_deg: f32, aspect_ratio: f32, speed: f32) -> Self {
         let near = 0.01;
         let far = 100.0;
         let fov_rad = fov_deg.to_radians();
@@ -45,35 +41,6 @@ impl Camera2D {
             glam::Vec3::new(0.0, 0.0, 0.0),
             glam::Vec3::Y,
         );
-        let comp = proj * look_at;
-
-        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Camera"),
-            contents: bytemuck::cast_slice(&[comp.to_cols_array()]),
-            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
-        });
-        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: None,
-            entries: &[wgpu::BindGroupLayoutEntry {
-                binding: 0,
-                visibility: wgpu::ShaderStages::VERTEX,
-                ty: wgpu::BindingType::Buffer {
-                    ty: wgpu::BufferBindingType::Uniform,
-                    has_dynamic_offset: false,
-                    min_binding_size: None,
-                },
-                count: None,
-            }],
-        });
-
-        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: None,
-            layout: &bind_group_layout,
-            entries: &[wgpu::BindGroupEntry {
-                binding: 0,
-                resource: buffer.as_entire_binding(),
-            }],
-        });
         let key_codes = HashMap::new();
         let current_actions = HashSet::new();
         let position = Vector3::new(0.0, 0.0, 1.0);
@@ -83,9 +50,6 @@ impl Camera2D {
             _near: near,
             _far: far,
             _fov_deg: fov_deg,
-            buffer,
-            bind_group,
-            bind_group_layout,
             key_codes,
             speed,
             current_actions,
@@ -97,20 +61,16 @@ impl Camera2D {
         (self.proj * self.look_at).to_cols_array_2d()
     }
 
-    pub fn buffer(&self) -> wgpu::BufferSlice {
-        self.buffer.slice(..)
-    }
-
-    pub fn bind_group(&self) -> &wgpu::BindGroup {
-        &self.bind_group
-    }
-
-    pub fn bind_group_layout(&self) -> &wgpu::BindGroupLayout {
-        &self.bind_group_layout
-    }
-
     pub fn position(&self) -> Vector3<f32> {
         self.position
+    }
+
+    pub fn proj(&self) -> glam::Mat4 {
+        self.proj
+    }
+
+    pub fn look_at(&self) -> glam::Mat4 {
+        self.look_at
     }
 }
 
@@ -130,16 +90,7 @@ impl Camera2DSystem {
         camera.speed = speed;
     }
 
-    pub fn update(camera: &mut Camera2D, queue: &wgpu::Queue) {
-        let comp = camera.proj * camera.look_at;
-        queue.write_buffer(
-            &camera.buffer,
-            0,
-            bytemuck::cast_slice(&comp.to_cols_array()),
-        );
-    }
-
-    pub fn process_inputs(camera: &mut Camera2D, ctx: &EffectEvent, delta_time: Duration) {
+    pub fn update(camera: &mut Camera2D, ctx: &EffectEvent, delta_time: Duration) {
         for (camera_action, key_code) in camera.key_codes.iter() {
             if ctx.is_key_pressed(*key_code) {
                 camera.current_actions.insert(*camera_action);

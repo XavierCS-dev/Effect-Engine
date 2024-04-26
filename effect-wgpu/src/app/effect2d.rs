@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use anyhow::Result;
 use effect_core::{camera::camera2d::Camera2D, id::LayerID};
 use effect_events::input::{EffectEvent, EffectEventSystem};
@@ -36,12 +38,8 @@ impl EffectWeb2D {
     }
 
     /// it is up to the user to sort the layers, they have the tools to do so.
-    pub fn render(
-        &mut self,
-        layers: &Vec<WebLayer2D>,
-        camera: &Camera2D,
-    ) -> Result<(), wgpu::SurfaceError> {
-        self.engine.render(&layers, camera)
+    pub fn render(&mut self, layers: &Vec<WebLayer2D>) -> Result<(), wgpu::SurfaceError> {
+        self.engine.render(&layers)
     }
 
     /// Make sure your texture_size is set to the larger dimension that appears in your textures.
@@ -71,15 +69,20 @@ impl EffectWeb2D {
         self.engine.init_camera(fov)
     }
 
-    pub fn update_camera(&self, camera: &mut Camera2D) {
-        self.engine.update_camera(camera);
+    pub fn update_camera(
+        &mut self,
+        camera: &mut Camera2D,
+        ctx: &EffectEvent,
+        delta_time: Duration,
+    ) {
+        self.engine.update_camera(camera, ctx, delta_time);
     }
 
     pub fn set_background(&mut self, texture: WebTexture2D, pixel_art: bool) -> Result<()> {
         self.engine.set_background(texture, pixel_art)
     }
 
-    pub fn update(&mut self, ctx: &mut EffectEvent) {
+    pub fn update(&mut self, ctx: &mut EffectEvent /* will need to put camera here..fook*/) {
         if ctx.window_resized() {
             self.engine.resize(ctx.window_size());
         }
