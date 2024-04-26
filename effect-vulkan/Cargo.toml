@@ -6,7 +6,7 @@ homepage.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Utilities for the Effect Engine"
+description = "Vulkan renderer for the Effect Engine"
 
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
