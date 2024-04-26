@@ -180,6 +180,4 @@ impl WebBackground2D {
 }
 
 // manage all background related operations
-pub struct Background2DSystem;
-
-pub struct BackgroundID(&'static str);
+pub struct WebBackground2DSystem;

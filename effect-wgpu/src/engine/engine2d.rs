@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use effect_core::{
     camera::camera2d::{Camera2D, Camera2DSystem},
+    id::LayerID,
     primitives::vertex::Vertex,
     raw::entityraw::Entity2DRaw,
 };
@@ -13,7 +14,7 @@ use anyhow::Result;
 use crate::{
     background::background2d::WebBackground2D,
     entity::entity2d::{WebEntity2D, WebEntity2DRaw},
-    layer::{LayerID, WebLayer2D, WebLayer2DSystem},
+    layer::{WebLayer2D, WebLayer2DSystem},
     texture::texture2d::WebTexture2D,
 };
 

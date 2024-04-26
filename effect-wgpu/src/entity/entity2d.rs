@@ -1,5 +1,6 @@
 use anyhow::Result;
 use effect_core::{
+    id::{LayerID, TextureID},
     primitives::vector::Vector3,
     raw::entityraw::Entity2DRaw,
     transform::{Transform2D, Transform2DSystem},
@@ -7,10 +8,7 @@ use effect_core::{
 use effect_util::effect_error::EffectError;
 use winit::dpi::PhysicalSize;
 
-use crate::{
-    layer::{LayerID, WebLayer2D},
-    texture::texture2d::TextureID,
-};
+use crate::layer::WebLayer2D;
 
 pub trait WebEntity2DRaw {
     const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 6];

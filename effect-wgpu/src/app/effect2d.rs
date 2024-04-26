@@ -1,5 +1,5 @@
 use anyhow::Result;
-use effect_core::camera::camera2d::Camera2D;
+use effect_core::{camera::camera2d::Camera2D, id::LayerID};
 use winit::{
     dpi::PhysicalSize,
     event_loop::{ControlFlow, EventLoop},
@@ -7,9 +7,7 @@ use winit::{
 };
 
 use crate::{
-    engine::engine2d::WebEngine2D,
-    entity::entity2d::WebEntity2D,
-    layer::{LayerID, WebLayer2D},
+    engine::engine2d::WebEngine2D, entity::entity2d::WebEntity2D, layer::WebLayer2D,
     texture::texture2d::WebTexture2D,
 };
 

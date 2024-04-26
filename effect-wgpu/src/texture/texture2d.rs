@@ -1,8 +1,6 @@
+use effect_core::id::TextureID;
 use image::ImageBuffer;
 use image::Rgba;
-
-#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Debug, Copy)]
-pub struct TextureID(pub &'static str);
 
 #[derive(Clone, Debug)]
 pub struct WebTexture2D {

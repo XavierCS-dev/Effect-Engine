@@ -1,18 +1,16 @@
 use anyhow::Result;
-use effect_core::{primitives::vertex::Vertex, raw::entityraw::Entity2DRaw};
+use effect_core::{
+    id::{LayerID, TextureID},
+    primitives::vertex::Vertex,
+    raw::entityraw::Entity2DRaw,
+};
 use std::collections::{hash_map::Keys, HashMap};
 use winit::dpi::PhysicalSize;
 
 use crate::{
     entity::entity2d::WebEntity2D,
-    texture::{
-        texture2d::{TextureID, WebTexture2D},
-        texture_atlas::WebTextureAtlas2D,
-    },
+    texture::{texture2d::WebTexture2D, texture_atlas::WebTextureAtlas2D},
 };
-
-#[derive(std::cmp::PartialEq, std::cmp::Eq, Hash, Clone, Copy, Debug, PartialOrd, Ord)]
-pub struct LayerID(pub u32);
 
 // Takes final ownership of textures, the data etc.
 // When a entity wants to get the texture offset, it must get the data from here.
