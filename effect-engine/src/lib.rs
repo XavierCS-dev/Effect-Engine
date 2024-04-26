@@ -36,7 +36,7 @@ pub struct EffectAppBuilder {
 impl Default for EffectAppBuilder {
     fn default() -> Self {
         let engine_type = EngineType::D2;
-        let app_name = "Untitled Window";
+        let app_name = "Untitled";
         let window_dimensions = PhysicalSize::new(800, 600);
         let resizable_window = false;
         let graphics_api = GraphicsAPI::WGPU;
