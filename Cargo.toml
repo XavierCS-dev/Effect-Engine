@@ -13,7 +13,7 @@ members = [
 
 [workspace.package]
 name = "Effect 2"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 edition = "2021"
 license = "MIT"
 homepage = "https://github.com/XavierCS-dev/Effect-Engine"
@@ -36,47 +36,47 @@ ash = "0.37"
 
 [workspace.dependencies.effect-examples]
 package = "effect-examples"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-examples"
 
 [workspace.dependencies.effect-core]
 package = "effect-core"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-core"
 
 [workspace.dependencies.effect-audio]
 package = "effect-audio"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-audio"
 
 [workspace.dependencies.effect-events]
 package = "effect-events"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-events"
 
 [workspace.dependencies.effect-engine]
 package = "effect-engine"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-engine"
 
 [workspace.dependencies.effect-gui]
 package = "effect-gui"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-gui"
 
 [workspace.dependencies.effect-util]
 package = "effect-util"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-util"
 
 [workspace.dependencies.effect-wgpu]
 package = "effect-wgpu"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-wgpu"
 
 [workspace.dependencies.effect-vulkan]
 package = "effect-vulkan"
-version = "0.2.6-alpha"
+version = "0.2.8-alpha"
 path = "./effect-vulkan"
 
 [workspace.dependencies.image]

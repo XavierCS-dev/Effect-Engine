@@ -19,6 +19,7 @@ pub struct EffectEvent {
     window_resized: bool,
     window_size: winit::dpi::PhysicalSize<u32>,
     scale_factor_changed: bool,
+    close_requested: bool,
 }
 
 impl EffectEvent {
@@ -33,6 +34,7 @@ impl EffectEvent {
         let window_resized = false;
         let scale_factor_changed = false;
         let window_size = winit::dpi::PhysicalSize::new(0, 0);
+        let close_requested = false;
         Self {
             keys_pressed,
             keys_released,
@@ -44,6 +46,7 @@ impl EffectEvent {
             window_resized,
             window_size,
             scale_factor_changed,
+            close_requested,
         }
     }
 
@@ -82,6 +85,10 @@ impl EffectEvent {
     pub fn scale_factor_changed(&self) -> bool {
         self.scale_factor_changed
     }
+
+    pub fn close_requested(&self) -> bool {
+        self.close_requested
+    }
 }
 
 pub struct EffectEventSystem;
@@ -89,6 +96,9 @@ impl EffectEventSystem {
     pub fn update(context: &mut EffectEvent, event: &Event<()>) {
         match event {
             Event::WindowEvent { event, .. } => match event {
+                WindowEvent::CloseRequested => {
+                    context.close_requested = true;
+                }
                 WindowEvent::Resized(size) => {
                     context.window_resized = true;
                     context.window_size = *size;
