@@ -1,5 +1,6 @@
 use anyhow::Result;
 use effect_core::{camera::camera2d::Camera2D, id::LayerID};
+use effect_events::input::{EffectEvent, EffectEventSystem};
 use winit::{
     dpi::PhysicalSize,
     event_loop::{ControlFlow, EventLoop},
@@ -16,13 +17,18 @@ pub struct EffectWeb2D {
 }
 
 impl EffectWeb2D {
-    pub fn new(screen_dimensions: PhysicalSize<u32>, v_sync: bool) -> (Self, EventLoop<()>) {
+    pub fn new(
+        screen_dimensions: PhysicalSize<u32>,
+        v_sync: bool,
+        app_name: &'static str,
+        resizable: bool,
+    ) -> (Self, EventLoop<()>) {
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(ControlFlow::Poll);
         let window = WindowBuilder::new()
-            .with_title("Effect Engine")
+            .with_title(app_name)
             .with_inner_size(screen_dimensions)
-            .with_resizable(false)
+            .with_resizable(resizable)
             .build(&event_loop)
             .unwrap();
         let engine = pollster::block_on(WebEngine2D::new(window, v_sync));
@@ -71,6 +77,23 @@ impl EffectWeb2D {
 
     pub fn set_background(&mut self, texture: WebTexture2D, pixel_art: bool) -> Result<()> {
         self.engine.set_background(texture, pixel_art)
+    }
+
+    pub fn update(&mut self, ctx: &mut EffectEvent) {
+        if ctx.window_resized() {
+            self.engine.resize(ctx.window_size());
+        }
+        if ctx.scale_factor_changed() {
+            self.engine.resize(ctx.window_size());
+        }
+        EffectEventSystem::reset_window_changes(ctx)
+    }
+
+    pub fn resize_window(&mut self, width: u32, height: u32) {
+        let size = PhysicalSize::new(width, height);
+        self.engine.window.set_resizable(true);
+        let _ = self.engine.window.request_inner_size(size);
+        self.engine.window.set_resizable(false);
     }
 
     pub fn queue(&self) -> &wgpu::Queue {

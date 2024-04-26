@@ -670,6 +670,7 @@ dependencies = [
  "anyhow",
  "bytemuck",
  "effect-core",
+ "effect-events",
  "effect-util",
  "image",
  "pollster",

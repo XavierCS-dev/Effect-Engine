@@ -16,6 +16,9 @@ pub struct EffectEvent {
     mouse_within_window: bool,
     mouse_position: PhysicalPosition<f64>,
     mouse_travel: (f64, f64),
+    window_resized: bool,
+    window_size: winit::dpi::PhysicalSize<u32>,
+    scale_factor_changed: bool,
 }
 
 impl EffectEvent {
@@ -27,6 +30,9 @@ impl EffectEvent {
         let mouse_within_window = false;
         let mouse_position = PhysicalPosition::new(0.0, 0.0);
         let mouse_travel = (0.0, 0.0);
+        let window_resized = false;
+        let scale_factor_changed = false;
+        let window_size = winit::dpi::PhysicalSize::new(0, 0);
         Self {
             keys_pressed,
             keys_released,
@@ -35,6 +41,9 @@ impl EffectEvent {
             mouse_within_window,
             mouse_position,
             mouse_travel,
+            window_resized,
+            window_size,
+            scale_factor_changed,
         }
     }
 
@@ -61,6 +70,18 @@ impl EffectEvent {
     pub fn mouse_delta(&self) -> (f64, f64) {
         self.mouse_travel
     }
+
+    pub fn window_resized(&self) -> bool {
+        self.window_resized
+    }
+
+    pub fn window_size(&self) -> winit::dpi::PhysicalSize<u32> {
+        self.window_size
+    }
+
+    pub fn scale_factor_changed(&self) -> bool {
+        self.scale_factor_changed
+    }
 }
 
 pub struct EffectEventSystem;
@@ -68,6 +89,16 @@ impl EffectEventSystem {
     pub fn update(context: &mut EffectEvent, event: &Event<()>) {
         match event {
             Event::WindowEvent { event, .. } => match event {
+                WindowEvent::Resized(size) => {
+                    context.window_resized = true;
+                    context.window_size = *size;
+                }
+                WindowEvent::ScaleFactorChanged {
+                    scale_factor,
+                    inner_size_writer,
+                } => {
+                    context.scale_factor_changed = true;
+                }
                 WindowEvent::KeyboardInput { event, .. } => match event.state {
                     ElementState::Pressed => {
                         context.keys_pressed.insert(event.physical_key);
@@ -116,5 +147,10 @@ impl EffectEventSystem {
     pub fn clear_released(context: &mut EffectEvent) {
         context.keys_released.clear();
         context.mouse_released.clear();
+    }
+
+    pub fn reset_window_changes(context: &mut EffectEvent) {
+        context.window_resized = false;
+        context.scale_factor_changed = false;
     }
 }

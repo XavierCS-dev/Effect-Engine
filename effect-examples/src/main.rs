@@ -7,11 +7,14 @@ fn main() {
         .window_dimensions(600, 600)
         .graphics_api(effect_engine::GraphicsAPI::WGPU)
         .engine_type(effect_engine::EngineType::D2)
+        .resizable_window(false)
         .build()
         .get_wgpu_2d();
     let layers = Vec::new();
     let camera = app.init_camera(45.0);
-    EffectEventLoop::run(event_loop, |_ctx, _delta_time, _control| {
+    app.resize_window(800, 600);
+    EffectEventLoop::run(event_loop, |ctx, _delta_time, _control| {
         app.render(&layers, &camera).unwrap();
+        app.update(ctx);
     });
 }

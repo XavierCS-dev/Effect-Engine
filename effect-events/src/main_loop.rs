@@ -12,7 +12,7 @@ pub struct EffectEventLoop {}
 impl EffectEventLoop {
     pub fn run<F>(event_loop: EventLoop<()>, mut user_loop: F)
     where
-        F: FnMut(&EffectEvent, Duration, &EventLoopWindowTarget<()>) -> (),
+        F: FnMut(&mut EffectEvent, Duration, &EventLoopWindowTarget<()>) -> (),
     {
         let mut ctx = EffectEvent::new();
         let mut before = Instant::now();
@@ -25,7 +25,7 @@ impl EffectEventLoop {
             match event {
                 Event::AboutToWait => {
                     after = Instant::now();
-                    user_loop(&ctx, after - before, control);
+                    user_loop(&mut ctx, after - before, control);
                     before = after;
                     EffectEventSystem::clear_released(&mut ctx);
                 }

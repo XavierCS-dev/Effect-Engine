@@ -23,7 +23,7 @@ pub struct WebEngine2D {
     device: wgpu::Device,
     queue: wgpu::Queue,
     surface_configuration: wgpu::SurfaceConfiguration,
-    window: Arc<winit::window::Window>,
+    pub window: Arc<winit::window::Window>,
     render_pipeline: wgpu::RenderPipeline,
     texture_bgl: wgpu::BindGroupLayout,
     background: Option<WebBackground2D>,
