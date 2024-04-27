@@ -56,21 +56,12 @@ fn main() {
     // Extremely verbose just to get a texture on screen.
     // This will be improved when layer is internalised and further improved through the
     // the user of builders and code cleanup
-    /*
-    let tex_id = TextureID("Tree");
-    let texture = WebTexture2D::new(tex_id, "assets/tree.png");
-    let tex = vec![texture];
-    app.init_layer(LayerID(0), tex, PhysicalSize::new(32, 32), true)
-        .unwrap();
-    let ent = app.init_entity(Vector3::new(0.0, 0.0, -1.0), LayerID(0), tex_id);
-    let ents = vec![&ent];
-    app.set_entities(LayerID(0), &ents);i
-    */
     let mut game = GameState {
         initialised: false,
         camera: None,
     };
     // Camera stops updating after a while, this needs to be fixed
+    // Can only press key once then can never press it again
     event_loop.run(|ctx, _delta_time, control, app| {
         if ctx.close_requested() {
             control.exit();
