@@ -6,6 +6,8 @@ pub extern crate effect_util as util;
 pub extern crate effect_vulkan as vulkan;
 pub extern crate effect_wgpu as web_render;
 
+use core::misc::fullscreen::FullScreenMode;
+
 use effect_wgpu::app::effect2d::EffectWeb2D;
 use winit::{dpi::PhysicalSize, event_loop::EventLoop};
 
@@ -31,6 +33,8 @@ pub struct EffectAppBuilder {
     resizable_window: bool,
     graphics_api: GraphicsAPI, // pixel art should be on a per texture basis
     vsync: bool,
+    fullscreen_mode: FullScreenMode,
+    monitor: u32,
 }
 
 impl Default for EffectAppBuilder {
@@ -41,6 +45,8 @@ impl Default for EffectAppBuilder {
         let resizable_window = false;
         let graphics_api = GraphicsAPI::WGPU;
         let vsync = true;
+        let fullscreen_mode = FullScreenMode::WINDOWED;
+        let monitor = 0;
         Self {
             engine_type,
             app_name,
@@ -48,6 +54,8 @@ impl Default for EffectAppBuilder {
             resizable_window,
             graphics_api,
             vsync,
+            fullscreen_mode,
+            monitor,
         }
     }
 }
@@ -84,6 +92,16 @@ impl EffectAppBuilder {
         self
     }
 
+    pub fn fullscreen_mode(mut self, mode: FullScreenMode) -> Self {
+        self.fullscreen_mode = mode;
+        self
+    }
+
+    pub fn monitor(mut self, monitor: u32) -> Self {
+        self.monitor = monitor;
+        self
+    }
+
     pub fn build(self) -> EffectAppVariant {
         match self.graphics_api {
             GraphicsAPI::WGPU => match self.engine_type {
@@ -92,6 +110,8 @@ impl EffectAppBuilder {
                     self.vsync,
                     self.app_name,
                     self.resizable_window,
+                    self.fullscreen_mode,
+                    self.monitor,
                 )),
                 _ => {
                     unimplemented!()

@@ -1,4 +1,5 @@
 use effect_engine::core::id::{LayerID, TextureID};
+use effect_engine::core::misc::fullscreen::FullScreenMode;
 use effect_engine::core::primitives::vector::Vector3;
 use effect_engine::events::main_loop::EffectEventLoop;
 use effect_engine::web_render::entity::entity2d::WebEntity2D;
@@ -10,6 +11,8 @@ use winit::dpi::PhysicalSize;
 fn main() {
     let (mut app, event_loop) = EffectAppBuilder::default()
         .resizable_window(false)
+        .fullscreen_mode(FullScreenMode::BORDERLESS)
+        .monitor(0)
         .build()
         .get_wgpu_2d();
 
