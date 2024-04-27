@@ -12,7 +12,7 @@ fn main() {
         .resizable_window(true)
         .build()
         .get_wgpu_2d();
-    let tex_id = TextureID("bossmansir");
+    let tex_id = TextureID("Tree");
     let texture = WebTexture2D::new(tex_id, "assets/tree.png");
     let tex = vec![texture];
     let mut layer = app
