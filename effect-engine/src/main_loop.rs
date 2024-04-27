@@ -87,6 +87,7 @@ where
             unsafe { &mut self.app.as_mut().unwrap_unchecked() },
         );
         self.time_before = self.time_after;
+        EffectEventSystem::clear_released(&mut self.event);
     }
 }
 
