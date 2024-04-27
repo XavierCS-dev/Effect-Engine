@@ -17,5 +17,4 @@ bytemuck.workspace = true
 winit.workspace = true
 anyhow.workspace = true
 effect-util.workspace = true
-effect-events.workspace = true
 glam.workspace = true

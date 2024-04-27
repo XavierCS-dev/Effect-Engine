@@ -3,21 +3,20 @@ use std::{
     time::Duration,
 };
 
-use effect_events::input::EffectEvent;
 use winit::{dpi::PhysicalSize, keyboard::KeyCode};
 
 use crate::primitives::vector::Vector3;
 
 pub struct Camera2D {
-    look_at: glam::Mat4,
-    proj: glam::Mat4,
-    position: Vector3<f32>,
-    _near: f32,
-    _far: f32,
-    _fov_deg: f32,
-    key_codes: HashMap<CameraAction, KeyCode>,
-    current_actions: HashSet<CameraAction>,
-    speed: f32,
+    pub look_at: glam::Mat4,
+    pub proj: glam::Mat4,
+    pub position: Vector3<f32>,
+    pub _near: f32,
+    pub _far: f32,
+    pub _fov_deg: f32,
+    pub key_codes: HashMap<CameraAction, KeyCode>,
+    pub current_actions: HashSet<CameraAction>,
+    pub speed: f32,
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
@@ -98,46 +97,6 @@ impl Camera2DSystem {
 
     pub fn set_speed(camera: &mut Camera2D, speed: f32) {
         camera.speed = speed;
-    }
-
-    pub fn update(camera: &mut Camera2D, ctx: &EffectEvent, delta_time: Duration) {
-        for (camera_action, key_code) in camera.key_codes.iter() {
-            if ctx.is_key_pressed(*key_code) {
-                camera.current_actions.insert(*camera_action);
-            }
-            if ctx.is_key_released(*key_code) {
-                camera.current_actions.remove(camera_action);
-            }
-        }
-        let dt = delta_time.as_micros() as f32 / 1000.0;
-        for action in camera.current_actions.iter() {
-            match action {
-                CameraAction::Up => {
-                    camera.position.y += camera.speed * dt;
-                }
-                CameraAction::Down => {
-                    camera.position.y -= camera.speed * dt;
-                }
-                CameraAction::Right => {
-                    camera.position.x += camera.speed * dt;
-                }
-                CameraAction::Left => {
-                    camera.position.x -= camera.speed * dt;
-                }
-                CameraAction::ZoomIn => {
-                    camera.position.z -= camera.speed * dt;
-                }
-                CameraAction::ZoomOut => {
-                    camera.position.z += camera.speed * dt;
-                }
-            }
-        }
-
-        camera.look_at = glam::Mat4::look_at_rh(
-            glam::Vec3::new(camera.position.x, camera.position.y, camera.position.z),
-            glam::Vec3::new(camera.position.x, camera.position.y, 0.0),
-            glam::Vec3::Y,
-        );
     }
 
     pub fn set_inputs(camera: &mut Camera2D, inputs: &[(CameraAction, KeyCode)]) {

@@ -6,9 +6,12 @@ pub extern crate effect_util as util;
 pub extern crate effect_vulkan as vulkan;
 pub extern crate effect_wgpu as web_render;
 
-use core::misc::fullscreen::FullScreenMode;
+pub mod main_loop;
+
+use core::misc::{fullscreen::FullScreenMode, window_info::WindowInfo};
 
 use effect_wgpu::app::effect2d::EffectWeb2D;
+use main_loop::EffectEventLoopWeb;
 use winit::{dpi::PhysicalSize, event_loop::EventLoop};
 
 pub enum EngineType {
@@ -22,7 +25,7 @@ pub enum GraphicsAPI {
 }
 
 pub enum EffectAppVariant {
-    Web2D((EffectWeb2D, EventLoop<()>)),
+    Web2D(EffectEventLoopWeb),
     // Web3D(EffectWeb3D),
 }
 
@@ -34,7 +37,7 @@ pub struct EffectAppBuilder {
     graphics_api: GraphicsAPI, // pixel art should be on a per texture basis
     vsync: bool,
     fullscreen_mode: FullScreenMode,
-    monitor: u32,
+    monitor: usize,
 }
 
 impl Default for EffectAppBuilder {
@@ -97,36 +100,36 @@ impl EffectAppBuilder {
         self
     }
 
-    pub fn monitor(mut self, monitor: u32) -> Self {
+    pub fn monitor(mut self, monitor: usize) -> Self {
         self.monitor = monitor;
         self
     }
 
     pub fn build(self) -> EffectAppVariant {
+        let window_info = WindowInfo::default()
+            .dimensions(self.window_dimensions)
+            .app_name(self.app_name)
+            .resizable(self.resizable_window)
+            .fullscreen(self.fullscreen_mode)
+            .monitor(self.monitor);
+        let event_loop = EventLoop::new().unwrap();
+        event_loop.set_control_flow(winit::event_loop::ControlFlow::Poll);
         match self.graphics_api {
             GraphicsAPI::WGPU => match self.engine_type {
-                EngineType::D2 => EffectAppVariant::Web2D(EffectWeb2D::new(
-                    self.window_dimensions,
-                    self.vsync,
-                    self.app_name,
-                    self.resizable_window,
-                    self.fullscreen_mode,
-                    self.monitor,
-                )),
-                _ => {
-                    unimplemented!()
+                EngineType::D2 => {
+                    let effect_loop = EffectEventLoopWeb::new(event_loop, window_info);
+                    EffectAppVariant::Web2D(effect_loop)
                 }
+                _ => unimplemented!(),
             },
-            _ => {
-                unimplemented!()
-            }
+            _ => unimplemented!(),
         }
     }
 }
 
 #[allow(unreachable_patterns)]
 impl EffectAppVariant {
-    pub fn get_wgpu_2d(self) -> (EffectWeb2D, EventLoop<()>) {
+    pub fn get_wgpu_2d(self) -> EffectEventLoopWeb {
         match self {
             EffectAppVariant::Web2D(val) => return val,
             _ => {

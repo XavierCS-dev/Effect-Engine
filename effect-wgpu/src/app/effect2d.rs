@@ -4,15 +4,14 @@ use anyhow::Result;
 use effect_core::{
     camera::camera2d::Camera2D,
     id::{LayerID, TextureID},
-    misc::fullscreen::FullScreenMode,
+    misc::{fullscreen::FullScreenMode, window_info::WindowInfo},
     primitives::vector::Vector3,
 };
 use effect_events::input::{EffectEvent, EffectEventSystem};
 use winit::{
     dpi::PhysicalSize,
-    event_loop::{ControlFlow, EventLoop},
+    event_loop::{ActiveEventLoop, ControlFlow, EventLoop},
     monitor::{MonitorHandle, VideoMode},
-    window::WindowBuilder,
 };
 
 use std::collections::vec_deque::*;
@@ -28,40 +27,15 @@ pub struct EffectWeb2D {
 
 impl EffectWeb2D {
     pub fn new(
-        screen_dimensions: PhysicalSize<u32>,
-        v_sync: bool,
-        app_name: &'static str,
-        resizable: bool,
-        fullscreen_mode: FullScreenMode,
-        monitor: u32,
-    ) -> (Self, EventLoop<()>) {
-        let event_loop = EventLoop::new().unwrap();
-        event_loop.set_control_flow(ControlFlow::Poll);
-        let window = WindowBuilder::new()
-            .with_title(app_name)
-            .with_inner_size(screen_dimensions)
-            .with_resizable(resizable)
-            .build(&event_loop)
-            .unwrap();
-        let mut monitors: Vec<MonitorHandle> = window.available_monitors().collect();
-        if monitor as usize >= monitors.len() {
-            panic!("Could not find monitor {}", monitor);
-        }
-        let monitor = monitors.remove(monitor as usize);
-        let mut video_modes: Vec<VideoMode> = monitor.video_modes().collect();
-        window.set_fullscreen(match fullscreen_mode {
-            FullScreenMode::WINDOWED => None,
-            FullScreenMode::BORDERLESS => {
-                Some(winit::window::Fullscreen::Borderless(Some(monitor)))
-            }
-            FullScreenMode::FULLSCREEN => Some(winit::window::Fullscreen::Exclusive(
-                video_modes
-                    .pop()
-                    .expect("Monitor does not support any video modes"),
-            )),
-        });
-        let engine = pollster::block_on(WebEngine2D::new(window, v_sync));
-        (Self { engine }, event_loop)
+        engine: WebEngine2D, /*
+                             screen_dimensions: PhysicalSize<u32>,
+                             app_name: &'static str,
+                             resizable: bool,
+                             fullscreen_mode: FullScreenMode,
+                             monitor: u32,
+                             */
+    ) -> Self {
+        Self { engine }
     }
 
     /// it is up to the user to sort the layers, they have the tools to do so.

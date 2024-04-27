@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-
+pub mod camera2d;
 use winit::{
     dpi::PhysicalPosition,
     event::{DeviceEvent, ElementState, Event, MouseButton, WindowEvent},
@@ -93,65 +93,64 @@ impl EffectEvent {
 
 pub struct EffectEventSystem;
 impl EffectEventSystem {
-    pub fn update(context: &mut EffectEvent, event: &Event<()>) {
+    pub fn device_event_update(context: &mut EffectEvent, event: &DeviceEvent) {
         match event {
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::CloseRequested => {
-                    context.close_requested = true;
+            DeviceEvent::MouseMotion { delta } => {
+                context.mouse_travel = *delta;
+            }
+            _ => (),
+        };
+    }
+    pub fn window_event_update(context: &mut EffectEvent, event: &WindowEvent) {
+        match event {
+            WindowEvent::CloseRequested => {
+                context.close_requested = true;
+            }
+            WindowEvent::Resized(size) => {
+                context.window_resized = true;
+                context.window_size = *size;
+            }
+            WindowEvent::ScaleFactorChanged {
+                scale_factor,
+                inner_size_writer,
+            } => {
+                context.scale_factor_changed = true;
+            }
+            WindowEvent::KeyboardInput { event, .. } => match event.state {
+                ElementState::Pressed => {
+                    context.keys_pressed.insert(event.physical_key);
                 }
-                WindowEvent::Resized(size) => {
-                    context.window_resized = true;
-                    context.window_size = *size;
-                }
-                WindowEvent::ScaleFactorChanged {
-                    scale_factor,
-                    inner_size_writer,
-                } => {
-                    context.scale_factor_changed = true;
-                }
-                WindowEvent::KeyboardInput { event, .. } => match event.state {
-                    ElementState::Pressed => {
-                        context.keys_pressed.insert(event.physical_key);
-                    }
-                    ElementState::Released => {
-                        match context.keys_pressed.take(&event.physical_key) {
-                            Some(key) => {
-                                context.keys_released.insert(key);
-                            }
-                            _ => (),
-                        };
-                    }
-                },
-                WindowEvent::MouseInput { state, button, .. } => match state {
-                    ElementState::Pressed => {
-                        context.mouse_pressed.insert(*button);
-                    }
-                    ElementState::Released => match context.mouse_pressed.take(button) {
-                        Some(button) => {
-                            context.mouse_released.insert(button);
+                ElementState::Released => {
+                    match context.keys_pressed.take(&event.physical_key) {
+                        Some(key) => {
+                            context.keys_released.insert(key);
                         }
                         _ => (),
-                    },
+                    };
+                }
+            },
+            WindowEvent::MouseInput { state, button, .. } => match state {
+                ElementState::Pressed => {
+                    context.mouse_pressed.insert(*button);
+                }
+                ElementState::Released => match context.mouse_pressed.take(button) {
+                    Some(button) => {
+                        context.mouse_released.insert(button);
+                    }
+                    _ => (),
                 },
-                WindowEvent::CursorMoved { position, .. } => {
-                    context.mouse_position = *position;
-                }
-                WindowEvent::CursorEntered { .. } => {
-                    context.mouse_within_window = true;
-                }
-                WindowEvent::CursorLeft { .. } => {
-                    context.mouse_within_window = false;
-                }
-                _ => (),
             },
-            Event::DeviceEvent { event, .. } => match event {
-                DeviceEvent::MouseMotion { delta } => {
-                    context.mouse_travel = *delta;
-                }
-                _ => (),
-            },
+            WindowEvent::CursorMoved { position, .. } => {
+                context.mouse_position = *position;
+            }
+            WindowEvent::CursorEntered { .. } => {
+                context.mouse_within_window = true;
+            }
+            WindowEvent::CursorLeft { .. } => {
+                context.mouse_within_window = false;
+            }
             _ => (),
-        }
+        };
     }
 
     pub fn clear_released(context: &mut EffectEvent) {

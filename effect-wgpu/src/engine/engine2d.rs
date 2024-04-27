@@ -6,7 +6,7 @@ use effect_core::{
     primitives::{vector::Vector3, vertex::Vertex},
     raw::entityraw::Entity2DRaw,
 };
-use effect_events::input::EffectEvent;
+use effect_events::input::{camera2d::CameraUpdateSystem2D, EffectEvent};
 use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalSize;
 
@@ -353,7 +353,7 @@ impl WebEngine2D {
         ctx: &EffectEvent,
         delta_time: Duration,
     ) {
-        Camera2DSystem::update(camera, ctx, delta_time);
+        CameraUpdateSystem2D::update(camera, ctx, delta_time);
         WebCameraSystem2D::update(camera, &mut self.camera);
         WebCameraSystem2D::update_buffers(&self.camera, &self.queue)
     }
