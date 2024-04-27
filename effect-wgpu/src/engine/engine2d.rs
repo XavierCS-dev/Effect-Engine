@@ -204,12 +204,28 @@ impl WebEngine2D {
         }
     }
 
-    pub fn resize(&mut self, size: winit::dpi::PhysicalSize<u32>) {
+    pub fn resize(
+        &mut self,
+        size: winit::dpi::PhysicalSize<u32>,
+        camera: &mut Option<&mut Camera2D>,
+    ) {
         if size.width > 0 && size.height > 0 {
             self.surface_configuration.width = size.width;
             self.surface_configuration.height = size.height;
             self.surface
                 .configure(&self.device, &self.surface_configuration);
+            match camera.as_mut() {
+                Some(camera) => {
+                    Camera2DSystem::update_projection(camera, self.window.inner_size());
+                    WebCameraSystem2D::update(camera, &mut self.camera);
+                }
+                _ => {
+                    WebCameraSystem2D::update_projection(
+                        &mut self.camera,
+                        self.window.inner_size(),
+                    );
+                }
+            };
             WebCameraSystem2D::update_buffers(&self.camera, &self.queue)
         }
     }

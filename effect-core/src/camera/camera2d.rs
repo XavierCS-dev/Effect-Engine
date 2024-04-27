@@ -4,7 +4,7 @@ use std::{
 };
 
 use effect_events::input::EffectEvent;
-use winit::keyboard::KeyCode;
+use winit::{dpi::PhysicalSize, keyboard::KeyCode};
 
 use crate::primitives::vector::Vector3;
 
@@ -77,6 +77,16 @@ impl Camera2D {
 pub struct Camera2DSystem;
 
 impl Camera2DSystem {
+    pub fn update_projection(camera: &mut Camera2D, window_size: PhysicalSize<u32>) {
+        let proj = glam::Mat4::perspective_rh(
+            camera._fov_deg.to_radians(),
+            window_size.width as f32 / window_size.height as f32,
+            camera._near,
+            camera._far,
+        );
+        camera.proj = proj;
+    }
+
     pub fn transform(camera: &mut Camera2D, position: Vector3<f32>) {
         camera.position = position;
         camera.look_at = glam::Mat4::look_at_rh(

@@ -1,10 +1,13 @@
 use effect_core::camera::camera2d::Camera2D;
 use wgpu::util::DeviceExt;
+use winit::dpi::PhysicalSize;
 
 pub struct WebCamera {
     pub bind_group: wgpu::BindGroup,
     pub bind_group_layout: wgpu::BindGroupLayout,
     pub buffer: wgpu::Buffer,
+    pub proj: glam::Mat4,
+    pub look_at: glam::Mat4,
 }
 
 // TODO: Going to have to figure out another way sort camera resizing
@@ -43,6 +46,8 @@ impl WebCamera {
             bind_group,
             bind_group_layout,
             buffer,
+            proj,
+            look_at,
         }
     }
     pub fn buffer(&self) -> wgpu::BufferSlice {
@@ -61,6 +66,16 @@ impl WebCamera {
 pub struct WebCameraSystem2D;
 
 impl WebCameraSystem2D {
+    pub fn update_projection(camera: &mut WebCamera, window_size: PhysicalSize<u32>) {
+        let proj = glam::Mat4::perspective_rh(
+            45f32.to_radians(),
+            window_size.width as f32 / window_size.height as f32,
+            0.1,
+            10.0,
+        );
+        camera.proj = proj;
+    }
+
     pub fn update(camera: &Camera2D, web_cam: &mut WebCamera) {
         web_cam.proj = camera.proj();
         web_cam.look_at = camera.look_at();

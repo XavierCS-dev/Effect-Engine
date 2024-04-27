@@ -82,12 +82,12 @@ impl EffectWeb2D {
         self.engine.set_background(texture, pixel_art)
     }
 
-    pub fn update(&mut self, ctx: &mut EffectEvent /* will need to put camera here..fook*/) {
+    pub fn update(&mut self, ctx: &mut EffectEvent, camera: &mut Option<&mut Camera2D>) {
         if ctx.window_resized() {
-            self.engine.resize(ctx.window_size());
+            self.engine.resize(ctx.window_size(), camera);
         }
         if ctx.scale_factor_changed() {
-            self.engine.resize(ctx.window_size());
+            self.engine.resize(ctx.window_size(), camera);
         }
         EffectEventSystem::reset_window_changes(ctx)
     }
