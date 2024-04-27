@@ -69,6 +69,10 @@ fn main() {
         if !game.initialised() {
             game.initialise(app);
         }
+        // proves the failure is only for the camera
+        if ctx.is_key_pressed(KeyCode::Comma) {
+            println!("Hi");
+        }
         app.render().unwrap();
         app.update_camera(game.camera.as_mut().unwrap(), &ctx, _delta_time);
         app.update(ctx, &mut None);
