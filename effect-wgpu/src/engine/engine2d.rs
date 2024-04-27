@@ -1,9 +1,9 @@
-use std::{sync::Arc, time::Duration};
+use std::{collections::BTreeMap, sync::Arc, time::Duration};
 
 use effect_core::{
     camera::camera2d::{Camera2D, Camera2DSystem},
-    id::LayerID,
-    primitives::vertex::Vertex,
+    id::{LayerID, TextureID},
+    primitives::{vector::Vector3, vertex::Vertex},
     raw::entityraw::Entity2DRaw,
 };
 use effect_events::input::EffectEvent;
@@ -32,6 +32,7 @@ pub struct WebEngine2D {
     background: Option<WebBackground2D>,
     index_buffer: wgpu::Buffer,
     camera: WebCamera,
+    pub layers: BTreeMap<LayerID, WebLayer2D>,
 }
 
 /*
@@ -190,6 +191,8 @@ impl WebEngine2D {
         );
         let camera = WebCamera::new(&device, proj, look_at);
 
+        let layers = BTreeMap::new();
+
         Self {
             surface,
             device,
@@ -201,6 +204,7 @@ impl WebEngine2D {
             background,
             index_buffer,
             camera,
+            layers,
         }
     }
 
@@ -230,20 +234,7 @@ impl WebEngine2D {
         }
     }
 
-    pub fn input(&mut self, _event: &winit::event::Event<()>, _delta: &std::time::Duration) {
-        // do nothing
-        // not sure what to do with this yet
-        // TODO: move input to be a burden on user.
-    }
-
-    pub fn update(&mut self, _delta: &std::time::Duration) {
-        // TODO: Move update to be a burden on user
-
-        // millis returns 0 for some reason...use nano
-        // if accuracy is a problem, change to floats
-    }
-
-    pub fn render(&mut self, entities: &Vec<WebLayer2D>) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let surface_texture = self.surface.get_current_texture()?;
         let texture_view = surface_texture
             .texture
@@ -287,7 +278,7 @@ impl WebEngine2D {
         };
 
         render_pass.set_bind_group(1, self.camera.bind_group(), &[]);
-        for layer in entities {
+        for (_, layer) in self.layers.iter() {
             render_pass.set_bind_group(0, layer.bind_group(), &[]);
             render_pass.set_vertex_buffer(0, layer.vertex_buffer());
             render_pass.set_vertex_buffer(1, layer.entity_buffer().unwrap());
@@ -316,13 +307,13 @@ impl WebEngine2D {
     }
 
     pub fn init_layer(
-        &self,
+        &mut self,
         id: LayerID,
         textures: Vec<WebTexture2D>,
         texture_size: PhysicalSize<u32>,
         pixel_art: bool,
-    ) -> Result<WebLayer2D> {
-        WebLayer2D::new(
+    ) -> Result<()> {
+        let layer = WebLayer2D::new(
             id,
             self.window.inner_size(),
             textures,
@@ -331,11 +322,29 @@ impl WebEngine2D {
             &self.texture_bgl,
             texture_size,
             pixel_art,
-        )
+        )?;
+
+        let _ = self.layers.insert(id, layer);
+
+        Ok(())
     }
 
-    pub fn set_entities(&self, layer: &mut WebLayer2D, entities: &[&WebEntity2D]) {
-        WebLayer2DSystem::set_entities(layer, entities, &self.device, &self.queue)
+    pub fn init_entity(
+        &self,
+        position: Vector3<f32>,
+        layer: LayerID,
+        texture_id: TextureID,
+    ) -> WebEntity2D {
+        WebEntity2D::new(position, self.layers.get(&layer).unwrap(), texture_id)
+    }
+
+    pub fn set_entities(&mut self, layer: LayerID, entities: &[&WebEntity2D]) {
+        WebLayer2DSystem::set_entities(
+            self.layers.get_mut(&layer).unwrap(),
+            entities,
+            &self.device,
+            &self.queue,
+        )
     }
 
     pub fn update_camera(

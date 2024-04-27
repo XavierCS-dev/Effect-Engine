@@ -9,24 +9,26 @@ use winit::dpi::PhysicalSize;
 
 fn main() {
     let (mut app, event_loop) = EffectAppBuilder::default()
-        .resizable_window(true)
+        .resizable_window(false)
         .build()
         .get_wgpu_2d();
+
+    // Extremely verbose just to get a texture on screen.
+    // This will be improved when layer is internalised and further improved through the
+    // the user of builders and code cleanup
     let tex_id = TextureID("Tree");
     let texture = WebTexture2D::new(tex_id, "assets/tree.png");
     let tex = vec![texture];
-    let mut layer = app
-        .init_layer(LayerID(0), tex, PhysicalSize::new(32, 32), true)
+    app.init_layer(LayerID(0), tex, PhysicalSize::new(32, 32), true)
         .unwrap();
-    let ent = WebEntity2D::new(Vector3::new(0.0, 0.0, -1.0), &layer, tex_id);
+    let ent = app.init_entity(Vector3::new(0.0, 0.0, -1.0), LayerID(0), tex_id);
     let ents = vec![&ent];
-    app.set_entities(&mut layer, &ents);
-    let layers = vec![layer];
+    app.set_entities(LayerID(0), &ents);
     EffectEventLoop::run(event_loop, |ctx, _delta_time, control| {
         if ctx.close_requested() {
             control.exit();
         }
-        app.render(&layers).unwrap();
+        app.render().unwrap();
         app.update(ctx, &mut None);
     });
 }

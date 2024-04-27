@@ -1,7 +1,11 @@
 use std::time::Duration;
 
 use anyhow::Result;
-use effect_core::{camera::camera2d::Camera2D, id::LayerID};
+use effect_core::{
+    camera::camera2d::Camera2D,
+    id::{LayerID, TextureID},
+    primitives::vector::Vector3,
+};
 use effect_events::input::{EffectEvent, EffectEventSystem};
 use winit::{
     dpi::PhysicalSize,
@@ -38,8 +42,8 @@ impl EffectWeb2D {
     }
 
     /// it is up to the user to sort the layers, they have the tools to do so.
-    pub fn render(&mut self, layers: &Vec<WebLayer2D>) -> Result<(), wgpu::SurfaceError> {
-        self.engine.render(&layers)
+    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+        self.engine.render()
     }
 
     /// Make sure your texture_size is set to the larger dimension that appears in your textures.
@@ -51,18 +55,27 @@ impl EffectWeb2D {
     /// (provided you want the rendered in that order)
     /// It is advisable to have the texture_size be a square to avoid some textures getting crushed.
     pub fn init_layer(
-        &self,
+        &mut self,
         id: LayerID,
         textures: Vec<WebTexture2D>,
         texture_size: PhysicalSize<u32>,
         pixel_art: bool,
-    ) -> Result<WebLayer2D> {
+    ) -> Result<()> {
         self.engine
             .init_layer(id, textures, texture_size, pixel_art)
     }
 
-    pub fn set_entities(&self, layer: &mut WebLayer2D, entities: &[&WebEntity2D]) {
+    pub fn set_entities(&mut self, layer: LayerID, entities: &[&WebEntity2D]) {
         self.engine.set_entities(layer, entities);
+    }
+
+    pub fn init_entity(
+        &self,
+        position: Vector3<f32>,
+        layer: LayerID,
+        texture_id: TextureID,
+    ) -> WebEntity2D {
+        self.engine.init_entity(position, layer, texture_id)
     }
 
     pub fn init_camera(&self, fov: f32) -> Camera2D {
