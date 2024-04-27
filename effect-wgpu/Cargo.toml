@@ -23,3 +23,4 @@ image.workspace = true
 effect-core.workspace = true
 pollster.workspace = true
 effect-events.workspace = true
+glam.workspace = true
