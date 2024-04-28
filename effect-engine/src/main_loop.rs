@@ -1,18 +1,25 @@
 use std::time::{Duration, Instant};
 
+use effect_core::camera::camera2d::Camera2D;
 use effect_core::misc::fullscreen::FullScreenMode;
 use effect_core::misc::window_info::WindowInfo;
 use effect_events::input::EffectEvent;
 use effect_events::input::EffectEventSystem;
 use web_render::app::effect2d::EffectWeb2D;
+use web_render::camera::WebCamera;
+use web_render::engine::builders::engine2d_builder::WebEngine2DBuilder;
 use web_render::engine::engine2d::WebEngine2D;
+use web_render::texture::texture2d::WebTexture2D;
+use web_render::texture::texture2d::WebTexture2DBGL;
 use winit::application::ApplicationHandler;
 use winit::event_loop::ActiveEventLoop;
 use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
 use winit::monitor::VideoModeHandle;
 
-pub struct EffectLoopWeb<F>
+use web_render::camera::WebCameraBGL;
+
+pub struct EffectLoopWeb<'a, F>
 where
     F: FnMut(&mut EffectEvent, Duration, &ActiveEventLoop, &mut EffectWeb2D) -> (),
 {
@@ -21,10 +28,10 @@ where
     time_before: Instant,
     time_after: Instant,
     window_info: WindowInfo,
-    app: Option<EffectWeb2D>,
+    app: Option<EffectWeb2D<'a>>,
 }
 
-impl<F> ApplicationHandler<()> for EffectLoopWeb<F>
+impl<'a, F> ApplicationHandler<()> for EffectLoopWeb<'a, F>
 where
     F: FnMut(&mut EffectEvent, Duration, &ActiveEventLoop, &mut EffectWeb2D) -> (),
 {
@@ -54,11 +61,19 @@ where
                     .expect("Monitor does not support any video modes"),
             )),
         });
-        let mut engine = pollster::block_on(WebEngine2D::new(
-            window,
-            self.window_info.vsync,
-            self.window_info.resolution,
-        ));
+
+        let bgls = vec![Camera2D::layout(), WebTexture2D::layout()];
+        let mut engine = pollster::block_on(
+            WebEngine2DBuilder::default()
+                .window(window)
+                .window_info(self.window_info)
+                .power_preference(wgpu::PowerPreference::HighPerformance)
+                .vertex_shader("effect-wgpu/src/shaders/shader.wgsl")
+                .fragment_shader("effect-wgpu/src/shaders/shader.wgsl")
+                .bind_group_layouts(bgls)
+                .build(),
+        );
+
         let mut app = EffectWeb2D::new(engine);
         self.app = Some(app);
     }

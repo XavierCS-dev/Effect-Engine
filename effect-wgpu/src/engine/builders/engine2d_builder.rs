@@ -9,8 +9,13 @@ use wgpu::{util::DeviceExt, PowerPreference};
 use winit::dpi::PhysicalSize;
 
 use crate::{
-    background::background2d::WebBackground2D, camera::WebCamera, engine::engine2d::WebEngine2D,
-    entity::entity2d::WebEntity2DRaw, layer::WebLayer2D, layouts::WebVertexLayout,
+    background::background2d::WebBackground2D,
+    camera::WebCamera,
+    engine::engine2d::WebEngine2D,
+    entity::entity2d::WebEntity2DRaw,
+    layer::WebLayer2D,
+    layouts::WebVertexLayout,
+    texture::texture2d::{WebTexture2D, WebTexture2DBGL},
     window::WebWindow,
 };
 
@@ -19,7 +24,7 @@ pub struct WebEngine2DBuilder {
     window_info: WindowInfo,
     vsync: bool,
     power_preference: wgpu::PowerPreference,
-    bind_group_layouts: Box<[&'static wgpu::BindGroupLayout]>,
+    bind_group_layouts: Vec<wgpu::BindGroupLayoutDescriptor<'static>>,
     vertex_shader: Option<&'static str>, // option to detect if shader was set at all vs wrong path
     fragment_shader: Option<&'static str>,
 }
@@ -29,7 +34,7 @@ impl Default for WebEngine2DBuilder {
         let window = None;
         let vsync = true;
         let power_preference = wgpu::PowerPreference::HighPerformance;
-        let bind_group_layouts = Box::new([]);
+        let bind_group_layouts = Vec::new();
         let vertex_shader = None;
         let fragment_shader = None;
         let window_info = WindowInfo::default();
@@ -71,7 +76,10 @@ impl WebEngine2DBuilder {
         self
     }
 
-    pub fn bind_group_layouts(mut self, layouts: Box<[&'static wgpu::BindGroupLayout]>) -> Self {
+    pub fn bind_group_layouts(
+        mut self,
+        layouts: Vec<wgpu::BindGroupLayoutDescriptor<'static>>,
+    ) -> Self {
         self.bind_group_layouts = layouts;
         self
     }
@@ -81,7 +89,7 @@ impl WebEngine2DBuilder {
         self
     }
 
-    pub async fn build(mut self) -> WebEngine2D {
+    pub async fn build<'a>(self) -> WebEngine2D<'a> {
         let window = Arc::new(self.window.expect("Window must be supplied"));
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
@@ -141,14 +149,25 @@ impl WebEngine2DBuilder {
             .expect("Fragment shader path must be set");
         let vert_module = device.create_shader_module(wgsl_shader_builder(vrt_path));
         let frag_module = device.create_shader_module(wgsl_shader_builder(frg_path));
+
+        let mut bind_group_layouts = Vec::new();
+        for layout in self.bind_group_layouts.iter() {
+            bind_group_layouts.push(device.create_bind_group_layout(layout));
+        }
+
+        let mut bgls = Vec::new();
+        for layout in bind_group_layouts.iter() {
+            bgls.push(layout);
+        }
+
         let graphics_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: None,
-                bind_group_layouts: self.bind_group_layouts.as_ref(),
+                bind_group_layouts: &bgls,
                 push_constant_ranges: &[],
             });
 
-        let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        let graphics_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Render Pipeline"),
             layout: Some(&graphics_pipeline_layout),
             vertex: wgpu::VertexState {
@@ -209,8 +228,18 @@ impl WebEngine2DBuilder {
             self.window_info.fullscreen,
             self.window_info.resizable,
         );
-
-        todo!()
+        let texture_bgl = device.create_bind_group_layout(&WebTexture2D::layout());
+        pollster::block_on(WebEngine2D::new(
+            device,
+            queue,
+            window,
+            graphics_pipeline,
+            texture_bgl,
+            None,
+            index_buffer,
+            camera,
+            BTreeMap::new(),
+        ))
     }
 }
 

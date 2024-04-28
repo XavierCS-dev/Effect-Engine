@@ -11,6 +11,36 @@ pub struct WebTexture2D {
     pub index: Option<[u32; 2]>,
 }
 
+impl WebTexture2DBGL for WebTexture2D {
+    fn layout() -> wgpu::BindGroupLayoutDescriptor<'static> {
+        wgpu::BindGroupLayoutDescriptor {
+            entries: &[
+                wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        multisampled: false,
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
+            label: Some("Bind group layout"),
+        }
+    }
+}
+
+pub trait WebTexture2DBGL {
+    fn layout() -> wgpu::BindGroupLayoutDescriptor<'static>;
+}
+
 impl WebTexture2D {
     pub fn new(id: TextureID, path: &'static str) -> Self {
         Self {

@@ -2,6 +2,7 @@ use winit::dpi::PhysicalSize;
 
 use super::fullscreen::FullScreenMode;
 
+#[derive(Clone, Copy)]
 pub struct WindowInfo {
     pub dimensions: PhysicalSize<u32>,
     pub name: &'static str,

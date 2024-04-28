@@ -21,19 +21,19 @@ use crate::{
     texture::texture2d::WebTexture2D,
 };
 
-pub struct EffectWeb2D {
-    engine: WebEngine2D,
+pub struct EffectWeb2D<'a> {
+    engine: WebEngine2D<'a>,
 }
 
-impl EffectWeb2D {
+impl<'a> EffectWeb2D<'a> {
     pub fn new(
-        engine: WebEngine2D, /*
-                             screen_dimensions: PhysicalSize<u32>,
-                             app_name: &'static str,
-                             resizable: bool,
-                             fullscreen_mode: FullScreenMode,
-                             monitor: u32,
-                             */
+        engine: WebEngine2D<'a>, /*
+                                 screen_dimensions: PhysicalSize<u32>,
+                                 app_name: &'static str,
+                                 resizable: bool,
+                                 fullscreen_mode: FullScreenMode,
+                                 monitor: u32,
+                                 */
     ) -> Self {
         Self { engine }
     }
@@ -95,32 +95,13 @@ impl EffectWeb2D {
     pub fn update(&mut self, ctx: &mut EffectEvent) {
         if ctx.window_resized() {
             println!("resized");
-            self.engine.resize(ctx.window_size());
+            self.engine.set_res(ctx.window_size());
         }
         EffectEventSystem::reset_window_changes(ctx);
-    }
-
-    pub fn resize_window(&mut self, width: u32, height: u32) {
-        let size = PhysicalSize::new(width, height);
-        self.engine.window.set_resizable(true);
-        let _ = self.engine.window.request_inner_size(size);
-        self.engine.window.set_resizable(false);
     }
 
     pub fn set_resolution(&mut self, width: u32, height: u32) {
         let resolution = PhysicalSize::new(width, height);
         self.engine.set_res(resolution);
-    }
-
-    pub fn queue(&self) -> &wgpu::Queue {
-        self.engine.queue()
-    }
-
-    pub fn device(&self) -> &wgpu::Device {
-        self.engine.device()
-    }
-
-    pub fn surface(&self) -> &wgpu::Surface {
-        self.engine.surface()
     }
 }

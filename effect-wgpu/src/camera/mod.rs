@@ -90,3 +90,25 @@ impl WebCameraSystem2D {
         );
     }
 }
+
+pub trait WebCameraBGL {
+    fn layout() -> wgpu::BindGroupLayoutDescriptor<'static>;
+}
+
+impl WebCameraBGL for Camera2D {
+    fn layout() -> wgpu::BindGroupLayoutDescriptor<'static> {
+        wgpu::BindGroupLayoutDescriptor {
+            label: None,
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        }
+    }
+}
