@@ -22,7 +22,6 @@ use crate::{
 pub struct WebEngine2DBuilder {
     window: Option<winit::window::Window>,
     window_info: WindowInfo,
-    vsync: bool,
     power_preference: wgpu::PowerPreference,
     bind_group_layouts: Vec<wgpu::BindGroupLayoutDescriptor<'static>>,
     vertex_shader: Option<&'static str>, // option to detect if shader was set at all vs wrong path
@@ -32,7 +31,6 @@ pub struct WebEngine2DBuilder {
 impl Default for WebEngine2DBuilder {
     fn default() -> Self {
         let window = None;
-        let vsync = true;
         let power_preference = wgpu::PowerPreference::HighPerformance;
         let bind_group_layouts = Vec::new();
         let vertex_shader = None;
@@ -41,7 +39,6 @@ impl Default for WebEngine2DBuilder {
         Self {
             window,
             window_info,
-            vsync,
             power_preference,
             bind_group_layouts,
             vertex_shader,
@@ -84,11 +81,6 @@ impl WebEngine2DBuilder {
         self
     }
 
-    pub fn vsync(mut self, vsync: bool) -> Self {
-        self.vsync = vsync;
-        self
-    }
-
     pub async fn build<'a>(self) -> WebEngine2D<'a> {
         let window = Arc::new(self.window.expect("Window must be supplied"));
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
@@ -125,7 +117,7 @@ impl WebEngine2DBuilder {
 
         let surface_capabilities = surface.get_capabilities(&adapter);
         let present_mode;
-        if self.vsync {
+        if self.window_info.vsync {
             present_mode = wgpu::PresentMode::AutoVsync;
         } else {
             present_mode = wgpu::PresentMode::AutoNoVsync;
