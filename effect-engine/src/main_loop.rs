@@ -55,7 +55,7 @@ where
             FullScreenMode::BORDERLESS => {
                 Some(winit::window::Fullscreen::Borderless(Some(monitor)))
             }
-            FullScreenMode::FULLSCREEN => Some(winit::window::Fullscreen::Exclusive(
+            FullScreenMode::EXCLUSIVE => Some(winit::window::Fullscreen::Exclusive(
                 video_modes
                     .pop()
                     .expect("Monitor does not support any video modes"),

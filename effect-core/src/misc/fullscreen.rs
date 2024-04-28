@@ -1,6 +1,6 @@
 #[derive(Clone, Copy)]
 pub enum FullScreenMode {
-    FULLSCREEN,
+    EXCLUSIVE,
     BORDERLESS,
     WINDOWED,
 }
