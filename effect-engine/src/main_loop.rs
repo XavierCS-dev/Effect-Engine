@@ -54,8 +54,13 @@ where
                     .expect("Monitor does not support any video modes"),
             )),
         });
-        let engine = pollster::block_on(WebEngine2D::new(window, self.window_info.vsync));
-        self.app = Some(EffectWeb2D::new(engine));
+        let mut engine = pollster::block_on(WebEngine2D::new(
+            window,
+            self.window_info.vsync,
+            self.window_info.resolution,
+        ));
+        let mut app = EffectWeb2D::new(engine);
+        self.app = Some(app);
     }
 
     fn window_event(

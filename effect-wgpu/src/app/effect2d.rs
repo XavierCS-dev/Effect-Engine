@@ -92,14 +92,18 @@ impl EffectWeb2D {
         self.engine.set_background(texture, pixel_art)
     }
 
-    pub fn update(&mut self, ctx: &mut EffectEvent, camera: &mut Option<&mut Camera2D>) {
+    pub fn update(&mut self, ctx: &mut EffectEvent) {
         if ctx.window_resized() {
-            self.engine.resize(ctx.window_size(), camera);
+            println!("resized");
+            self.engine.resize(ctx.window_size());
         }
+        /*
         if ctx.scale_factor_changed() {
-            self.engine.resize(ctx.window_size(), camera);
+            // self.engine.resize(ctx.window_size(), camera);
+            println!("{}", ctx.scale_factor());
         }
-        EffectEventSystem::reset_window_changes(ctx)
+        */
+        EffectEventSystem::reset_window_changes(ctx);
     }
 
     pub fn resize_window(&mut self, width: u32, height: u32) {
@@ -107,6 +111,11 @@ impl EffectWeb2D {
         self.engine.window.set_resizable(true);
         let _ = self.engine.window.request_inner_size(size);
         self.engine.window.set_resizable(false);
+    }
+
+    pub fn set_resolution(&mut self, width: u32, height: u32) {
+        let resolution = PhysicalSize::new(width, height);
+        self.engine.set_res(resolution);
     }
 
     pub fn queue(&self) -> &wgpu::Queue {

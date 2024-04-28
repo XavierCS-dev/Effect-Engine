@@ -38,6 +38,7 @@ pub struct EffectAppBuilder {
     vsync: bool,
     fullscreen_mode: FullScreenMode,
     monitor: usize,
+    resolution: PhysicalSize<u32>,
 }
 
 impl Default for EffectAppBuilder {
@@ -50,6 +51,7 @@ impl Default for EffectAppBuilder {
         let vsync = true;
         let fullscreen_mode = FullScreenMode::WINDOWED;
         let monitor = 0;
+        let resolution = PhysicalSize::new(800, 600);
         Self {
             engine_type,
             app_name,
@@ -59,6 +61,7 @@ impl Default for EffectAppBuilder {
             vsync,
             fullscreen_mode,
             monitor,
+            resolution,
         }
     }
 }
@@ -105,13 +108,19 @@ impl EffectAppBuilder {
         self
     }
 
+    pub fn resolution(mut self, width: u32, height: u32) -> Self {
+        self.resolution = PhysicalSize::new(width, height);
+        self
+    }
+
     pub fn build(self) -> EffectAppVariant {
         let window_info = WindowInfo::default()
             .dimensions(self.window_dimensions)
             .app_name(self.app_name)
             .resizable(self.resizable_window)
             .fullscreen(self.fullscreen_mode)
-            .monitor(self.monitor);
+            .monitor(self.monitor)
+            .resolution(self.resolution);
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(winit::event_loop::ControlFlow::Poll);
         match self.graphics_api {

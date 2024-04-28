@@ -47,8 +47,9 @@ impl GameState {
 
 fn main() {
     let event_loop = EffectAppBuilder::default()
-        .resizable_window(false)
-        .fullscreen_mode(FullScreenMode::FULLSCREEN)
+        .fullscreen_mode(FullScreenMode::WINDOWED)
+        .resolution(384, 216)
+        .window_dimensions(1280, 720)
         .monitor(0)
         .build()
         .get_wgpu_2d();
@@ -73,8 +74,10 @@ fn main() {
         if ctx.is_key_pressed(KeyCode::Comma) {
             println!("Hi");
         }
+
         app.render().unwrap();
+        app.set_resolution(1920, 1080);
         app.update_camera(game.camera.as_mut().unwrap(), &ctx, _delta_time);
-        app.update(ctx, &mut None);
+        app.update(ctx);
     });
 }

@@ -9,6 +9,7 @@ pub struct WindowInfo {
     pub fullscreen: FullScreenMode,
     pub monitor: usize,
     pub vsync: bool,
+    pub resolution: PhysicalSize<u32>,
 }
 
 impl WindowInfo {
@@ -36,6 +37,11 @@ impl WindowInfo {
         self.monitor = index;
         self
     }
+
+    pub fn resolution(mut self, resolution: PhysicalSize<u32>) -> Self {
+        self.resolution = resolution;
+        self
+    }
 }
 
 impl Default for WindowInfo {
@@ -46,6 +52,7 @@ impl Default for WindowInfo {
         let fullscreen = FullScreenMode::WINDOWED;
         let monitor = 0;
         let vsync = true;
+        let resolution = PhysicalSize::new(800, 600);
         Self {
             dimensions,
             name,
@@ -53,6 +60,7 @@ impl Default for WindowInfo {
             fullscreen,
             monitor,
             vsync,
+            resolution,
         }
     }
 }

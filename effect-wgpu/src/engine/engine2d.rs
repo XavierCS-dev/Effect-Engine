@@ -27,6 +27,7 @@ pub struct WebEngine2D {
     queue: wgpu::Queue,
     surface_configuration: wgpu::SurfaceConfiguration,
     pub window: Arc<winit::window::Window>,
+    resolution: PhysicalSize<u32>,
     render_pipeline: wgpu::RenderPipeline,
     texture_bgl: wgpu::BindGroupLayout,
     background: Option<WebBackground2D>,
@@ -41,7 +42,11 @@ pub struct WebEngine2D {
 * 0.3.0 release
 */
 impl WebEngine2D {
-    pub async fn new(window: winit::window::Window, v_sync: bool) -> Self {
+    pub async fn new(
+        window: winit::window::Window,
+        v_sync: bool,
+        resolution: PhysicalSize<u32>,
+    ) -> Self {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
             ..Default::default()
@@ -86,8 +91,8 @@ impl WebEngine2D {
         let surface_configuration = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface_format,
-            width: window.inner_size().width,
-            height: window.inner_size().height,
+            width: resolution.width,
+            height: resolution.height,
             present_mode,
             alpha_mode: surface_capabilities.alpha_modes[0],
             view_formats: Vec::new(),
@@ -180,7 +185,7 @@ impl WebEngine2D {
 
         let proj = glam::Mat4::perspective_rh(
             45.0f32.to_radians(),
-            window.inner_size().width as f32 / window.inner_size().height as f32,
+            resolution.width as f32 / resolution.height as f32,
             0.1,
             10.0,
         );
@@ -205,33 +210,28 @@ impl WebEngine2D {
             index_buffer,
             camera,
             layers,
+            resolution,
         }
     }
 
-    pub fn resize(
-        &mut self,
-        size: winit::dpi::PhysicalSize<u32>,
-        camera: &mut Option<&mut Camera2D>,
-    ) {
+    pub fn resize(&mut self, size: winit::dpi::PhysicalSize<u32>) {
         if size.width > 0 && size.height > 0 {
-            self.surface_configuration.width = size.width;
-            self.surface_configuration.height = size.height;
             self.surface
                 .configure(&self.device, &self.surface_configuration);
-            match camera.as_mut() {
-                Some(camera) => {
-                    Camera2DSystem::update_projection(camera, self.window.inner_size());
-                    WebCameraSystem2D::update(camera, &mut self.camera);
-                }
-                _ => {
-                    WebCameraSystem2D::update_projection(
-                        &mut self.camera,
-                        self.window.inner_size(),
-                    );
-                }
-            };
-            WebCameraSystem2D::update_buffers(&self.camera, &self.queue)
+            println!(
+                "{}, {}",
+                self.surface_configuration.width, self.surface_configuration.height
+            );
         }
+    }
+
+    pub fn set_res(&mut self, resolution: PhysicalSize<u32>) {
+        self.surface_configuration.width = resolution.width;
+        self.surface_configuration.height = resolution.height;
+        self.surface
+            .configure(&self.device, &self.surface_configuration);
+        WebCameraSystem2D::update_projection(&mut self.camera, resolution);
+        WebCameraSystem2D::update_buffers(&self.camera, &self.queue);
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -356,6 +356,10 @@ impl WebEngine2D {
         CameraUpdateSystem2D::update(camera, ctx, delta_time);
         WebCameraSystem2D::update(camera, &mut self.camera);
         WebCameraSystem2D::update_buffers(&self.camera, &self.queue)
+    }
+
+    pub fn update_camera_buffers(&mut self) {
+        WebCameraSystem2D::update_buffers(&self.camera, &self.queue);
     }
 
     pub fn init_camera(&self, fov: f32) -> Camera2D {

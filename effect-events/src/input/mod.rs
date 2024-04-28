@@ -19,6 +19,7 @@ pub struct EffectEvent {
     window_resized: bool,
     window_size: winit::dpi::PhysicalSize<u32>,
     scale_factor_changed: bool,
+    scale_factor: f64,
     close_requested: bool,
 }
 
@@ -35,6 +36,7 @@ impl EffectEvent {
         let scale_factor_changed = false;
         let window_size = winit::dpi::PhysicalSize::new(0, 0);
         let close_requested = false;
+        let scale_factor = 1.0;
         Self {
             keys_pressed,
             keys_released,
@@ -47,6 +49,7 @@ impl EffectEvent {
             window_size,
             scale_factor_changed,
             close_requested,
+            scale_factor,
         }
     }
 
@@ -89,10 +92,18 @@ impl EffectEvent {
     pub fn close_requested(&self) -> bool {
         self.close_requested
     }
+
+    pub fn scale_factor(&self) -> f64 {
+        self.scale_factor
+    }
 }
 
 pub struct EffectEventSystem;
 impl EffectEventSystem {
+    pub fn force_resize(context: &mut EffectEvent) {
+        context.window_resized = true;
+    }
+
     pub fn device_event_update(context: &mut EffectEvent, event: &DeviceEvent) {
         match event {
             DeviceEvent::MouseMotion { delta } => {
@@ -115,6 +126,7 @@ impl EffectEventSystem {
                 inner_size_writer,
             } => {
                 context.scale_factor_changed = true;
+                context.scale_factor = *scale_factor
             }
             WindowEvent::KeyboardInput { event, .. } => match event.state {
                 ElementState::Pressed => {
