@@ -4,7 +4,6 @@ use super::fullscreen::FullScreenMode;
 
 #[derive(Clone, Copy)]
 pub struct WindowInfo {
-    pub dimensions: PhysicalSize<u32>,
     pub name: &'static str,
     pub resizable: bool,
     pub fullscreen: FullScreenMode,
@@ -14,11 +13,6 @@ pub struct WindowInfo {
 }
 
 impl WindowInfo {
-    pub fn dimensions(mut self, dimensions: PhysicalSize<u32>) -> Self {
-        self.dimensions = dimensions;
-        self
-    }
-
     pub fn app_name(mut self, app_name: &'static str) -> Self {
         self.name = app_name;
         self
@@ -55,7 +49,6 @@ impl Default for WindowInfo {
         let vsync = true;
         let resolution = PhysicalSize::new(800, 600);
         Self {
-            dimensions,
             name,
             resizable,
             fullscreen,

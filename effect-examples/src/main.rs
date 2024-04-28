@@ -46,10 +46,10 @@ impl GameState {
 }
 
 fn main() {
+    // need to separate resolution and window dimensions again
     let event_loop = EffectAppBuilder::default()
-        .fullscreen_mode(FullScreenMode::WINDOWED)
-        .resolution(384, 216)
-        .window_dimensions(1280, 720)
+        .fullscreen_mode(FullScreenMode::BORDERLESS)
+        .resolution(1280, 720)
         .monitor(0)
         .build()
         .get_wgpu_2d();
@@ -76,7 +76,6 @@ fn main() {
         }
 
         app.render().unwrap();
-        app.set_resolution(1920, 1080);
         app.update_camera(game.camera.as_mut().unwrap(), &ctx, _delta_time);
         app.update(ctx);
     });

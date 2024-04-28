@@ -226,14 +226,7 @@ impl WebEngine2DBuilder {
         );
         let camera = WebCamera::new(&device, proj, look_at);
         let layers: BTreeMap<LayerID, WebLayer2D> = BTreeMap::new();
-        let window = WebWindow::new(
-            window,
-            self.window_info.dimensions,
-            surface,
-            surface_config,
-            self.window_info.fullscreen,
-            self.window_info.resizable,
-        );
+        let window = WebWindow::new(window, surface, surface_config, self.window_info.fullscreen);
         let texture_bgl = device.create_bind_group_layout(&WebTexture2D::layout());
         pollster::block_on(WebEngine2D::new(
             device,

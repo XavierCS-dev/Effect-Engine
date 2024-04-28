@@ -93,11 +93,13 @@ impl<'a> EffectWeb2D<'a> {
     }
 
     pub fn update(&mut self, ctx: &mut EffectEvent) {
+        /*
         if ctx.window_resized() {
             println!("resized");
             self.engine.set_res(ctx.window_size());
         }
         EffectEventSystem::reset_window_changes(ctx);
+        */
     }
 
     pub fn set_resolution(&mut self, width: u32, height: u32) {

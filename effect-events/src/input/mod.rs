@@ -16,10 +16,6 @@ pub struct EffectEvent {
     mouse_within_window: bool,
     mouse_position: PhysicalPosition<f64>,
     mouse_travel: (f64, f64),
-    window_resized: bool,
-    window_size: winit::dpi::PhysicalSize<u32>,
-    scale_factor_changed: bool,
-    scale_factor: f64,
     close_requested: bool,
 }
 
@@ -32,11 +28,7 @@ impl EffectEvent {
         let mouse_within_window = false;
         let mouse_position = PhysicalPosition::new(0.0, 0.0);
         let mouse_travel = (0.0, 0.0);
-        let window_resized = false;
-        let scale_factor_changed = false;
-        let window_size = winit::dpi::PhysicalSize::new(0, 0);
         let close_requested = false;
-        let scale_factor = 1.0;
         Self {
             keys_pressed,
             keys_released,
@@ -45,11 +37,7 @@ impl EffectEvent {
             mouse_within_window,
             mouse_position,
             mouse_travel,
-            window_resized,
-            window_size,
-            scale_factor_changed,
             close_requested,
-            scale_factor,
         }
     }
 
@@ -77,33 +65,13 @@ impl EffectEvent {
         self.mouse_travel
     }
 
-    pub fn window_resized(&self) -> bool {
-        self.window_resized
-    }
-
-    pub fn window_size(&self) -> winit::dpi::PhysicalSize<u32> {
-        self.window_size
-    }
-
-    pub fn scale_factor_changed(&self) -> bool {
-        self.scale_factor_changed
-    }
-
     pub fn close_requested(&self) -> bool {
         self.close_requested
-    }
-
-    pub fn scale_factor(&self) -> f64 {
-        self.scale_factor
     }
 }
 
 pub struct EffectEventSystem;
 impl EffectEventSystem {
-    pub fn force_resize(context: &mut EffectEvent) {
-        context.window_resized = true;
-    }
-
     pub fn device_event_update(context: &mut EffectEvent, event: &DeviceEvent) {
         match event {
             DeviceEvent::MouseMotion { delta } => {
@@ -116,17 +84,6 @@ impl EffectEventSystem {
         match event {
             WindowEvent::CloseRequested => {
                 context.close_requested = true;
-            }
-            WindowEvent::Resized(size) => {
-                context.window_resized = true;
-                context.window_size = *size;
-            }
-            WindowEvent::ScaleFactorChanged {
-                scale_factor,
-                inner_size_writer,
-            } => {
-                context.scale_factor_changed = true;
-                context.scale_factor = *scale_factor
             }
             WindowEvent::KeyboardInput { event, .. } => match event.state {
                 ElementState::Pressed => {
@@ -168,10 +125,5 @@ impl EffectEventSystem {
     pub fn clear_released(context: &mut EffectEvent) {
         context.keys_released.clear();
         context.mouse_released.clear();
-    }
-
-    pub fn reset_window_changes(context: &mut EffectEvent) {
-        context.window_resized = false;
-        context.scale_factor_changed = false;
     }
 }

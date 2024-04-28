@@ -32,7 +32,6 @@ pub enum EffectAppVariant {
 pub struct EffectAppBuilder {
     engine_type: EngineType,
     app_name: &'static str,
-    window_dimensions: PhysicalSize<u32>,
     resizable_window: bool,
     graphics_api: GraphicsAPI, // pixel art should be on a per texture basis
     vsync: bool,
@@ -45,7 +44,6 @@ impl Default for EffectAppBuilder {
     fn default() -> Self {
         let engine_type = EngineType::D2;
         let app_name = "Untitled";
-        let window_dimensions = PhysicalSize::new(800, 600);
         let resizable_window = false;
         let graphics_api = GraphicsAPI::WGPU;
         let vsync = true;
@@ -55,7 +53,6 @@ impl Default for EffectAppBuilder {
         Self {
             engine_type,
             app_name,
-            window_dimensions,
             resizable_window,
             graphics_api,
             vsync,
@@ -75,11 +72,6 @@ impl EffectAppBuilder {
 
     pub fn app_name(mut self, app_name: &'static str) -> Self {
         self.app_name = app_name;
-        self
-    }
-
-    pub fn window_dimensions(mut self, width: u32, height: u32) -> Self {
-        self.window_dimensions = PhysicalSize::new(width, height);
         self
     }
 
@@ -115,7 +107,6 @@ impl EffectAppBuilder {
 
     pub fn build(self) -> EffectAppVariant {
         let window_info = WindowInfo::default()
-            .dimensions(self.window_dimensions)
             .app_name(self.app_name)
             .resizable(self.resizable_window)
             .fullscreen(self.fullscreen_mode)

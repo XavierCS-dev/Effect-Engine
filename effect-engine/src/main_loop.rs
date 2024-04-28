@@ -38,7 +38,7 @@ where
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         let attributes = winit::window::Window::default_attributes()
             .with_title(self.window_info.name)
-            .with_inner_size(self.window_info.dimensions)
+            .with_inner_size(self.window_info.resolution)
             .with_resizable(self.window_info.resizable);
         let window = event_loop
             .create_window(attributes)

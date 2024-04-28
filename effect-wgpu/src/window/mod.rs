@@ -5,34 +5,24 @@ use winit::dpi::PhysicalSize;
 
 pub struct WebWindow<'a> {
     window: Arc<winit::window::Window>,
-    dimensions: PhysicalSize<u32>,
     surface: wgpu::Surface<'a>,
     surface_config: wgpu::SurfaceConfiguration,
     mode: FullScreenMode,
-    always_resizable: bool,
 }
 
 impl<'a> WebWindow<'a> {
     pub fn new(
         window: Arc<winit::window::Window>,
-        dimensions: PhysicalSize<u32>,
         surface: wgpu::Surface<'a>,
         surface_config: wgpu::SurfaceConfiguration,
         mode: FullScreenMode,
-        always_resizable: bool,
     ) -> Self {
         Self {
             window,
-            dimensions,
             surface,
             surface_config,
             mode,
-            always_resizable,
         }
-    }
-
-    pub fn dimensions(&self) -> PhysicalSize<u32> {
-        self.dimensions
     }
 
     pub fn resolution(&self) -> PhysicalSize<u32> {
@@ -50,6 +40,10 @@ impl<'a> WebWindow<'a> {
     pub fn window_mut(&mut self) -> &winit::window::Window {
         &mut self.window
     }
+
+    pub fn mode(&self) -> FullScreenMode {
+        self.mode
+    }
 }
 
 pub struct WebWindowSystem;
@@ -61,8 +55,6 @@ impl WebWindowSystem {
         window.surface_config.width = res.width;
         window.surface_config.height = res.height;
         window.surface.configure(device, &window.surface_config);
-        if !window.always_resizable {
-            window.window.set_resizable(false);
-        }
+        window.window.set_resizable(false);
     }
 }
