@@ -62,7 +62,7 @@ where
             )),
         });
 
-        let bgls = vec![Camera2D::layout(), WebTexture2D::layout()];
+        let bgls = vec![WebTexture2D::layout(), Camera2D::layout()];
         let mut engine = pollster::block_on(
             WebEngine2DBuilder::default()
                 .window(window)

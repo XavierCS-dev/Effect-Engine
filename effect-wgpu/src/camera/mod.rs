@@ -98,7 +98,7 @@ pub trait WebCameraBGL {
 impl WebCameraBGL for Camera2D {
     fn layout() -> wgpu::BindGroupLayoutDescriptor<'static> {
         wgpu::BindGroupLayoutDescriptor {
-            label: None,
+            label: Some("Camera bgl"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStages::VERTEX,

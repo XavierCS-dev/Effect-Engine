@@ -149,8 +149,22 @@ impl WebEngine2DBuilder {
 
         let mut bgls = Vec::new();
         for layout in bind_group_layouts.iter() {
+            println!("{:?}", layout);
             bgls.push(layout);
         }
+        let cam_bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+            label: Some("Camera bgl"),
+            entries: &[wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
+                count: None,
+            }],
+        });
 
         let graphics_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
