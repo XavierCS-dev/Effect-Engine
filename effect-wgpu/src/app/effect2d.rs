@@ -97,12 +97,6 @@ impl EffectWeb2D {
             println!("resized");
             self.engine.resize(ctx.window_size());
         }
-        /*
-        if ctx.scale_factor_changed() {
-            // self.engine.resize(ctx.window_size(), camera);
-            println!("{}", ctx.scale_factor());
-        }
-        */
         EffectEventSystem::reset_window_changes(ctx);
     }
 
