@@ -111,6 +111,7 @@ impl EffectAppBuilder {
             .resizable(self.resizable_window)
             .fullscreen(self.fullscreen_mode)
             .monitor(self.monitor)
+            .vsync(self.vsync)
             .resolution(self.resolution);
         let event_loop = EventLoop::new().unwrap();
         event_loop.set_control_flow(winit::event_loop::ControlFlow::Poll);

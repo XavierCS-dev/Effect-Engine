@@ -37,11 +37,14 @@ impl WindowInfo {
         self.resolution = resolution;
         self
     }
+    pub fn vsync(mut self, vsync: bool) -> Self {
+        self.vsync = vsync;
+        self
+    }
 }
 
 impl Default for WindowInfo {
     fn default() -> Self {
-        let dimensions = PhysicalSize::new(800, 600);
         let name = "Untitled";
         let resizable = true;
         let fullscreen = FullScreenMode::WINDOWED;

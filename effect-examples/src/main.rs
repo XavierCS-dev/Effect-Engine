@@ -45,11 +45,13 @@ impl GameState {
     }
 }
 
+// TODO: Simplifiy initialisation stages.
+// TODO: Give the use a way to pass a closure to be run once (initialisation)
 fn main() {
-    // need to separate resolution and window dimensions again
     let event_loop = EffectAppBuilder::default()
         .fullscreen_mode(FullScreenMode::BORDERLESS)
         .resolution(1280, 720)
+        .vsync(false)
         .monitor(0)
         .build()
         .get_wgpu_2d();
@@ -61,8 +63,6 @@ fn main() {
         initialised: false,
         camera: None,
     };
-    // Camera stops updating after a while, this needs to be fixed
-    // Can only press key once then can never press it again
     event_loop.run(|ctx, _delta_time, control, app| {
         if ctx.close_requested() {
             control.exit();
