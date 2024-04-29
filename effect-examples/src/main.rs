@@ -45,8 +45,9 @@ impl GameState {
     }
 }
 
-// TODO: Simplifiy initialisation stages.
-// TODO: Give the use a way to pass a closure to be run once (initialisation)
+// TODO: Simplifiy initialisation of parts.
+// TODO: Reduce dependency on app for initialisation,
+// so user can do their init first
 fn main() {
     let event_loop = EffectAppBuilder::default()
         .fullscreen_mode(FullScreenMode::BORDERLESS)
