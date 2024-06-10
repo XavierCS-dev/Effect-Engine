@@ -3,7 +3,9 @@ use std::num::NonZeroU64;
 use effect_util::effect_error::EffectError;
 use winit::dpi::PhysicalSize;
 
-use crate::engine::builders::texture_data_builder::TextureDataBuilder;
+use crate::{
+    engine::builders::texture_data_builder::TextureDataBuilder, texture::texture_data::TextureData,
+};
 
 use super::texture2d::Texture2D;
 
@@ -42,18 +44,21 @@ impl TextureArray {
                 .as_str(),
             ));
         }
+        let tex_data: Vec<TextureData> = Vec::new();
         for (index, texture) in textures.iter_mut().enumerate() {
             // We don't need to check the size as it will be resized when using the builder, or will fail.
-            let tex_data = TextureDataBuilder::default()
-                .dimensions(texture_dimensions)
-                .texture(texture.clone())
-                .pixel_art(true)
-                .build(device, queue)
-                .expect(format!("Failed to create texture data, index: {}", index).as_str());
+            tex_data.push(
+                TextureDataBuilder::default()
+                    .dimensions(texture_dimensions)
+                    .texture(texture.clone())
+                    .pixel_art(true)
+                    .build(device, queue)
+                    .expect(format!("Failed to create texture data, index: {}", index).as_str()),
+            );
         }
 
         // Can't put this in its own function due to lifetime issues
-        device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        let bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             entries: &[
                 wgpu::BindGroupLayoutEntry {
                     binding: 0,
@@ -84,7 +89,31 @@ impl TextureArray {
             ],
             label: None,
         });
-
+        let views: Vec<&wgpu::TextureView> = tex_data.iter().map(|f| &f.view).collect();
+        let samplers: Vec<&wgpu::Sampler> = tex_data.iter().map(|f| &f.sampler).collect();
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureViewArray(&views),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::SamplerArray(&samplers),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                        // figure out how texture indices will be deduced....
+                        buffer: &texture_index_buffer,
+                        offset: 0,
+                        size: Some(NonZeroU64::new(4).unwrap()),
+                    }),
+                },
+            ],
+            layout: &bgl,
+            label: Some("bind group"),
+        });
         todo!()
     }
 }
