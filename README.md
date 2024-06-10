@@ -47,6 +47,7 @@
   - [ ] Parallax backgrounds
   - [ ] 2D Shadows and lighting, fog etc
   - [ ] Normal maps
+  - [ ] Custom shaders and pipeline, mainly for lighting and 3D tech
 
 This may or may not need to come before shadows, lighting and fog etc
 - [ ] Possible 0.7.0 alpha
