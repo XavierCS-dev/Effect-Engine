@@ -29,6 +29,8 @@
   - [ ] Simplify Texture2D to component struct used to by user to easily reinitialise a texture
     - Technical aspects will be covered by TextureData
     - Size will be stored in the layer, as it will be uniform with all other textures in the layer.
+      - [ ] Remove size, index fields from Texture2D
+    - [ ] Update Texture2D to implement Copy
 
 - [ ] Possible 0.4.0 alpha
   - [ ] Debug GUI using egui
