@@ -26,15 +26,7 @@ pub struct EffectEngine2D<'a> {
 }
 
 impl<'a> EffectEngine2D<'a> {
-    pub fn new(
-        engine: Engine2D<'a>, /*
-                              screen_dimensions: PhysicalSize<u32>,
-                              app_name: &'static str,
-                              resizable: bool,
-                              fullscreen_mode: FullScreenMode,
-                              monitor: u32,
-                              */
-    ) -> Self {
+    pub fn new(engine: Engine2D<'a>) -> Self {
         Self { engine }
     }
 

@@ -1,7 +1,8 @@
+// don't continue with this, just implement texture arrays instead
+
 use winit::dpi::PhysicalSize;
 
 use crate::texture::texture2d::{Texture2D, Texture2DBGL};
-
 pub struct TextureAtlas2DBuilder {
     textures: Vec<Texture2D>,
     bind_group_layout_descriptor: wgpu::BindGroupLayoutDescriptor<'static>,

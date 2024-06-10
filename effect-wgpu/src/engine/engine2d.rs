@@ -40,7 +40,7 @@ pub struct Engine2D<'a> {
 * 0.3.0 release
 */
 impl<'a> Engine2D<'a> {
-    pub async fn new(
+    pub fn new(
         device: wgpu::Device,
         queue: wgpu::Queue,
         window: Window<'a>,

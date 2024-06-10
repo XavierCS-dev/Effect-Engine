@@ -5,7 +5,7 @@ use effect_core::{
     raw::entityraw::Entity2DRaw,
 };
 use effect_util::file_to_bytes;
-use wgpu::{util::DeviceExt, PowerPreference};
+use wgpu::{naga::back, util::DeviceExt, PowerPreference};
 use winit::dpi::PhysicalSize;
 
 use crate::{
@@ -213,17 +213,17 @@ impl Engine2DBuilder {
         let layers: BTreeMap<LayerID, Layer2D> = BTreeMap::new();
         let window = Window::new(window, surface, surface_config, self.window_info.fullscreen);
         let texture_bgl = device.create_bind_group_layout(&Texture2D::layout());
-        pollster::block_on(Engine2D::new(
+        Engine2D::new(
             device,
             queue,
             window,
             graphics_pipeline,
             texture_bgl,
-            None,
+            background,
             index_buffer,
             camera,
             BTreeMap::new(),
-        ))
+        )
     }
 }
 
