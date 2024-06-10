@@ -3,14 +3,14 @@ use std::sync::Arc;
 use effect_core::misc::fullscreen::FullScreenMode;
 use winit::dpi::PhysicalSize;
 
-pub struct WebWindow<'a> {
+pub struct Window<'a> {
     window: Arc<winit::window::Window>,
     surface: wgpu::Surface<'a>,
     surface_config: wgpu::SurfaceConfiguration,
     mode: FullScreenMode,
 }
 
-impl<'a> WebWindow<'a> {
+impl<'a> Window<'a> {
     pub fn new(
         window: Arc<winit::window::Window>,
         surface: wgpu::Surface<'a>,
@@ -46,10 +46,10 @@ impl<'a> WebWindow<'a> {
     }
 }
 
-pub struct WebWindowSystem;
+pub struct WindowSystem;
 
-impl WebWindowSystem {
-    pub fn set_resolution(window: &mut WebWindow, res: PhysicalSize<u32>, device: &wgpu::Device) {
+impl WindowSystem {
+    pub fn set_resolution(window: &mut Window, res: PhysicalSize<u32>, device: &wgpu::Device) {
         window.window.set_resizable(true);
         let _ = window.window.request_inner_size(res);
         window.surface_config.width = res.width;

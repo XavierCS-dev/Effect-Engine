@@ -5,35 +5,32 @@ use effect_core::misc::fullscreen::FullScreenMode;
 use effect_core::misc::window_info::WindowInfo;
 use effect_events::input::EffectEvent;
 use effect_events::input::EffectEventSystem;
-use web_render::app::effect2d::EffectWeb2D;
-use web_render::camera::WebCamera;
-use web_render::engine::builders::engine2d_builder::WebEngine2DBuilder;
-use web_render::engine::engine2d::WebEngine2D;
-use web_render::texture::texture2d::WebTexture2D;
-use web_render::texture::texture2d::WebTexture2DBGL;
+use web_render::app::effect2d::EffectEngine2D;
+use web_render::camera::CameraBGL;
+use web_render::engine::builders::engine2d_builder::Engine2DBuilder;
+use web_render::texture::texture2d::Texture2D;
+use web_render::texture::texture2d::Texture2DBGL;
 use winit::application::ApplicationHandler;
 use winit::event_loop::ActiveEventLoop;
 use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
 use winit::monitor::VideoModeHandle;
 
-use web_render::camera::WebCameraBGL;
-
-pub struct EffectLoopWeb<'a, F>
+pub struct EffectLoop2D<'a, F>
 where
-    F: FnMut(&mut EffectEvent, Duration, &ActiveEventLoop, &mut EffectWeb2D) -> (),
+    F: FnMut(&mut EffectEvent, Duration, &ActiveEventLoop, &mut EffectEngine2D) -> (),
 {
     user_loop: F,
     event: EffectEvent,
     time_before: Instant,
     time_after: Instant,
     window_info: WindowInfo,
-    app: Option<EffectWeb2D<'a>>,
+    app: Option<EffectEngine2D<'a>>,
 }
 
-impl<'a, F> ApplicationHandler<()> for EffectLoopWeb<'a, F>
+impl<'a, F> ApplicationHandler<()> for EffectLoop2D<'a, F>
 where
-    F: FnMut(&mut EffectEvent, Duration, &ActiveEventLoop, &mut EffectWeb2D) -> (),
+    F: FnMut(&mut EffectEvent, Duration, &ActiveEventLoop, &mut EffectEngine2D) -> (),
 {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         let attributes = winit::window::Window::default_attributes()
@@ -62,9 +59,9 @@ where
             )),
         });
 
-        let bgls = vec![WebTexture2D::layout(), Camera2D::layout()];
+        let bgls = vec![Texture2D::layout(), Camera2D::layout()];
         let mut engine = pollster::block_on(
-            WebEngine2DBuilder::default()
+            Engine2DBuilder::default()
                 .window(window)
                 .window_info(self.window_info)
                 .power_preference(wgpu::PowerPreference::HighPerformance)
@@ -74,7 +71,7 @@ where
                 .build(),
         );
 
-        let mut app = EffectWeb2D::new(engine);
+        let mut app = EffectEngine2D::new(engine);
         self.app = Some(app);
     }
 
@@ -111,12 +108,12 @@ where
     }
 }
 
-pub struct EffectEventLoopWeb {
+pub struct EffectEventLoop {
     event_loop: EventLoop<()>,
     window_info: WindowInfo,
 }
 
-impl EffectEventLoopWeb {
+impl EffectEventLoop {
     pub fn new(event_loop: EventLoop<()>, window_info: WindowInfo) -> Self {
         Self {
             event_loop,
@@ -126,7 +123,7 @@ impl EffectEventLoopWeb {
 
     pub fn run<F>(self, user_loop: F)
     where
-        F: FnMut(&mut EffectEvent, Duration, &ActiveEventLoop, &mut EffectWeb2D) -> (),
+        F: FnMut(&mut EffectEvent, Duration, &ActiveEventLoop, &mut EffectEngine2D) -> (),
     {
         let event = EffectEvent::new();
         let time_before = Instant::now();
@@ -134,7 +131,7 @@ impl EffectEventLoopWeb {
         let window_info = self.window_info;
         let app = None;
 
-        let mut effect_loop = EffectLoopWeb {
+        let mut effect_loop = EffectLoop2D {
             user_loop,
             event,
             time_before,

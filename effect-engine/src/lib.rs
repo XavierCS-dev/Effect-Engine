@@ -10,8 +10,8 @@ pub mod main_loop;
 
 use core::misc::{fullscreen::FullScreenMode, window_info::WindowInfo};
 
-use effect_wgpu::app::effect2d::EffectWeb2D;
-use main_loop::EffectEventLoopWeb;
+use effect_wgpu::app::effect2d::EffectEngine2D;
+use main_loop::EffectEventLoop;
 use winit::{dpi::PhysicalSize, event_loop::EventLoop};
 
 pub enum EngineType {
@@ -25,7 +25,7 @@ pub enum GraphicsAPI {
 }
 
 pub enum EffectAppVariant {
-    Web2D(EffectEventLoopWeb),
+    Web2D(EffectEventLoop),
     // Web3D(EffectWeb3D),
 }
 
@@ -118,7 +118,7 @@ impl EffectAppBuilder {
         match self.graphics_api {
             GraphicsAPI::WGPU => match self.engine_type {
                 EngineType::D2 => {
-                    let effect_loop = EffectEventLoopWeb::new(event_loop, window_info);
+                    let effect_loop = EffectEventLoop::new(event_loop, window_info);
                     EffectAppVariant::Web2D(effect_loop)
                 }
                 _ => unimplemented!(),
@@ -130,7 +130,7 @@ impl EffectAppBuilder {
 
 #[allow(unreachable_patterns)]
 impl EffectAppVariant {
-    pub fn get_wgpu_2d(self) -> EffectEventLoopWeb {
+    pub fn get_wgpu_2d(self) -> EffectEventLoop {
         match self {
             EffectAppVariant::Web2D(val) => return val,
             _ => {

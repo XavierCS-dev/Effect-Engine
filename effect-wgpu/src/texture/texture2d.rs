@@ -3,7 +3,7 @@ use image::ImageBuffer;
 use image::Rgba;
 
 #[derive(Clone, Debug)]
-pub struct WebTexture2D {
+pub struct Texture2D {
     pub id: TextureID,
     pub path: &'static str,
     pub width: u32,
@@ -11,7 +11,7 @@ pub struct WebTexture2D {
     pub index: Option<[u32; 2]>,
 }
 
-impl WebTexture2DBGL for WebTexture2D {
+impl Texture2DBGL for Texture2D {
     fn layout() -> wgpu::BindGroupLayoutDescriptor<'static> {
         wgpu::BindGroupLayoutDescriptor {
             entries: &[
@@ -37,11 +37,11 @@ impl WebTexture2DBGL for WebTexture2D {
     }
 }
 
-pub trait WebTexture2DBGL {
+pub trait Texture2DBGL {
     fn layout() -> wgpu::BindGroupLayoutDescriptor<'static>;
 }
 
-impl WebTexture2D {
+impl Texture2D {
     pub fn new(id: TextureID, path: &'static str) -> Self {
         Self {
             id,
@@ -73,13 +73,13 @@ impl WebTexture2D {
     }
 }
 
-pub struct WebTexture2DSystem;
-impl WebTexture2DSystem {
-    pub fn set_index(texture: &mut WebTexture2D, index: [u32; 2]) {
+pub struct Texture2DSystem;
+impl Texture2DSystem {
+    pub fn set_index(texture: &mut Texture2D, index: [u32; 2]) {
         texture.index = Some(index);
     }
 
-    pub fn set_dimensions(texture: &mut WebTexture2D, width: u32, height: u32) {
+    pub fn set_dimensions(texture: &mut Texture2D, width: u32, height: u32) {
         texture.width = width;
         texture.height = height;
     }

@@ -9,17 +9,17 @@ use wgpu::{util::DeviceExt, PowerPreference};
 use winit::dpi::PhysicalSize;
 
 use crate::{
-    background::background2d::WebBackground2D,
-    camera::WebCamera,
-    engine::engine2d::WebEngine2D,
-    entity::entity2d::WebEntity2DRaw,
-    layer::WebLayer2D,
-    layouts::WebVertexLayout,
-    texture::texture2d::{WebTexture2D, WebTexture2DBGL},
-    window::WebWindow,
+    background::background2d::Background2D,
+    camera::Camera,
+    engine::engine2d::Engine2D,
+    entity::entity2d::Entity2DLayout,
+    layer::Layer2D,
+    layouts::VertexLayout,
+    texture::texture2d::{Texture2D, Texture2DBGL},
+    window::Window,
 };
 
-pub struct WebEngine2DBuilder {
+pub struct Engine2DBuilder {
     window: Option<winit::window::Window>,
     window_info: WindowInfo,
     power_preference: wgpu::PowerPreference,
@@ -28,7 +28,7 @@ pub struct WebEngine2DBuilder {
     fragment_shader: Option<&'static str>,
 }
 
-impl Default for WebEngine2DBuilder {
+impl Default for Engine2DBuilder {
     fn default() -> Self {
         let window = None;
         let power_preference = wgpu::PowerPreference::HighPerformance;
@@ -47,7 +47,7 @@ impl Default for WebEngine2DBuilder {
     }
 }
 
-impl WebEngine2DBuilder {
+impl Engine2DBuilder {
     pub fn window(mut self, window: winit::window::Window) -> Self {
         self.window = Some(window);
         self
@@ -81,7 +81,7 @@ impl WebEngine2DBuilder {
         self
     }
 
-    pub async fn build<'a>(self) -> WebEngine2D<'a> {
+    pub async fn build<'a>(self) -> Engine2D<'a> {
         let window = Arc::new(self.window.expect("Window must be supplied"));
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
             backends: wgpu::Backends::all(),
@@ -197,7 +197,7 @@ impl WebEngine2DBuilder {
             multiview: None,
         });
 
-        let background: Option<WebBackground2D> = None;
+        let background: Option<Background2D> = None;
         let proj = glam::Mat4::perspective_rh(
             45.0f32.to_radians(),
             self.window_info.resolution.width as f32 / self.window_info.resolution.height as f32,
@@ -209,11 +209,11 @@ impl WebEngine2DBuilder {
             glam::Vec3::new(0.0, 0.0, 0.0),
             glam::Vec3::Y,
         );
-        let camera = WebCamera::new(&device, proj, look_at);
-        let layers: BTreeMap<LayerID, WebLayer2D> = BTreeMap::new();
-        let window = WebWindow::new(window, surface, surface_config, self.window_info.fullscreen);
-        let texture_bgl = device.create_bind_group_layout(&WebTexture2D::layout());
-        pollster::block_on(WebEngine2D::new(
+        let camera = Camera::new(&device, proj, look_at);
+        let layers: BTreeMap<LayerID, Layer2D> = BTreeMap::new();
+        let window = Window::new(window, surface, surface_config, self.window_info.fullscreen);
+        let texture_bgl = device.create_bind_group_layout(&Texture2D::layout());
+        pollster::block_on(Engine2D::new(
             device,
             queue,
             window,

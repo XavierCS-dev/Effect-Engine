@@ -4,15 +4,15 @@ use winit::dpi::PhysicalSize;
 
 use anyhow::Result;
 
-use crate::texture::texture2d::{WebTexture2D, WebTexture2DSystem};
+use crate::texture::texture2d::{Texture2D, Texture2DSystem};
 
 // Render before layers.
 // Support parallax in the future.
 // should just request bind groups etc and should just work
 // including any animations etc
-pub struct WebBackground2D {
+pub struct Background2D {
     bind_group: wgpu::BindGroup,
-    texture_data: WebTexture2D,
+    texture_data: Texture2D,
     dimensions: PhysicalSize<u32>,
     vertex_buffer: wgpu::Buffer,
     camera_spoof: wgpu::Buffer,
@@ -23,6 +23,8 @@ pub struct WebBackground2D {
 // Switching render pipelines and shader is very costly just for background...
 // texture buffer switches for every layer anyway, so only buffer affected is
 // is camera buffer which is only switched out once.
+
+// TODO: THIS WILL NOW GET ITS OWN PIPELINE
 #[repr(C)]
 #[derive(bytemuck::Pod, bytemuck::Zeroable, Clone, Copy, Debug)]
 pub struct EntitySpoof {
@@ -31,9 +33,9 @@ pub struct EntitySpoof {
     texture_size: [f32; 2],
 }
 
-impl WebBackground2D {
+impl Background2D {
     pub fn new(
-        texture: WebTexture2D,
+        texture: Texture2D,
         bind_group_layout: &wgpu::BindGroupLayout,
         pixel_art: bool,
         device: &wgpu::Device,
@@ -48,10 +50,10 @@ impl WebBackground2D {
             depth_or_array_layers: 1,
         };
         let mut texture = texture;
-        WebTexture2DSystem::set_index(&mut texture, [0, 0]);
-        WebTexture2DSystem::set_dimensions(&mut texture, dimensions.width, dimensions.height);
+        Texture2DSystem::set_index(&mut texture, [0, 0]);
+        Texture2DSystem::set_dimensions(&mut texture, dimensions.width, dimensions.height);
 
-        let bind_group = WebTexture2DSystem::init_texture(
+        let bind_group = Texture2DSystem::init_texture(
             extent,
             tex_rgb,
             bind_group_layout,
@@ -170,7 +172,7 @@ impl WebBackground2D {
         &self.camera_bind_group
     }
 
-    pub fn texture(&self) -> &WebTexture2D {
+    pub fn texture(&self) -> &Texture2D {
         &self.texture_data
     }
 
@@ -180,4 +182,4 @@ impl WebBackground2D {
 }
 
 // manage all background related operations
-pub struct WebBackground2DSystem;
+pub struct Background2DSystem;

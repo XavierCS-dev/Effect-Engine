@@ -1,11 +1,11 @@
 use effect_core::primitives::vertex::Vertex;
 
-pub trait WebVertexLayout {
+pub trait VertexLayout {
     const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 2];
     fn layout() -> wgpu::VertexBufferLayout<'static>;
 }
 
-impl WebVertexLayout for Vertex {
+impl VertexLayout for Vertex {
     const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 2] =
         wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x2];
 

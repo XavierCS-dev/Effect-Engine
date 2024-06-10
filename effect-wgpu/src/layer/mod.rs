@@ -8,16 +8,16 @@ use std::collections::{hash_map::Keys, HashMap};
 use winit::dpi::PhysicalSize;
 
 use crate::{
-    entity::entity2d::WebEntity2D,
-    texture::{texture2d::WebTexture2D, texture_atlas::WebTextureAtlas2D},
+    entity::entity2d::Entity2D,
+    texture::{texture2d::Texture2D, texture_atlas::TextureAtlas2D},
 };
 
 // Takes final ownership of textures, the data etc.
 // When a entity wants to get the texture offset, it must get the data from here.
-pub struct WebLayer2D {
+pub struct Layer2D {
     id: LayerID,
-    textures: HashMap<TextureID, WebTexture2D>,
-    atlas: WebTextureAtlas2D,
+    textures: HashMap<TextureID, Texture2D>,
+    atlas: TextureAtlas2D,
     vertex_buffer: wgpu::Buffer,
     entity_count: usize,
     entity_maximum: usize,
@@ -25,18 +25,18 @@ pub struct WebLayer2D {
     dimensions: winit::dpi::PhysicalSize<u32>,
 }
 
-impl WebLayer2D {
+impl Layer2D {
     pub fn new(
         id: LayerID,
         dimensions: winit::dpi::PhysicalSize<u32>,
-        mut textures: Vec<WebTexture2D>,
+        mut textures: Vec<Texture2D>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
         texture_size: PhysicalSize<u32>,
         pixel_art: bool,
     ) -> Result<Self> {
-        let atlas = WebTextureAtlas2D::new(
+        let atlas = TextureAtlas2D::new(
             &mut textures,
             device,
             queue,
@@ -50,7 +50,7 @@ impl WebLayer2D {
         }
         let entity_count = 0;
         let entity_maximum = 0;
-        let vertex_buffer = WebLayer2DSystem::create_vertex_buffer(
+        let vertex_buffer = Layer2DSystem::create_vertex_buffer(
             texture_size,
             atlas.tex_coord_size(),
             device,
@@ -80,7 +80,7 @@ impl WebLayer2D {
         self.textures.contains_key(texture_id)
     }
 
-    pub fn texture_ids<'a>(&'a self) -> Keys<'a, TextureID, WebTexture2D> {
+    pub fn texture_ids<'a>(&'a self) -> Keys<'a, TextureID, Texture2D> {
         self.textures.keys()
     }
 
@@ -110,7 +110,7 @@ impl WebLayer2D {
         self.entity_maximum
     }
 
-    pub fn get_texture(&self, id: TextureID) -> Option<&WebTexture2D> {
+    pub fn get_texture(&self, id: TextureID) -> Option<&Texture2D> {
         self.textures.get(&id)
     }
 
@@ -131,9 +131,9 @@ impl WebLayer2D {
     }
 }
 
-pub struct WebLayer2DSystem;
+pub struct Layer2DSystem;
 
-impl WebLayer2DSystem {
+impl Layer2DSystem {
     fn alloc_buffer(
         data: &[u8],
         size: u64,
@@ -160,14 +160,14 @@ impl WebLayer2DSystem {
 
     // alloc buffer to 2x the size and set new max entity count
     fn create_entity_buffer(
-        entities: &[&WebEntity2D],
+        entities: &[&Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) -> wgpu::Buffer {
         let ents = entities.iter().map(|e| e.to_raw()).collect::<Vec<_>>();
         let data: &[u8] = bytemuck::cast_slice(ents.as_slice());
         let size = std::mem::size_of_val(data) as u64;
-        WebLayer2DSystem::alloc_buffer(data, size * 2, device, queue, "Entity Buffer", false)
+        Layer2DSystem::alloc_buffer(data, size * 2, device, queue, "Entity Buffer", false)
     }
 
     fn _create_index_buffer(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Buffer {
@@ -175,7 +175,7 @@ impl WebLayer2DSystem {
         indices.extend_from_slice(&[0, 1, 2, 0, 2, 3]);
         let data: &[u8] = bytemuck::cast_slice(&indices);
         let size = (std::mem::size_of::<u16>() * 6) as u64;
-        WebLayer2DSystem::alloc_buffer(data, size, device, queue, "Index Buffer", true)
+        Layer2DSystem::alloc_buffer(data, size, device, queue, "Index Buffer", true)
     }
 
     fn create_vertex_buffer(
@@ -207,14 +207,14 @@ impl WebLayer2DSystem {
         ];
         let data: &[u8] = bytemuck::cast_slice(verts.as_slice());
         let size = (std::mem::size_of::<Vertex>() * verts.len()) as u64;
-        WebLayer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)
+        Layer2DSystem::alloc_buffer(data, size, device, queue, "Vertex Buffer", false)
     }
 
     /// Set the entity data for the particular layer.
     /// Ensure every entity has a texture from the specified layer otherwise you will run into problems.
     pub fn set_entities(
-        layer: &mut WebLayer2D,
-        entities: &[&WebEntity2D],
+        layer: &mut Layer2D,
+        entities: &[&Entity2D],
         device: &wgpu::Device,
         queue: &wgpu::Queue,
     ) {
@@ -224,7 +224,7 @@ impl WebLayer2DSystem {
 
         if layer.entity_count() > layer.entity_maximum() || layer.entity_buffer().is_none() {
             // Allocate new buffers
-            layer.entity_buffer = Some(WebLayer2DSystem::create_entity_buffer(
+            layer.entity_buffer = Some(Layer2DSystem::create_entity_buffer(
                 &entities, device, queue,
             ));
             layer.entity_maximum = layer.entity_count * 2;

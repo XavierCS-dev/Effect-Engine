@@ -3,11 +3,8 @@ use effect_engine::core::id::{LayerID, TextureID};
 use effect_engine::core::misc::fullscreen::FullScreenMode;
 use effect_engine::core::primitives::vector::Vector3;
 use effect_engine::events::input::camera2d::CameraUpdateSystem2D;
-use effect_engine::web_render::app::effect2d::EffectWeb2D;
-use effect_engine::web_render::camera::WebCameraSystem2D;
-use effect_engine::web_render::entity::entity2d::WebEntity2D;
-use effect_engine::web_render::layer::WebLayer2D;
-use effect_engine::web_render::texture::texture2d::{WebTexture2D, WebTexture2DSystem};
+use effect_engine::web_render::app::effect2d::EffectEngine2D;
+use effect_engine::web_render::texture::texture2d::Texture2D;
 use effect_engine::EffectAppBuilder;
 use winit::dpi::PhysicalSize;
 use winit::keyboard::KeyCode;
@@ -18,9 +15,9 @@ struct GameState {
 }
 
 impl GameState {
-    pub fn initialise(&mut self, app: &mut EffectWeb2D) {
+    pub fn initialise(&mut self, app: &mut EffectEngine2D) {
         let tex_id = TextureID("Tree");
-        let texture = WebTexture2D::new(tex_id, "assets/tree.png");
+        let texture = Texture2D::new(tex_id, "assets/tree.png");
         let tex = vec![texture];
         app.init_layer(LayerID(0), tex, PhysicalSize::new(32, 32), true)
             .unwrap();

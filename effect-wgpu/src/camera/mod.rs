@@ -2,7 +2,7 @@ use effect_core::camera::camera2d::Camera2D;
 use wgpu::util::DeviceExt;
 use winit::dpi::PhysicalSize;
 
-pub struct WebCamera {
+pub struct Camera {
     pub bind_group: wgpu::BindGroup,
     pub bind_group_layout: wgpu::BindGroupLayout,
     pub buffer: wgpu::Buffer,
@@ -11,7 +11,7 @@ pub struct WebCamera {
 }
 
 // TODO: Going to have to figure out another way sort camera resizing
-impl WebCamera {
+impl Camera {
     pub fn new(device: &wgpu::Device, proj: glam::Mat4, look_at: glam::Mat4) -> Self {
         let comp = proj * look_at;
         let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -63,10 +63,10 @@ impl WebCamera {
     }
 }
 
-pub struct WebCameraSystem2D;
+pub struct CameraSystem2D;
 
-impl WebCameraSystem2D {
-    pub fn update_projection(camera: &mut WebCamera, window_size: PhysicalSize<u32>) {
+impl CameraSystem2D {
+    pub fn update_projection(camera: &mut Camera, window_size: PhysicalSize<u32>) {
         let proj = glam::Mat4::perspective_rh(
             45f32.to_radians(),
             window_size.width as f32 / window_size.height as f32,
@@ -76,12 +76,12 @@ impl WebCameraSystem2D {
         camera.proj = proj;
     }
 
-    pub fn update(camera: &Camera2D, web_cam: &mut WebCamera) {
+    pub fn update(camera: &Camera2D, web_cam: &mut Camera) {
         web_cam.proj = camera.proj();
         web_cam.look_at = camera.look_at();
     }
 
-    pub fn update_buffers(camera: &WebCamera, queue: &wgpu::Queue) {
+    pub fn update_buffers(camera: &Camera, queue: &wgpu::Queue) {
         let comp = camera.proj * camera.look_at;
         queue.write_buffer(
             &camera.buffer,
@@ -91,11 +91,11 @@ impl WebCameraSystem2D {
     }
 }
 
-pub trait WebCameraBGL {
+pub trait CameraBGL {
     fn layout() -> wgpu::BindGroupLayoutDescriptor<'static>;
 }
 
-impl WebCameraBGL for Camera2D {
+impl CameraBGL for Camera2D {
     fn layout() -> wgpu::BindGroupLayoutDescriptor<'static> {
         wgpu::BindGroupLayoutDescriptor {
             label: Some("Camera bgl"),

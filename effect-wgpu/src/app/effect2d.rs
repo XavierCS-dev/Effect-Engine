@@ -17,23 +17,23 @@ use winit::{
 use std::collections::vec_deque::*;
 
 use crate::{
-    engine::engine2d::WebEngine2D, entity::entity2d::WebEntity2D, layer::WebLayer2D,
-    texture::texture2d::WebTexture2D,
+    engine::engine2d::Engine2D, entity::entity2d::Entity2D, layer::Layer2D,
+    texture::texture2d::Texture2D,
 };
 
-pub struct EffectWeb2D<'a> {
-    engine: WebEngine2D<'a>,
+pub struct EffectEngine2D<'a> {
+    engine: Engine2D<'a>,
 }
 
-impl<'a> EffectWeb2D<'a> {
+impl<'a> EffectEngine2D<'a> {
     pub fn new(
-        engine: WebEngine2D<'a>, /*
-                                 screen_dimensions: PhysicalSize<u32>,
-                                 app_name: &'static str,
-                                 resizable: bool,
-                                 fullscreen_mode: FullScreenMode,
-                                 monitor: u32,
-                                 */
+        engine: Engine2D<'a>, /*
+                              screen_dimensions: PhysicalSize<u32>,
+                              app_name: &'static str,
+                              resizable: bool,
+                              fullscreen_mode: FullScreenMode,
+                              monitor: u32,
+                              */
     ) -> Self {
         Self { engine }
     }
@@ -54,7 +54,7 @@ impl<'a> EffectWeb2D<'a> {
     pub fn init_layer(
         &mut self,
         id: LayerID,
-        textures: Vec<WebTexture2D>,
+        textures: Vec<Texture2D>,
         texture_size: PhysicalSize<u32>,
         pixel_art: bool,
     ) -> Result<()> {
@@ -62,7 +62,7 @@ impl<'a> EffectWeb2D<'a> {
             .init_layer(id, textures, texture_size, pixel_art)
     }
 
-    pub fn set_entities(&mut self, layer: LayerID, entities: &[&WebEntity2D]) {
+    pub fn set_entities(&mut self, layer: LayerID, entities: &[&Entity2D]) {
         self.engine.set_entities(layer, entities);
     }
 
@@ -71,7 +71,7 @@ impl<'a> EffectWeb2D<'a> {
         position: Vector3<f32>,
         layer: LayerID,
         texture_id: TextureID,
-    ) -> WebEntity2D {
+    ) -> Entity2D {
         self.engine.init_entity(position, layer, texture_id)
     }
 
@@ -88,7 +88,7 @@ impl<'a> EffectWeb2D<'a> {
         self.engine.update_camera(camera, ctx, delta_time);
     }
 
-    pub fn set_background(&mut self, texture: WebTexture2D, pixel_art: bool) -> Result<()> {
+    pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
         self.engine.set_background(texture, pixel_art)
     }
 

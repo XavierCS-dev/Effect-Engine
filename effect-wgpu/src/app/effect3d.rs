@@ -1,1 +1,1 @@
-pub struct EffectWeb3D {}
+pub struct EffectEngine3D {}

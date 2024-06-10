@@ -8,14 +8,14 @@ use effect_core::{
 use effect_util::effect_error::EffectError;
 use winit::dpi::PhysicalSize;
 
-use crate::layer::WebLayer2D;
+use crate::layer::Layer2D;
 
-pub trait WebEntity2DRaw {
+pub trait Entity2DLayout {
     const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 6];
     fn layout() -> wgpu::VertexBufferLayout<'static>;
 }
 
-impl WebEntity2DRaw for Entity2DRaw {
+impl Entity2DLayout for Entity2DRaw {
     const ATTRIBUTE_ARRAY: [wgpu::VertexAttribute; 6] = wgpu::vertex_attr_array![2 => Float32x4, 3=> Float32x4,
         4=> Float32x4,5=> Float32x4,6=> Float32x2, 7=>Float32x2];
 
@@ -28,7 +28,7 @@ impl WebEntity2DRaw for Entity2DRaw {
     }
 }
 
-pub struct WebEntity2D {
+pub struct Entity2D {
     layer: LayerID,
     transform: Transform2D,
     texture: TextureID,
@@ -36,8 +36,8 @@ pub struct WebEntity2D {
     texture_size: PhysicalSize<f32>,
 }
 
-impl WebEntity2D {
-    pub fn new(position: Vector3<f32>, layer: &WebLayer2D, texture: TextureID) -> Self {
+impl Entity2D {
+    pub fn new(position: Vector3<f32>, layer: &Layer2D, texture: TextureID) -> Self {
         let tex = layer.get_texture(texture).unwrap();
         let texture_index = tex.index().expect("Tex not in given layer");
         let texture_size = layer.tex_coord_size();
@@ -74,11 +74,7 @@ pub struct EntitySystem2D;
 impl EntitySystem2D {
     /// Sets tht texture of the given entity. The texture must be in the layer provided.
     /// Make sure to store a reference to this entity in the correct layer if you change it
-    pub fn set_texture(
-        entity: &mut WebEntity2D,
-        texture: TextureID,
-        layer: &WebLayer2D,
-    ) -> Result<()> {
+    pub fn set_texture(entity: &mut Entity2D, texture: TextureID, layer: &Layer2D) -> Result<()> {
         let tex = layer
             .get_texture(texture)
             .ok_or(EffectError::new("Texture is not in given layer"))?;
@@ -89,13 +85,13 @@ impl EntitySystem2D {
         Ok(())
     }
 
-    pub fn set_position(entity: &mut WebEntity2D, position: Vector3<f32>) {
+    pub fn set_position(entity: &mut Entity2D, position: Vector3<f32>) {
         Transform2DSystem::translate(&mut entity.transform, position);
     }
-    pub fn set_rotation(entity: &mut WebEntity2D, degrees: f32) {
+    pub fn set_rotation(entity: &mut Entity2D, degrees: f32) {
         Transform2DSystem::rotate(&mut entity.transform, degrees);
     }
-    pub fn set_scale(entity: &mut WebEntity2D, scale: f32) {
+    pub fn set_scale(entity: &mut Entity2D, scale: f32) {
         Transform2DSystem::scale(&mut entity.transform, scale);
     }
 }

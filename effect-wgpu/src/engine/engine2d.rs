@@ -13,25 +13,25 @@ use winit::dpi::PhysicalSize;
 use anyhow::Result;
 
 use crate::{
-    background::background2d::WebBackground2D,
-    camera::{WebCamera, WebCameraSystem2D},
-    entity::entity2d::{WebEntity2D, WebEntity2DRaw},
-    layer::{WebLayer2D, WebLayer2DSystem},
-    layouts::WebVertexLayout,
-    texture::texture2d::WebTexture2D,
-    window::{WebWindow, WebWindowSystem},
+    background::background2d::Background2D,
+    camera::{Camera, CameraSystem2D},
+    entity::entity2d::Entity2D,
+    layer::{Layer2D, Layer2DSystem},
+    layouts::VertexLayout,
+    texture::texture2d::Texture2D,
+    window::{Window, WindowSystem},
 };
 
-pub struct WebEngine2D<'a> {
+pub struct Engine2D<'a> {
     device: wgpu::Device,
     queue: wgpu::Queue,
-    pub window: WebWindow<'a>,
+    pub window: Window<'a>,
     graphics_pipeline: wgpu::RenderPipeline,
     texture_bgl: wgpu::BindGroupLayout,
-    background: Option<WebBackground2D>,
+    background: Option<Background2D>,
     index_buffer: wgpu::Buffer,
-    camera: WebCamera,
-    pub layers: BTreeMap<LayerID, WebLayer2D>,
+    camera: Camera,
+    pub layers: BTreeMap<LayerID, Layer2D>,
 }
 
 /*
@@ -39,17 +39,17 @@ pub struct WebEngine2D<'a> {
 * these closures are to be stored in Engine upon initialisation
 * 0.3.0 release
 */
-impl<'a> WebEngine2D<'a> {
+impl<'a> Engine2D<'a> {
     pub async fn new(
         device: wgpu::Device,
         queue: wgpu::Queue,
-        window: WebWindow<'a>,
+        window: Window<'a>,
         graphics_pipeline: wgpu::RenderPipeline,
         texture_bgl: wgpu::BindGroupLayout,
-        background: Option<WebBackground2D>,
+        background: Option<Background2D>,
         index_buffer: wgpu::Buffer,
-        camera: WebCamera,
-        layers: BTreeMap<LayerID, WebLayer2D>,
+        camera: Camera,
+        layers: BTreeMap<LayerID, Layer2D>,
     ) -> Self {
         Self {
             device,
@@ -65,9 +65,9 @@ impl<'a> WebEngine2D<'a> {
     }
 
     pub fn set_res(&mut self, resolution: PhysicalSize<u32>) {
-        WebWindowSystem::set_resolution(&mut self.window, resolution, &self.device);
-        WebCameraSystem2D::update_projection(&mut self.camera, resolution);
-        WebCameraSystem2D::update_buffers(&self.camera, &self.queue);
+        WindowSystem::set_resolution(&mut self.window, resolution, &self.device);
+        CameraSystem2D::update_projection(&mut self.camera, resolution);
+        CameraSystem2D::update_buffers(&self.camera, &self.queue);
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
@@ -137,11 +137,11 @@ impl<'a> WebEngine2D<'a> {
     pub fn init_layer(
         &mut self,
         id: LayerID,
-        textures: Vec<WebTexture2D>,
+        textures: Vec<Texture2D>,
         texture_size: PhysicalSize<u32>,
         pixel_art: bool,
     ) -> Result<()> {
-        let layer = WebLayer2D::new(
+        let layer = Layer2D::new(
             id,
             self.window.window().inner_size(),
             textures,
@@ -162,12 +162,12 @@ impl<'a> WebEngine2D<'a> {
         position: Vector3<f32>,
         layer: LayerID,
         texture_id: TextureID,
-    ) -> WebEntity2D {
-        WebEntity2D::new(position, self.layers.get(&layer).unwrap(), texture_id)
+    ) -> Entity2D {
+        Entity2D::new(position, self.layers.get(&layer).unwrap(), texture_id)
     }
 
-    pub fn set_entities(&mut self, layer: LayerID, entities: &[&WebEntity2D]) {
-        WebLayer2DSystem::set_entities(
+    pub fn set_entities(&mut self, layer: LayerID, entities: &[&Entity2D]) {
+        Layer2DSystem::set_entities(
             self.layers.get_mut(&layer).unwrap(),
             entities,
             &self.device,
@@ -182,12 +182,12 @@ impl<'a> WebEngine2D<'a> {
         delta_time: Duration,
     ) {
         CameraUpdateSystem2D::update(camera, ctx, delta_time);
-        WebCameraSystem2D::update(camera, &mut self.camera);
-        WebCameraSystem2D::update_buffers(&self.camera, &self.queue)
+        CameraSystem2D::update(camera, &mut self.camera);
+        CameraSystem2D::update_buffers(&self.camera, &self.queue)
     }
 
     pub fn update_camera_buffers(&mut self) {
-        WebCameraSystem2D::update_buffers(&self.camera, &self.queue);
+        CameraSystem2D::update_buffers(&self.camera, &self.queue);
     }
 
     pub fn init_camera(&self, fov: f32) -> Camera2D {
@@ -195,8 +195,8 @@ impl<'a> WebEngine2D<'a> {
         Camera2D::new(fov, (dims.width as f32) / (dims.height as f32), 0.5)
     }
 
-    pub fn set_background(&mut self, texture: WebTexture2D, pixel_art: bool) -> Result<()> {
-        self.background = Some(WebBackground2D::new(
+    pub fn set_background(&mut self, texture: Texture2D, pixel_art: bool) -> Result<()> {
+        self.background = Some(Background2D::new(
             texture,
             &self.texture_bgl,
             pixel_art,
