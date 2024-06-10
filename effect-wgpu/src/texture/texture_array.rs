@@ -1,5 +1,9 @@
+use std::num::NonZeroU64;
+
 use effect_util::effect_error::EffectError;
 use winit::dpi::PhysicalSize;
+
+use crate::engine::builders::texture_data_builder::TextureDataBuilder;
 
 use super::texture2d::Texture2D;
 
@@ -21,8 +25,11 @@ pub struct TextureArray {
 }
 
 impl TextureArray {
+    // NEED TO FIGURE OUT HOW TO PASS PIXEL ART OPTION ON PER TEXTURE BASIS,
+    // PERHAPS ANOTHER FIELD ON TEXTURE2D
     pub fn new(
-        device: wgpu::Device,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
         textures: &mut Vec<Texture2D>,
         texture_dimensions: PhysicalSize<u32>,
     ) -> Result<Self> {
@@ -36,28 +43,17 @@ impl TextureArray {
             ));
         }
         for (index, texture) in textures.iter_mut().enumerate() {
-            let raw = image::open(texture.file_path())?;
-            if PhysicalSize::new(texture.width(), texture.height) != texture_dimensions {
-                bail!(EffectError::new(
-                    format!(
-                        "Expected texture dimensions: {:?}, found {:?} at index: {}",
-                        texture_dimensions,
-                        PhysicalSize::new(raw.width(), raw.height()),
-                        index
-                    )
-                    .as_str(),
-                ));
-            }
+            // We don't need to check the size as it will be resized when using the builder, or will fail.
+            let tex_data = TextureDataBuilder::default()
+                .dimensions(texture_dimensions)
+                .texture(texture.clone())
+                .pixel_art(true)
+                .build(device, queue)
+                .expect(format!("Failed to create texture data, index: {}", index).as_str());
         }
 
-        todo!()
-    }
-}
-
-// TODO: This needs to be changed to include the texture array, the index array and sampler array
-impl TextureArray {
-    fn layout() -> wgpu::BindGroupLayoutDescriptor<'static> {
-        wgpu::BindGroupLayoutDescriptor {
+        // Can't put this in its own function due to lifetime issues
+        device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             entries: &[
                 wgpu::BindGroupLayoutEntry {
                     binding: 0,
@@ -75,8 +71,20 @@ impl TextureArray {
                     ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
                     count: None,
                 },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: true,
+                        min_binding_size: Some(NonZeroU64::new(4).unwrap()),
+                    },
+                    count: None,
+                },
             ],
-            label: Some("Bind group layout"),
-        }
+            label: None,
+        });
+
+        todo!()
     }
 }

@@ -31,6 +31,7 @@
     - Size will be stored in the layer, as it will be uniform with all other textures in the layer.
       - [ ] Remove size, index fields from Texture2D
     - [ ] Update Texture2D to implement Copy
+  - [ ] Add pixel art option to TextureData builder, so it is done on a per texture basis
 
 - [ ] Possible 0.4.0 alpha
   - [ ] Debug GUI using egui
