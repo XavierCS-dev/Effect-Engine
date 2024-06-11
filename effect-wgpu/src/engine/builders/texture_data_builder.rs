@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::texture::{texture2d::Texture2D, texture_data::TextureData};
 use anyhow::Result;
 use winit::dpi::PhysicalSize;
@@ -5,19 +7,19 @@ use winit::dpi::PhysicalSize;
 // using a builder so expanding this with new options in the future is easy
 pub struct TextureDataBuilder {
     dimensions: PhysicalSize<u32>,
-    texture: Option<Texture2D>,
+    path: &'static str,
     pixel_art: bool,
 }
 
 impl Default for TextureDataBuilder {
     fn default() -> Self {
         let dimensions = PhysicalSize::new(0, 0);
-        let texture = None;
+        let path = "";
         let pixel_art = false;
 
         Self {
             dimensions,
-            texture,
+            path,
             pixel_art,
         }
     }
@@ -29,8 +31,8 @@ impl TextureDataBuilder {
         self
     }
 
-    pub fn texture(mut self, texture: Texture2D) -> Self {
-        self.texture = Some(texture);
+    pub fn path(mut self, path: &str) -> Self {
+        self.path = path;
         self
     }
 
@@ -44,10 +46,7 @@ impl TextureDataBuilder {
 // view, sampler, and index
 impl TextureDataBuilder {
     pub fn build(mut self, device: &wgpu::Device, queue: &wgpu::Queue) -> Result<TextureData> {
-        let texture = self
-            .texture
-            .expect("A texture must be supplied to the data builder");
-        let tex = image::open(texture.file_path())?;
+        let tex = image::open(self.path)?;
         let rgba_image = tex.to_rgba8();
         tex.resize(
             self.dimensions.width,
@@ -60,7 +59,7 @@ impl TextureDataBuilder {
             height: self.dimensions.height,
             depth_or_array_layers: 1,
         };
-        let wgpu_texture = device.create_texture(&wgpu::TextureDescriptor {
+        let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("texture"),
             size: extent,
             dimension: wgpu::TextureDimension::D2,
@@ -73,7 +72,7 @@ impl TextureDataBuilder {
 
         queue.write_texture(
             wgpu::ImageCopyTexture {
-                texture: &wgpu_texture,
+                texture: &texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
@@ -87,7 +86,7 @@ impl TextureDataBuilder {
             extent,
         );
 
-        let view = wgpu_texture.create_view(&wgpu::TextureViewDescriptor::default());
+        let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
         let mag_filter;
         if self.pixel_art {
             mag_filter = wgpu::FilterMode::Nearest;
@@ -104,10 +103,6 @@ impl TextureDataBuilder {
             ..Default::default()
         });
 
-        Ok(TextureData {
-            ID: texture.id,
-            sampler,
-            view,
-        })
+        Ok(TextureData { sampler, view })
     }
 }

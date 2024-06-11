@@ -1,5 +1,6 @@
-use std::num::NonZeroU64;
+use std::{collections::HashMap, num::NonZeroU64};
 
+use effect_core::id::TextureID;
 use effect_util::effect_error::EffectError;
 use winit::dpi::PhysicalSize;
 
@@ -21,9 +22,13 @@ Will need:
 - Texture count?
  */
 // Will be uniform
+// Texture2Ds will be copyable, and non modifiable
+// Texture2Ds can be requested from their respective layer
+// User supplies path and ID, not a Texture2D
 pub struct TextureArray {
-    texture_size: PhysicalSize<u32>,
+    texture_dimensions: PhysicalSize<u32>,
     bind_group: wgpu::BindGroup,
+    textures: HashMap<TextureID, Texture2D>,
 }
 
 impl TextureArray {
@@ -32,7 +37,7 @@ impl TextureArray {
     pub fn new(
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        textures: &mut Vec<Texture2D>,
+        textures: Vec<(TextureID, &'static str)>,
         texture_dimensions: PhysicalSize<u32>,
     ) -> Result<Self> {
         if textures.len() > MAX_TEXTURE_ARRAY_SIZE {
@@ -44,18 +49,24 @@ impl TextureArray {
                 .as_str(),
             ));
         }
-        let tex_data: Vec<TextureData> = Vec::new();
-        for (index, texture) in textures.iter_mut().enumerate() {
+        let mut tex_data: Vec<TextureData> = Vec::new();
+        for (index, texture) in textures.iter().enumerate() {
             // We don't need to check the size as it will be resized when using the builder, or will fail.
             tex_data.push(
                 TextureDataBuilder::default()
                     .dimensions(texture_dimensions)
-                    .texture(texture.clone())
+                    .path(texture.1)
                     .pixel_art(true)
                     .build(device, queue)
                     .expect(format!("Failed to create texture data, index: {}", index).as_str()),
             );
         }
+
+        let textures = textures
+            .iter()
+            .enumerate()
+            .map(|(index, (id, path))| (*id, Texture2D::new(*id, *path, index)))
+            .collect();
 
         // Can't put this in its own function due to lifetime issues
         let bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -91,6 +102,9 @@ impl TextureArray {
         });
         let views: Vec<&wgpu::TextureView> = tex_data.iter().map(|f| &f.view).collect();
         let samplers: Vec<&wgpu::Sampler> = tex_data.iter().map(|f| &f.sampler).collect();
+
+        // Texture index and ID will be stored here..each ID corresponds with an index. Should be fetched only when switching
+        // to a new texture, and not every time
         let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             entries: &[
                 wgpu::BindGroupEntry {
@@ -101,19 +115,31 @@ impl TextureArray {
                     binding: 2,
                     resource: wgpu::BindingResource::SamplerArray(&samplers),
                 },
-                wgpu::BindGroupEntry {
-                    binding: 3,
-                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
-                        // figure out how texture indices will be deduced....
-                        buffer: &texture_index_buffer,
-                        offset: 0,
-                        size: Some(NonZeroU64::new(4).unwrap()),
-                    }),
-                },
             ],
             layout: &bgl,
             label: Some("bind group"),
         });
-        todo!()
+        let texture_size = texture_dimensions;
+        Ok(Self {
+            textures,
+            texture_dimensions,
+            bind_group,
+        })
+    }
+
+    pub fn texture(&self, id: &TextureID) -> Option<Texture2D> {
+        self.textures.get(id).copied()
+    }
+
+    pub fn textures(&self) -> &HashMap<TextureID, Texture2D> {
+        &self.textures
+    }
+
+    pub fn bind_group(&self) -> &wgpu::BindGroup {
+        &self.bind_group
+    }
+
+    pub fn texture_dimensions(&self) -> PhysicalSize<u32> {
+        self.texture_dimensions
     }
 }
