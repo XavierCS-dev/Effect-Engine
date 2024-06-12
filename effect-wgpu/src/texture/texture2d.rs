@@ -3,6 +3,23 @@ use image::ImageBuffer;
 use image::Rgba;
 
 #[derive(Clone, Debug, Copy)]
+pub struct TextureDescriptor2D {
+    pub id: TextureID,
+    pub path: &'static str,
+    pub pixel_art: bool,
+}
+
+impl TextureDescriptor2D {
+    pub fn new(id: TextureID, path: &'static str, pixel_art: bool) -> Self {
+        Self {
+            id,
+            path,
+            pixel_art,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Copy)]
 pub struct Texture2D {
     id: TextureID,
     path: &'static str,

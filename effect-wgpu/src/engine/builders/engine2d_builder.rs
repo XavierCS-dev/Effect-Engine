@@ -9,14 +9,9 @@ use wgpu::{naga::back, util::DeviceExt, PowerPreference};
 use winit::dpi::PhysicalSize;
 
 use crate::{
-    background::background2d::Background2D,
-    camera::Camera,
-    engine::engine2d::Engine2D,
-    entity::entity2d::Entity2DLayout,
-    layer::Layer2D,
-    layouts::VertexLayout,
-    texture::texture2d::{Texture2D, Texture2DBGL},
-    window::Window,
+    background::background2d::Background2D, camera::Camera, engine::engine2d::Engine2D,
+    entity::entity2d::Entity2DLayout, layer::Layer2D, layouts::VertexLayout,
+    texture::texture2d::Texture2D, window::Window,
 };
 
 pub struct Engine2DBuilder {

@@ -8,7 +8,7 @@ use crate::{
     engine::builders::texture_data_builder::TextureDataBuilder, texture::texture_data::TextureData,
 };
 
-use super::texture2d::Texture2D;
+use super::texture2d::{Texture2D, TextureDescriptor2D};
 
 use anyhow::{bail, Result};
 
@@ -28,6 +28,7 @@ Will need:
 pub struct TextureArray {
     texture_dimensions: PhysicalSize<u32>,
     bind_group: wgpu::BindGroup,
+    bind_group_layout: wgpu::BindGroupLayout,
     textures: HashMap<TextureID, Texture2D>,
 }
 
@@ -37,7 +38,7 @@ impl TextureArray {
     pub fn new(
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        textures: Vec<(TextureID, &'static str)>,
+        textures: Vec<TextureDescriptor2D>,
         texture_dimensions: PhysicalSize<u32>,
     ) -> Result<Self> {
         if textures.len() > MAX_TEXTURE_ARRAY_SIZE {
@@ -55,7 +56,7 @@ impl TextureArray {
             tex_data.push(
                 TextureDataBuilder::default()
                     .dimensions(texture_dimensions)
-                    .path(texture.1)
+                    .path(texture.path)
                     .pixel_art(true)
                     .build(device, queue)
                     .expect(format!("Failed to create texture data, index: {}", index).as_str()),
@@ -65,11 +66,16 @@ impl TextureArray {
         let textures = textures
             .iter()
             .enumerate()
-            .map(|(index, (id, path))| (*id, Texture2D::new(*id, *path, index)))
+            .map(|(index, descriptor)| {
+                (
+                    descriptor.id,
+                    Texture2D::new(descriptor.id, descriptor.path, index),
+                )
+            })
             .collect();
 
         // Can't put this in its own function due to lifetime issues
-        let bgl = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             entries: &[
                 wgpu::BindGroupLayoutEntry {
                     binding: 0,
@@ -116,7 +122,7 @@ impl TextureArray {
                     resource: wgpu::BindingResource::SamplerArray(&samplers),
                 },
             ],
-            layout: &bgl,
+            layout: &bind_group_layout,
             label: Some("bind group"),
         });
         let texture_size = texture_dimensions;
@@ -124,6 +130,7 @@ impl TextureArray {
             textures,
             texture_dimensions,
             bind_group,
+            bind_group_layout,
         })
     }
 

@@ -1,3 +1,4 @@
+pub mod allocator;
 pub mod app;
 pub mod background;
 pub mod camera;
