@@ -24,8 +24,7 @@ pub struct Layer2D {
     // vertex buffer should be replaced by vertex generation in the shader
     vertex_buffer: Buffer,
     index_buffer: Buffer,
-    entity_count: usize,
-    entity_maximum: usize,
+    entities: usize,
     entity_buffer: Option<Buffer>,
 }
 
@@ -40,8 +39,7 @@ impl Layer2D {
     ) -> Result<Self> {
         let texture_array = TextureArray::new(device, queue, textures, texture_dimensions)?;
         // use separate new system for managing buffers.
-        let entity_count = 0;
-        let entity_maximum = 0;
+        let entities = 0;
         let entity_buffer = None;
         // to maintain aspect ratio, divide both by width
         let width = (texture_dimensions.width / screen_dimensions.width) as f32;
@@ -68,7 +66,7 @@ impl Layer2D {
             .usage(wgpu::BufferUsages::VERTEX)
             .data(Vec::from(bytemuck::cast_slice(&vertices)))
             .allocate(device);
-        let indices: [u16; 6] = [0, 1, 2, 0, 2, 3];
+        let indices: [u16; 6] = [0, 1, 2, 0, 2, 3]; // repeated for each entity
         let index_buffer = BufferAllocator::default()
             .usage(wgpu::BufferUsages::INDEX)
             .data(Vec::from(bytemuck::cast_slice(&indices)))
@@ -79,8 +77,7 @@ impl Layer2D {
             texture_array,
             vertex_buffer,
             index_buffer,
-            entity_count,
-            entity_maximum,
+            entities,
             entity_buffer,
         })
     }
@@ -88,4 +85,30 @@ impl Layer2D {
 
 pub struct Layer2DSystem;
 
-impl Layer2DSystem {}
+impl Layer2DSystem {
+    pub fn set_entities(
+        layer: &mut Layer2D,
+        entities: &[&Entity2D],
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+    ) {
+        let data: Vec<Entity2DRaw> = entities.iter().map(|e| e.to_raw()).collect();
+        match layer.entity_buffer.as_mut() {
+            Some(buf) => {
+                buf.write(bytemuck::cast_slice(&data), device, queue);
+            }
+            None => {
+                // Not using the data method as it is better for when the entities won't incease,
+                // as reallocating a lot when creating new layers / extending the buffer could cause stutters.
+                // the *2 means 2 times the needed buffer size will be allocated
+                let mut buf = BufferAllocator::default()
+                    .usage(wgpu::BufferUsages::VERTEX)
+                    .size((std::mem::size_of::<Entity2DRaw>() * data.len()) as u64 * 2)
+                    .allocate(device);
+                buf.write(bytemuck::cast_slice(&data), device, queue);
+                layer.entity_buffer = Some(buf);
+            }
+        }
+        layer.entities = entities.len();
+    }
+}
