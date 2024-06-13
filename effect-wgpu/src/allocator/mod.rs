@@ -1,3 +1,4 @@
+use anyhow::Result;
 use wgpu::util::DeviceExt;
 
 pub struct BufferAllocator {
@@ -57,11 +58,11 @@ impl BufferAllocator {
     }
 
     /// Create the buffer
-    pub fn allocate(mut self, device: &wgpu::Device) -> wgpu::Buffer {
-        match self.data {
+    fn allocate_buffer(&self, device: &wgpu::Device) -> wgpu::Buffer {
+        match self.data.as_ref() {
             Some(data) => device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
                 label: self.label,
-                contents: &data,
+                contents: data,
                 usage: self.usage,
             }),
             None => device.create_buffer(&wgpu::BufferDescriptor {
@@ -71,5 +72,83 @@ impl BufferAllocator {
                 mapped_at_creation: self.mapped_at_creation,
             }),
         }
+    }
+
+    pub fn allocate(self, device: &wgpu::Device) -> Buffer {
+        let buffer = self.allocate_buffer(device);
+        let size = match self.data {
+            Some(data) => data.len(),
+            None => 0,
+        };
+        let capacity = self.size as usize;
+        let usage = self.usage;
+        Buffer::new(buffer, size, capacity, usage)
+    }
+}
+
+pub struct Buffer {
+    buffer: wgpu::Buffer,
+    size: usize,
+    capacity: usize,
+    usage: wgpu::BufferUsages,
+}
+
+impl Buffer {
+    pub fn new(
+        buffer: wgpu::Buffer,
+        size: usize,
+        capacity: usize,
+        usage: wgpu::BufferUsages,
+    ) -> Self {
+        Self {
+            buffer,
+            size,
+            capacity,
+            usage,
+        }
+    }
+
+    /// Overwrite the data in the buffer
+    pub fn write(&mut self, data: &[u8], device: &wgpu::Device, queue: &wgpu::Queue) {
+        let size = std::mem::size_of_val(data);
+        if size > self.capacity {
+            let capacity = size * 2;
+            let buffer = BufferAllocator::default()
+                .size(capacity as u64)
+                .usage(self.usage)
+                .allocate_buffer(device);
+            queue.write_buffer(&buffer, 0, data);
+            self.capacity = capacity;
+            self.size = size;
+        } else {
+            queue.write_buffer(&self.buffer, 0, data);
+            self.size = size;
+        }
+    }
+
+    pub fn buffer(&self) -> wgpu::BufferSlice {
+        self.buffer.slice(..self.size as u64)
+    }
+
+    pub fn size(&self) -> usize {
+        self.size
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.capacity
+    }
+
+    pub fn usage(&self) -> wgpu::BufferUsages {
+        self.usage
+    }
+
+    unsafe fn write_at(
+        &mut self,
+        data: &[u8],
+        offset: wgpu::BufferAddress,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+    ) {
+        unimplemented!()
     }
 }

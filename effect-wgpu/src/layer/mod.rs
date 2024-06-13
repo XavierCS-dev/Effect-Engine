@@ -8,7 +8,7 @@ use std::collections::{hash_map::Keys, HashMap};
 use winit::dpi::PhysicalSize;
 
 use crate::{
-    allocator::BufferAllocator,
+    allocator::{Buffer, BufferAllocator},
     entity::entity2d::Entity2D,
     texture::{
         texture2d::{Texture2D, TextureDescriptor2D},
@@ -22,17 +22,18 @@ pub struct Layer2D {
     id: LayerID,
     texture_array: TextureArray,
     // vertex buffer should be replaced by vertex generation in the shader
-    vertex_buffer: wgpu::Buffer,
-    index_buffer: wgpu::Buffer,
+    vertex_buffer: Buffer,
+    index_buffer: Buffer,
     entity_count: usize,
     entity_maximum: usize,
-    entity_buffer: Option<wgpu::Buffer>,
+    entity_buffer: Option<Buffer>,
 }
 
 impl Layer2D {
     pub fn new(
         id: LayerID,
         texture_dimensions: PhysicalSize<u32>,
+        screen_dimensions: PhysicalSize<u32>,
         textures: Vec<TextureDescriptor2D>,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
@@ -42,16 +43,36 @@ impl Layer2D {
         let entity_count = 0;
         let entity_maximum = 0;
         let entity_buffer = None;
+        // to maintain aspect ratio, divide both by width
+        let width = (texture_dimensions.width / screen_dimensions.width) as f32;
+        let height = (texture_dimensions.height / screen_dimensions.width) as f32;
+        let vertices = [
+            Vertex {
+                position: [width, height, 0.0],
+                tex_coords: [1.0, 1.0],
+            },
+            Vertex {
+                position: [0.0, height, 0.0],
+                tex_coords: [1.0, 1.0],
+            },
+            Vertex {
+                position: [0.0, 0.0, 0.0],
+                tex_coords: [1.0, 1.0],
+            },
+            Vertex {
+                position: [width, 0.0, 0.0],
+                tex_coords: [1.0, 1.0],
+            },
+        ];
         let vertex_buffer = BufferAllocator::default()
             .usage(wgpu::BufferUsages::VERTEX)
-            .size(std::mem::size_of::<Vertex>() as u64 * 4)
+            .data(Vec::from(bytemuck::cast_slice(&vertices)))
             .allocate(device);
+        let indices: [u16; 6] = [0, 1, 2, 0, 2, 3];
         let index_buffer = BufferAllocator::default()
             .usage(wgpu::BufferUsages::INDEX)
-            .size(std::mem::size_of::<u32>() as u64 * 6)
+            .data(Vec::from(bytemuck::cast_slice(&indices)))
             .allocate(device);
-
-        panic!("Vertex and index buffers do not have their data assigned");
 
         Ok(Self {
             id,
