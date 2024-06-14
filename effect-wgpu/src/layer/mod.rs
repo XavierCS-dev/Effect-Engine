@@ -82,6 +82,37 @@ impl Layer2D {
             entity_buffer,
         })
     }
+
+    pub fn get_texture(&self, id: &TextureID) -> Option<Texture2D> {
+        self.texture_array.texture(id)
+    }
+
+    pub fn texture_dimensions(&self) -> PhysicalSize<u32> {
+        self.texture_array.texture_dimensions()
+    }
+
+    pub fn bind_group(&self) -> &wgpu::BindGroup {
+        self.texture_array.bind_group()
+    }
+
+    pub fn get_textures(&self) -> &HashMap<TextureID, Texture2D> {
+        self.texture_array.textures()
+    }
+
+    pub fn vertex_buffer(&self) -> wgpu::BufferSlice {
+        self.vertex_buffer.buffer()
+    }
+
+    pub fn index_buffer(&self) -> wgpu::BufferSlice {
+        self.index_buffer.buffer()
+    }
+
+    pub fn entity_buffer(&self) -> Option<wgpu::BufferSlice> {
+        match self.entity_buffer.as_ref() {
+            Some(buf) => Some(buf.buffer()),
+            None => None,
+        }
+    }
 }
 
 pub struct Layer2DSystem;
