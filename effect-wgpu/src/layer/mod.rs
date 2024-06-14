@@ -28,6 +28,8 @@ pub struct Layer2D {
     entity_buffer: Option<Buffer>,
 }
 
+const INDICES: [u16; 6] = [0, 1, 2, 0, 2, 3];
+
 impl Layer2D {
     pub fn new(
         id: LayerID,
@@ -66,10 +68,9 @@ impl Layer2D {
             .usage(wgpu::BufferUsages::VERTEX)
             .data(Vec::from(bytemuck::cast_slice(&vertices)))
             .allocate(device);
-        let indices: [u16; 6] = [0, 1, 2, 0, 2, 3]; // repeated for each entity
         let index_buffer = BufferAllocator::default()
             .usage(wgpu::BufferUsages::INDEX)
-            .data(Vec::from(bytemuck::cast_slice(&indices)))
+            .data(Vec::from(bytemuck::cast_slice(&INDICES)))
             .allocate(device);
 
         Ok(Self {
@@ -109,6 +110,14 @@ impl Layer2DSystem {
                 layer.entity_buffer = Some(buf);
             }
         }
+        // Extend indices to match number of entities
         layer.entities = entities.len();
+        let mut data = Vec::new();
+        for i in 0..entities.len() {
+            data.extend_from_slice(&INDICES);
+        }
+        layer
+            .index_buffer
+            .write(bytemuck::cast_slice(&data), device, queue);
     }
 }

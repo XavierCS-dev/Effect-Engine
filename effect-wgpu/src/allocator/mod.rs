@@ -108,7 +108,7 @@ impl Buffer {
         }
     }
 
-    /// Overwrite the data in the buffer
+    /// Overwrite the data in the buffer, data must be a slice of bytes
     pub fn write(&mut self, data: &[u8], device: &wgpu::Device, queue: &wgpu::Queue) {
         let size = std::mem::size_of_val(data);
         if size > self.capacity {
