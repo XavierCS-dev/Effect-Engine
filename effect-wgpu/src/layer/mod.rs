@@ -83,6 +83,14 @@ impl Layer2D {
         })
     }
 
+    pub fn id(&self) -> LayerID {
+        self.id
+    }
+
+    pub fn entity_count(&self) -> usize {
+        self.entities
+    }
+
     pub fn get_texture(&self, id: &TextureID) -> Option<Texture2D> {
         self.texture_array.texture(id)
     }

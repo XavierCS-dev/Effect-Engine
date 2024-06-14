@@ -69,7 +69,7 @@ impl TextureArray {
             .map(|(index, descriptor)| {
                 (
                     descriptor.id,
-                    Texture2D::new(descriptor.id, descriptor.path, index),
+                    Texture2D::new(descriptor.id, descriptor.path, index as u32),
                 )
             })
             .collect();

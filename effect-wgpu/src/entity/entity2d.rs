@@ -32,15 +32,13 @@ pub struct Entity2D {
     layer: LayerID,
     transform: Transform2D,
     texture: TextureID,
-    texture_index: [u32; 2],
-    texture_size: PhysicalSize<f32>,
+    texture_index: u32,
 }
 
 impl Entity2D {
     pub fn new(position: Vector3<f32>, layer: &Layer2D, texture: TextureID) -> Self {
-        let tex = layer.get_texture(texture).unwrap();
-        let texture_index = tex.index().expect("Tex not in given layer");
-        let texture_size = layer.tex_coord_size();
+        let tex = layer.get_texture(&texture).expect("Tex not in given layer");
+        let texture_index = tex.index();
         let mut transform = Transform2D::new();
         Transform2DSystem::translate(&mut transform, position);
         Self {
@@ -48,15 +46,13 @@ impl Entity2D {
             transform,
             texture,
             texture_index,
-            texture_size,
         }
     }
 
     pub fn to_raw(&self) -> Entity2DRaw {
         Entity2DRaw {
             transform: self.transform.to_raw().inner,
-            texture_index: [self.texture_index[0] as f32, self.texture_index[1] as f32],
-            texture_size: self.texture_size.into(),
+            texture_index: self.texture_index,
         }
     }
 
@@ -72,14 +68,13 @@ impl Entity2D {
 pub struct EntitySystem2D;
 
 impl EntitySystem2D {
-    /// Sets tht texture of the given entity. The texture must be in the layer provided.
-    /// Make sure to store a reference to this entity in the correct layer if you change it
+    /// Sets the texture of the given entity. The texture must be in the layer provided.
+    /// The entity data must also be in the layer provided
     pub fn set_texture(entity: &mut Entity2D, texture: TextureID, layer: &Layer2D) -> Result<()> {
         let tex = layer
-            .get_texture(texture)
+            .get_texture(&texture)
             .ok_or(EffectError::new("Texture is not in given layer"))?;
-        entity.texture_index = tex.index().unwrap();
-        entity.texture_size = layer.tex_coord_size();
+        entity.texture_index = tex.index();
         entity.layer = layer.id();
         entity.texture = texture;
         Ok(())

@@ -18,7 +18,7 @@ use crate::{
     entity::entity2d::Entity2D,
     layer::{Layer2D, Layer2DSystem},
     layouts::VertexLayout,
-    texture::texture2d::Texture2D,
+    texture::texture2d::{Texture2D, TextureDescriptor2D},
     window::{Window, WindowSystem},
 };
 
@@ -137,19 +137,16 @@ impl<'a> Engine2D<'a> {
     pub fn init_layer(
         &mut self,
         id: LayerID,
-        textures: Vec<Texture2D>,
+        textures: Vec<TextureDescriptor2D>,
         texture_size: PhysicalSize<u32>,
-        pixel_art: bool,
     ) -> Result<()> {
         let layer = Layer2D::new(
             id,
+            texture_size,
             self.window.window().inner_size(),
             textures,
             &self.device,
             &self.queue,
-            &self.texture_bgl,
-            texture_size,
-            pixel_art,
         )?;
 
         let _ = self.layers.insert(id, layer);

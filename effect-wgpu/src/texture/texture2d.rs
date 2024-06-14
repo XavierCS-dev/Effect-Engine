@@ -23,11 +23,11 @@ impl TextureDescriptor2D {
 pub struct Texture2D {
     id: TextureID,
     path: &'static str,
-    index: usize,
+    index: u32, // u32 and not u16 as bytebuck has problems when the data types in a struct are of different size
 }
 
 impl Texture2D {
-    pub fn new(id: TextureID, path: &'static str, index: usize) -> Self {
+    pub fn new(id: TextureID, path: &'static str, index: u32) -> Self {
         Self { id, path, index }
     }
 
@@ -39,7 +39,7 @@ impl Texture2D {
         &self.id
     }
 
-    pub fn index(&self) -> usize {
+    pub fn index(&self) -> u32 {
         self.index
     }
 }
