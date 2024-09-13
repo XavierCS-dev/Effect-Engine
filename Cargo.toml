@@ -5,10 +5,9 @@ members = [
   "effect-audio",
   "effect-events",
   "effect-engine",
-  "effect-wgpu",
   "effect-gui", 
   "effect-vulkan", 
-  "effect-util", "effect-core",
+  "effect-util", "effect-network",
 ]
 
 [workspace.package]
@@ -39,11 +38,6 @@ package = "effect-examples"
 version = "0.2.8-alpha"
 path = "./effect-examples"
 
-[workspace.dependencies.effect-core]
-package = "effect-core"
-version = "0.2.8-alpha"
-path = "./effect-core"
-
 [workspace.dependencies.effect-audio]
 package = "effect-audio"
 version = "0.2.8-alpha"
@@ -69,15 +63,16 @@ package = "effect-util"
 version = "0.2.8-alpha"
 path = "./effect-util"
 
-[workspace.dependencies.effect-wgpu]
-package = "effect-wgpu"
-version = "0.2.8-alpha"
-path = "./effect-wgpu"
-
 [workspace.dependencies.effect-vulkan]
 package = "effect-vulkan"
 version = "0.2.8-alpha"
 path = "./effect-vulkan"
+
+[workspace.dependencies.effect-network]
+package = "effect-network"
+version = "0.2.8-alpha"
+path = "./effect-network"
+
 
 [workspace.dependencies.image]
 version = "0.25"

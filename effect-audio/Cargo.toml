@@ -15,4 +15,3 @@ description = "Audio control for the Effect Engine"
 anyhow.workspace = true
 rodio.workspace = true
 effect-util.workspace = true
-effect-core.workspace = true
