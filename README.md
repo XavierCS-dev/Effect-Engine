@@ -1,6 +1,6 @@
 # Effect Engine 2
 
-- [ ] Finish C++ based Vulkan Renderer to an MVP states
+- [ ] Finish C++ based Vulkan Renderer to an MVP state
   - [x] Dynamic Rendering Pipeline 
   - [x] Mesh buffers
   - [ ] Textures
