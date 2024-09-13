@@ -6,9 +6,12 @@ pub extern crate effect_util as util;
 pub extern crate effect_vulkan as vulkan;
 pub extern crate effect_wgpu as web_render;
 
-use core::misc::fullscreen::FullScreenMode;
+pub mod main_loop;
 
-use effect_wgpu::app::effect2d::EffectWeb2D;
+use core::misc::{fullscreen::FullScreenMode, window_info::WindowInfo};
+
+use effect_wgpu::app::effect2d::EffectEngine2D;
+use main_loop::EffectEventLoop;
 use winit::{dpi::PhysicalSize, event_loop::EventLoop};
 
 pub enum EngineType {
@@ -22,40 +25,40 @@ pub enum GraphicsAPI {
 }
 
 pub enum EffectAppVariant {
-    Web2D((EffectWeb2D, EventLoop<()>)),
+    Web2D(EffectEventLoop),
     // Web3D(EffectWeb3D),
 }
 
 pub struct EffectAppBuilder {
     engine_type: EngineType,
     app_name: &'static str,
-    window_dimensions: PhysicalSize<u32>,
     resizable_window: bool,
     graphics_api: GraphicsAPI, // pixel art should be on a per texture basis
     vsync: bool,
     fullscreen_mode: FullScreenMode,
-    monitor: u32,
+    monitor: usize,
+    resolution: PhysicalSize<u32>,
 }
 
 impl Default for EffectAppBuilder {
     fn default() -> Self {
         let engine_type = EngineType::D2;
         let app_name = "Untitled";
-        let window_dimensions = PhysicalSize::new(800, 600);
         let resizable_window = false;
         let graphics_api = GraphicsAPI::WGPU;
         let vsync = true;
         let fullscreen_mode = FullScreenMode::WINDOWED;
         let monitor = 0;
+        let resolution = PhysicalSize::new(800, 600);
         Self {
             engine_type,
             app_name,
-            window_dimensions,
             resizable_window,
             graphics_api,
             vsync,
             fullscreen_mode,
             monitor,
+            resolution,
         }
     }
 }
@@ -69,11 +72,6 @@ impl EffectAppBuilder {
 
     pub fn app_name(mut self, app_name: &'static str) -> Self {
         self.app_name = app_name;
-        self
-    }
-
-    pub fn window_dimensions(mut self, width: u32, height: u32) -> Self {
-        self.window_dimensions = PhysicalSize::new(width, height);
         self
     }
 
@@ -97,36 +95,42 @@ impl EffectAppBuilder {
         self
     }
 
-    pub fn monitor(mut self, monitor: u32) -> Self {
+    pub fn monitor(mut self, monitor: usize) -> Self {
         self.monitor = monitor;
         self
     }
 
+    pub fn resolution(mut self, width: u32, height: u32) -> Self {
+        self.resolution = PhysicalSize::new(width, height);
+        self
+    }
+
     pub fn build(self) -> EffectAppVariant {
+        let window_info = WindowInfo::default()
+            .app_name(self.app_name)
+            .resizable(self.resizable_window)
+            .fullscreen(self.fullscreen_mode)
+            .monitor(self.monitor)
+            .vsync(self.vsync)
+            .resolution(self.resolution);
+        let event_loop = EventLoop::new().unwrap();
+        event_loop.set_control_flow(winit::event_loop::ControlFlow::Poll);
         match self.graphics_api {
             GraphicsAPI::WGPU => match self.engine_type {
-                EngineType::D2 => EffectAppVariant::Web2D(EffectWeb2D::new(
-                    self.window_dimensions,
-                    self.vsync,
-                    self.app_name,
-                    self.resizable_window,
-                    self.fullscreen_mode,
-                    self.monitor,
-                )),
-                _ => {
-                    unimplemented!()
+                EngineType::D2 => {
+                    let effect_loop = EffectEventLoop::new(event_loop, window_info);
+                    EffectAppVariant::Web2D(effect_loop)
                 }
+                _ => unimplemented!(),
             },
-            _ => {
-                unimplemented!()
-            }
+            _ => unimplemented!(),
         }
     }
 }
 
 #[allow(unreachable_patterns)]
 impl EffectAppVariant {
-    pub fn get_wgpu_2d(self) -> (EffectWeb2D, EventLoop<()>) {
+    pub fn get_wgpu_2d(self) -> EffectEventLoop {
         match self {
             EffectAppVariant::Web2D(val) => return val,
             _ => {
